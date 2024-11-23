@@ -1,8 +1,9 @@
 import "@std/dotenv/load";
 import { parse } from "@std/yaml";
-import { Bot, CommandContext, Context } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
+import { Bot, CommandContext, Context, HearsContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
 import { Configuration, BotConfig, WebLinkMap } from "./types.ts";
 import { findMatchingMap } from "./utils.ts";
+import { Message } from "https://deno.land/x/grammy_types@v3.16.0/message.ts";
 
 const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || "config.yaml";
 
@@ -45,8 +46,63 @@ console.table(ABOUT);
 
 type CustomContext = Context & { config: BotConfig };
 
-function generateFromDebugString(ctx: CommandContext<CustomContext>): string {
+/**
+ * Get all the origins' hostnames.
+ * @returns A strings array containing all the supported hostnames for detection
+ */
+function getOriginRegExes(): RegExp[] {
+	return WEB_LINKS.filter((map: WebLinkMap): boolean => map.enabled) // Filter out maps that are not enabled
+		.flatMap((map: WebLinkMap): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
+}
+function generateFromDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext>): string {
 	return `${ctx.from?.first_name}${ctx.config.isDeveloper ? " [Developer]" : ""} (@${ctx.from?.username + " / "}${ctx.from?.id})`;
+}
+
+/**
+ * Process an incoming link conversion request.
+ * @param ctx Command or Hears context.
+ * @returns Completion promise.
+ */
+async function processConversionRequest(ctx: CommandContext<CustomContext> | HearsContext<CustomContext>) {
+	// Handle mistakes where no link is given
+	if (ctx.match.length < 1 && ctx.chat.type === "private") {
+		await ctx.reply("Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>", {
+			parse_mode: "HTML",
+			reply_parameters: { message_id: ctx.msg.message_id },
+		});
+		return;
+	}
+
+	// Check if link matches in map
+	await ctx.react("🤔");
+	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match, WEB_LINKS);
+	if (matchingMap) {
+		console.debug("Found the following math : " + matchingMap?.name);
+		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match));
+		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match)).toString() && ctx.chat.type === "private")
+			ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msg.message_id } });
+		else {
+			await ctx.react("👀");
+			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msg.message_id } });
+			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msg.message_id } });
+			if (ctx.chat.type === "private")
+				await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
+					parse_mode: "HTML",
+					reply_parameters: { message_id: linkConvertedMessage.message_id },
+				});
+		}
+		return;
+	} else if (ctx.chat.type === "private") {
+		// Handle when link isn't known in map
+		await ctx.react("🗿");
+		await ctx.reply(
+			`Sorry, I don't have an equivalent for that website. 😥\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ABOUT.code_repo}/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
+			{
+				parse_mode: "HTML",
+				reply_parameters: { message_id: ctx.msg.message_id },
+			},
+		);
+	}
 }
 
 // https://grammy.dev/guide/context#transformative-context-flavors
@@ -79,7 +135,8 @@ BOT.command(COMMANDS.START, (ctx) => {
 	let response: string = `Hi! I'm the ${BOT.botInfo.first_name}! A simple bot that serves the purpose of automatically embedding links! 👋`;
 	response += "\n";
 	response += `\nI can convert links given with the « ${COMMANDS.LINK_CONVERT} » command to become an embed-friendly + tracking-free version. 💛`;
-	if (CONFIG.features.link_recognition) response += `\nAlso, if I get added to a group and someone sends a link I recognize, I'll convert it and reply with the converted one automatically. 👀`;
+	// if (CONFIG.features.link_recognition) response += `\nAlso, if I get added to a group and someone sends a link I recognize, I'll convert it and reply with the converted one automatically. 👀`;
+	if (CONFIG.features.link_recognition) response += `\nAlso, if I see a link I recognize, I'll convert it and reply with the converted one automatically. 👀`;
 	response += `\n<blockquote>When I convert a link, I also get rid of its parameters (the text after a « ? » in a link). It allows to get rid of tracking IDs for example. 😉</blockquote>`;
 	response += "\n";
 	response += `\nOf course, if you feel concerned about privacy with me, feel free to check out <a href="${CONFIG.about.code_repo}">my code on GitHub</a>! 🌐`;
@@ -111,56 +168,17 @@ BOT.command(COMMANDS.GET_SUPPORTED_LINKS, (ctx) => {
  */
 BOT.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async (ctx) => {
 	console.debug(`Requested to convert a link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
-
-	// Handle mistakes where no link is given
-	if (ctx.match.length < 1) {
-		ctx.reply("Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>", {
-			parse_mode: "HTML",
-			reply_parameters: { message_id: ctx.msg.message_id },
-		});
-		return;
-	}
-
-	// Check if link matches in map
-	ctx.react("🤔");
-	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match, WEB_LINKS);
-	if (matchingMap) {
-		console.debug("Found the following math : " + matchingMap?.name);
-		ctx.react("👀");
-		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match));
-		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match)).toString()) ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msg.message_id } });
-		else {
-			ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msg.message_id } });
-			ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
-				parse_mode: "HTML",
-				reply_parameters: { message_id: (await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msg.message_id } })).message_id },
-			});
-		}
-		return;
-	} else {
-		// Handle when link isn't known in map
-		ctx.react("🗿");
-		ctx.reply(
-			`Sorry, I don't have an equivalent for that website. 😥\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ABOUT.code_repo}/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
-			{
-				parse_mode: "HTML",
-				reply_parameters: { message_id: ctx.msg.message_id },
-			},
-		);
-	}
+	await processConversionRequest(ctx);
 });
 
-// for (const webLink of WEB_LINKS) {
-// 	BOT.hears(webLink.origin_regex, (ctx: HearsContext<CustomContext>) => {
-// 		if (ctx.match instanceof String) webLink.convertLink(ctx.);
-// 	});
+BOT.hears(getOriginRegExes(), async (ctx) => {
+	console.debug(`Recognized a link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
+	await processConversionRequest(ctx);
+});
 
-// 	// BOT.inlineQuery(new RegExp(`/(${ COMMANDS.LINK_CONVERT }|${ COMMANDS.LINK_EMBED })`, "gi"), (ctx) =>
-// 	// {
-// 	// 	const match = ctx.match
-// 	// 	InlineQueryResultBuilder.
-// 	// })
-// }
+// BOT.inlineQuery(getOriginRegExes(), async (ctx) => {
+// 	console.debug(ctx.match);
+// });
 
 Deno.addSignalListener("SIGINT", (): void => {
 	BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
@@ -179,6 +197,6 @@ if (Deno.build.os != "windows") {
 	});
 }
 
-await BOT.start();
-
 BOT.api.sendMessage(CONFIG.about.owner, "Bot now online! 🎉");
+
+await BOT.start();
