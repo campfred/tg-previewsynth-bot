@@ -1,6 +1,9 @@
 about:
   code_repo: https://github.com/campfred/tg-previewsynth-bot
   owner: 12345678
+  # status_updates: # Optional
+  #   chat: -12345678901234
+  #   # topic: 1234 # Optional within status_updates
 links:
   - name: FurAffinity
     origins:
