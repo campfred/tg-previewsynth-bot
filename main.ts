@@ -1,9 +1,10 @@
 import "@std/dotenv/load";
 import { parse } from "@std/yaml";
-import { Bot, CommandContext, Context, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
+import { Bot, CommandContext, Context, GrammyError, HearsContext, HttpError, InlineQueryContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
 import { Configuration, BotConfig, WebLinkMap } from "./types.ts";
 import { findMatchingMap } from "./utils.ts";
 import { Message } from "https://deno.land/x/grammy_types@v3.16.0/message.ts";
+import { BotError } from "https://deno.land/x/grammy@v1.32.0/bot.ts";
 
 const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || "config.yaml";
 
@@ -87,7 +88,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 		else {
 			await ctx.react("👀");
 			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
-			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId } });
+			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
 			if (ctx.chat.type === "private")
 				await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
 					parse_mode: "HTML",
@@ -103,6 +104,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 			{
 				parse_mode: "HTML",
 				reply_parameters: { message_id: ctx.msgId },
+				link_preview_options: { is_disabled: true },
 			},
 		);
 	}
@@ -110,7 +112,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 
 // https://grammy.dev/guide/context#transformative-context-flavors
 const BOT = new Bot<CustomContext>(Deno.env.get("TG_PREVIEW_BOT_TOKEN") || "");
-// await BOT.api.sendMessage(CONFIG.about.owner, "Bot is booting up… ⏳");
+// await BOT.api.sendMessage(getUpdatesChatID(), "Bot is booting up… ⏳");
 BOT.use((ctx, next) => {
 	ctx.config = {
 		botDeveloper: CONFIG.about.owner,
@@ -138,7 +140,7 @@ BOT.chatType("private").command(COMMANDS.START, function (ctx) {
 	response += `\n<blockquote>If you need more help, use the /${COMMANDS.HELP} command.</blockquote>`;
 	response += "\n";
 	response += `\nAnyway, I wish you a nice day! 🎶`;
-	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" });
+	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
 });
 
 /**
@@ -170,13 +172,13 @@ BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
 	response += "</blockquote>";
 	response += "\n";
 	response += `\nOf course, if there's a translation you'd like me to learn, feel free to suggest it as an issue <a href="${ABOUT.code_repo}/issues/new">on GitHub</a>! 🌐`;
-	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" });
+	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
 });
 
 /**
  * Convert link
  */
-BOT.chatType("private").command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async function (ctx) {
+BOT.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async function (ctx) {
 	console.debug(`Incoming /${COMMANDS.LINK_CONVERT} by ${getExpeditorDebugString(ctx)} : ${getQueryDebugString(ctx)}`);
 	await processConversionRequest(ctx);
 });
@@ -190,32 +192,49 @@ BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
 	const map: WebLinkMap | null = findMatchingMap(ctx.match.toString(), WEB_LINKS);
 	if (map != null) {
 		const response = (await map.parseLink(new URL(link))).toString();
-		ctx.answerInlineQuery([InlineQueryResultBuilder.article(map.name, `Convert ${map.name} link ✨`).text(response)]);
-	}
+		ctx.answerInlineQuery([InlineQueryResultBuilder.article(map.name, `Convert ${map.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);
+	} else ctx.answerInlineQuery([]);
 });
 
 /**
  * Lifecycle handling
  */
+function getUpdatesChatID(): number {
+	return CONFIG.about.status_updates ? CONFIG.about.status_updates.chat : CONFIG.about.owner;
+}
+BOT.catch((err) => {
+	const ctx = err.ctx;
+	let error_message: string = `Error while handling update ${ctx.update.update_id} :`;
+	const e = err.error;
+	if (e instanceof GrammyError) {
+		error_message += "Error in request : " + e.description;
+	} else if (e instanceof HttpError) {
+		error_message += "Could not contact Telegram : " + e;
+	} else {
+		error_message += "Unknown error : " + e;
+	}
+	console.error(error_message);
+	BOT.api.sendMessage(getUpdatesChatID(), error_message, CONFIG.about.status_updates?.topic ? { message_thread_id: CONFIG.about.status_updates.topic } : {});
+});
 Deno.addSignalListener("SIGINT", (): void => {
 	console.info("Bot shutting down.");
-	BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
+	BOT.api.sendMessage(getUpdatesChatID(), "Bot shutting down! 💤", CONFIG.about.status_updates?.topic ? { message_thread_id: CONFIG.about.status_updates.topic } : {});
 	BOT.stop();
 });
 if (Deno.build.os == "windows") {
 	Deno.addSignalListener("SIGBREAK", (): void => {
 		console.info("Bot shutting down.");
-		BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
+		BOT.api.sendMessage(getUpdatesChatID(), "Bot shutting down! 💤", CONFIG.about.status_updates?.topic ? { message_thread_id: CONFIG.about.status_updates.topic } : {});
 		BOT.stop();
 	});
 }
 if (Deno.build.os != "windows") {
 	Deno.addSignalListener("SIGTERM", (): void => {
 		console.info("Bot shutting down.");
-		BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
+		BOT.api.sendMessage(getUpdatesChatID(), "Bot shutting down! 💤", CONFIG.about.status_updates?.topic ? { message_thread_id: CONFIG.about.status_updates.topic } : {});
 		BOT.stop();
 	});
 }
 console.info("Bot online!");
-BOT.api.sendMessage(CONFIG.about.owner, "Bot online! 🎉");
+BOT.api.sendMessage(getUpdatesChatID(), "Bot online! 🎉", CONFIG.about.status_updates?.topic ? { message_thread_id: CONFIG.about.status_updates.topic } : {});
 BOT.start();

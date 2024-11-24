@@ -1,5 +1,5 @@
 export type Configuration = {
-	about: { code_repo: string; owner: number };
+	about: { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } };
 	links: { name: string; origins: string[]; destination: string; enabled?: boolean }[];
 	features: { link_recognition: boolean };
 };
