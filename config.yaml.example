@@ -1,0 +1,32 @@
+about:
+  code_repo: https://github.com/campfred/tg-previewsynth-bot
+  owner: 12345678
+links:
+  - name: FurAffinity
+    origins:
+      - https://furaffinity.net
+    destination: https://xfuraffinity.net
+    enabled: true
+  - name: Bluesky
+    origins:
+      - https://bsky.app
+    destination: https://fxbsky.app
+    enabled: true
+  - name: Twitter
+    origins:
+      - https://twitter.com
+      - https://x.com
+    destination: https://fxtwitter.com
+    enabled: true
+  - name: Instagram
+    origins:
+      - https://instagram.com
+    destination: https://ddinstagram.com
+    enabled: true
+  - name: TikTok
+    origins:
+      - https://tiktok.com
+    destination: https://vxtiktok.com
+    enabled: true
+features:
+  link_recognition: true
