@@ -9,7 +9,8 @@ const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || "confi
 
 enum COMMANDS {
 	START = "start",
-	GET_SUPPORTED_LINKS = "help",
+	PING = "ping",
+	HELP = "help",
 	LINK_CONVERT = "convert",
 	LINK_EMBED = "embed",
 }
@@ -68,7 +69,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 	if (ctx.match.length < 1 && ctx.chat.type === "private") {
 		await ctx.reply("Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>", {
 			parse_mode: "HTML",
-			reply_parameters: { message_id: ctx.msg.message_id },
+			reply_parameters: { message_id: ctx.msgId },
 		});
 		return;
 	}
@@ -77,14 +78,13 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 	await ctx.react("🤔");
 	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match, WEB_LINKS);
 	if (matchingMap) {
-		console.debug("Found the following math : " + matchingMap?.name);
+		console.debug("Found the following match : " + matchingMap?.name);
 		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match));
-		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match)).toString() && ctx.chat.type === "private")
-			ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msg.message_id } });
+		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match)).toString() && ctx.chat.type === "private") ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
 		else {
 			await ctx.react("👀");
-			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msg.message_id } });
-			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msg.message_id } });
+			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
+			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId } });
 			if (ctx.chat.type === "private")
 				await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
 					parse_mode: "HTML",
@@ -99,7 +99,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 			`Sorry, I don't have an equivalent for that website. 😥\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ABOUT.code_repo}/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
 			{
 				parse_mode: "HTML",
-				reply_parameters: { message_id: ctx.msg.message_id },
+				reply_parameters: { message_id: ctx.msgId },
 			},
 		);
 	}
@@ -107,51 +107,52 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 
 // https://grammy.dev/guide/context#transformative-context-flavors
 const BOT = new Bot<CustomContext>(Deno.env.get("TELEGRAM_BOT_TOKEN") || "");
+// await BOT.api.sendMessage(CONFIG.about.owner, "Bot is booting up… ⏳");
 BOT.use((ctx, next) => {
 	ctx.config = { botDeveloper: CONFIG.about.owner, isDeveloper: ctx.from?.id === CONFIG.about.owner };
 	next();
 });
 BOT.api.setMyCommands([
 	{ command: COMMANDS.START, description: "Start the bot." },
-	{ command: COMMANDS.GET_SUPPORTED_LINKS, description: "Get a list of supported links." },
+	{ command: COMMANDS.HELP, description: "Get a list of supported links." },
 	{ command: COMMANDS.LINK_CONVERT, description: "Convert a link." },
 ]);
 
 /**
- * Healthcheck ping command
+ * Start command
  */
-BOT.command("ping", (ctx) => {
-	console.debug(`Got pinged by ${generateFromDebugString(ctx)}`);
-	ctx.react("⚡");
-	ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msg.message_id } });
+BOT.chatType("private").command(COMMANDS.START, async (ctx) => {
+	console.debug(`Incoming /${COMMANDS.START} by ${generateFromDebugString(ctx)}`);
+	ctx.react("👀");
+	let response: string = `Hi! I'm the ${BOT.botInfo.first_name}! 👋`;
+	response += "\nA simple bot that serves the purpose of automatically embedding links!";
+	response += "\n";
+	if (CONFIG.features.link_recognition) response += "\nSend me a link I recognize and I'll respond with an embed-friendly + tracking-free version. ✨";
+	if (BOT.botInfo.can_join_groups) response += "\nAlso, if you add me to a group, I'll do the same with links I can convert. 👀";
+	response += `\n<blockquote>If you need more help, use the /${COMMANDS.HELP} command.</blockquote>`;
+	response += "\n";
+	response += `\nAnyway, I wish you a nice day! 🎶`;
+	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" });
 });
 
 /**
- * Start command
+ * Healthcheck ping command
  */
-BOT.command(COMMANDS.START, (ctx) => {
-	console.debug(`Started session with ${generateFromDebugString(ctx)}`);
-	ctx.react("👀");
-	let response: string = `Hi! I'm the ${BOT.botInfo.first_name}! A simple bot that serves the purpose of automatically embedding links! 👋`;
-	response += "\n";
-	response += `\nI can convert links given with the « ${COMMANDS.LINK_CONVERT} » command to become an embed-friendly + tracking-free version. 💛`;
-	// if (CONFIG.features.link_recognition) response += `\nAlso, if I get added to a group and someone sends a link I recognize, I'll convert it and reply with the converted one automatically. 👀`;
-	if (CONFIG.features.link_recognition) response += `\nAlso, if I see a link I recognize, I'll convert it and reply with the converted one automatically. 👀`;
-	response += `\n<blockquote>When I convert a link, I also get rid of its parameters (the text after a « ? » in a link). It allows to get rid of tracking IDs for example. 😉</blockquote>`;
-	response += "\n";
-	response += `\nOf course, if you feel concerned about privacy with me, feel free to check out <a href="${CONFIG.about.code_repo}">my code on GitHub</a>! 🌐`;
-	response += `\n<blockquote><b>Please do not</b> interact with bots that you do not understand or trust its handling of your information!</blockquote>`;
-	response += "\n";
-	response += `\nAnyway, I wish you a nice day! 🎶`;
-	ctx.reply(response, { reply_parameters: { message_id: ctx.msg.message_id }, parse_mode: "HTML" });
+BOT.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, (ctx) => {
+	console.debug(`Incoming /${COMMANDS.PING} by ${generateFromDebugString(ctx)}`);
+	ctx.react("⚡");
+	ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } });
 });
 
 /**
  * Get supported links
  */
-BOT.command(COMMANDS.GET_SUPPORTED_LINKS, (ctx) => {
-	console.debug(`Help requested from ${generateFromDebugString(ctx)}`);
-	let response = `Simply use the « /${COMMANDS.LINK_CONVERT} » command to convert a link to an embed-friendly one. ✨\nOf course, if there's a translation that you know about and would like me to learn, feel free to suggest it as an issue <a href="${ABOUT.code_repo}/issues/new">on GitHub</a>! 🌐\n\nFor info, here's a list of all the links I support and their equivalent :\n<blockquote>`;
+BOT.chatType("private").command(COMMANDS.HELP, (ctx) => {
+	console.debug(`Incoming /${COMMANDS.HELP} by ${generateFromDebugString(ctx)}`);
+	let response: string = "Oh, you'll see. I'm a simple Synth!";
+	response += `\nEither send me a link I recognize or use the /${COMMANDS.LINK_CONVERT} command to convert it into an embed-friendly one. ✨`;
+	response += "\n";
+	response += "\n<blockquote>The links I recognize at the moment are :";
 	let firstLink: boolean = true;
 	for (const webLink of WEB_LINKS) {
 		if (webLink.enabled) {
@@ -160,43 +161,46 @@ BOT.command(COMMANDS.GET_SUPPORTED_LINKS, (ctx) => {
 		}
 	}
 	response += "</blockquote>";
-	ctx.reply(response, { reply_parameters: { message_id: ctx.msg.message_id }, parse_mode: "HTML" });
+	response += "\n";
+	response += `\nOf course, if there's a translation you'd like me to learn, feel free to suggest it as an issue <a href="${ABOUT.code_repo}/issues/new">on GitHub</a>! 🌐`;
+	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" });
 });
 
 /**
  * Convert link
  */
-BOT.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async (ctx) => {
-	console.debug(`Requested to convert a link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
+BOT.chatType("private").command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async (ctx) => {
+	console.debug(`Incoming /${COMMANDS.LINK_CONVERT} by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
 	await processConversionRequest(ctx);
 });
-
 BOT.hears(getOriginRegExes(), async (ctx) => {
-	console.debug(`Recognized a link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
+	console.debug(`Recognized link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
 	await processConversionRequest(ctx);
 });
 
-// BOT.inlineQuery(getOriginRegExes(), async (ctx) => {
-// 	console.debug(ctx.match);
-// });
 
+/**
+ * Lifecycle handling
+ */
 Deno.addSignalListener("SIGINT", (): void => {
+	console.info("Bot shutting down.");
 	BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
 	BOT.stop();
 });
 if (Deno.build.os == "windows") {
 	Deno.addSignalListener("SIGBREAK", (): void => {
+		console.info("Bot shutting down.");
 		BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
 		BOT.stop();
 	});
 }
 if (Deno.build.os != "windows") {
 	Deno.addSignalListener("SIGTERM", (): void => {
+		console.info("Bot shutting down.");
 		BOT.api.sendMessage(CONFIG.about.owner, "Bot shutting down! 💤");
 		BOT.stop();
 	});
 }
-
-BOT.api.sendMessage(CONFIG.about.owner, "Bot now online! 🎉");
-
-await BOT.start();
+console.info("Bot online!");
+BOT.api.sendMessage(CONFIG.about.owner, "Bot online! 🎉");
+BOT.start();
