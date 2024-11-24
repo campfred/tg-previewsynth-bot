@@ -1,6 +1,6 @@
 import "@std/dotenv/load";
 import { parse } from "@std/yaml";
-import { Bot, CommandContext, Context, HearsContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
+import { Bot, CommandContext, Context, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
 import { Configuration, BotConfig, WebLinkMap } from "./types.ts";
 import { findMatchingMap } from "./utils.ts";
 import { Message } from "https://deno.land/x/grammy_types@v3.16.0/message.ts";
@@ -55,8 +55,11 @@ function getOriginRegExes(): RegExp[] {
 	return WEB_LINKS.filter((map: WebLinkMap): boolean => map.enabled) // Filter out maps that are not enabled
 		.flatMap((map: WebLinkMap): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
 }
-function generateFromDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext>): string {
+function getExpeditorDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext>): string {
 	return `${ctx.from?.first_name}${ctx.config.isDeveloper ? " [Developer]" : ""} (@${ctx.from?.username + " / "}${ctx.from?.id})`;
+}
+function getQueryDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext>): string | RegExpMatchArray {
+	return ctx.match.length < 1 ? "(nothing)" : ctx.match;
 }
 
 /**
@@ -64,7 +67,7 @@ function generateFromDebugString(ctx: CommandContext<CustomContext> | HearsConte
  * @param ctx Command or Hears context.
  * @returns Completion promise.
  */
-async function processConversionRequest(ctx: CommandContext<CustomContext> | HearsContext<CustomContext>) {
+async function processConversionRequest(ctx: CommandContext<CustomContext> | HearsContext<CustomContext>): Promise<void> {
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private") {
 		await ctx.reply("Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>", {
@@ -106,10 +109,13 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 }
 
 // https://grammy.dev/guide/context#transformative-context-flavors
-const BOT = new Bot<CustomContext>(Deno.env.get("TELEGRAM_BOT_TOKEN") || "");
+const BOT = new Bot<CustomContext>(Deno.env.get("TG_PREVIEW_BOT_TOKEN") || "");
 // await BOT.api.sendMessage(CONFIG.about.owner, "Bot is booting up… ⏳");
 BOT.use((ctx, next) => {
-	ctx.config = { botDeveloper: CONFIG.about.owner, isDeveloper: ctx.from?.id === CONFIG.about.owner };
+	ctx.config = {
+		botDeveloper: CONFIG.about.owner,
+		isDeveloper: ctx.from?.id === CONFIG.about.owner,
+	};
 	next();
 });
 BOT.api.setMyCommands([
@@ -121,8 +127,8 @@ BOT.api.setMyCommands([
 /**
  * Start command
  */
-BOT.chatType("private").command(COMMANDS.START, async (ctx) => {
-	console.debug(`Incoming /${COMMANDS.START} by ${generateFromDebugString(ctx)}`);
+BOT.chatType("private").command(COMMANDS.START, function (ctx) {
+	console.debug(`Incoming /${COMMANDS.START} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("👀");
 	let response: string = `Hi! I'm the ${BOT.botInfo.first_name}! 👋`;
 	response += "\nA simple bot that serves the purpose of automatically embedding links!";
@@ -138,19 +144,20 @@ BOT.chatType("private").command(COMMANDS.START, async (ctx) => {
 /**
  * Healthcheck ping command
  */
-BOT.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, (ctx) => {
-	console.debug(`Incoming /${COMMANDS.PING} by ${generateFromDebugString(ctx)}`);
+BOT.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, function (ctx) {
+	console.debug(`Incoming /${COMMANDS.PING} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("⚡");
 	ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } });
 });
 
 /**
- * Get supported links
+ * Get help instructions
  */
-BOT.chatType("private").command(COMMANDS.HELP, (ctx) => {
-	console.debug(`Incoming /${COMMANDS.HELP} by ${generateFromDebugString(ctx)}`);
+BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
+	console.debug(`Incoming /${COMMANDS.HELP} by ${getExpeditorDebugString(ctx)}`);
 	let response: string = "Oh, you'll see. I'm a simple Synth!";
 	response += `\nEither send me a link I recognize or use the /${COMMANDS.LINK_CONVERT} command to convert it into an embed-friendly one. ✨`;
+	response += `\nYou may also use me directly while typing a new message in another chat. Simply start by mentioning me (${BOT.botInfo.username}) followed by a space! 😉`;
 	response += "\n";
 	response += "\n<blockquote>The links I recognize at the moment are :";
 	let firstLink: boolean = true;
@@ -169,15 +176,23 @@ BOT.chatType("private").command(COMMANDS.HELP, (ctx) => {
 /**
  * Convert link
  */
-BOT.chatType("private").command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async (ctx) => {
-	console.debug(`Incoming /${COMMANDS.LINK_CONVERT} by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
+BOT.chatType("private").command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async function (ctx) {
+	console.debug(`Incoming /${COMMANDS.LINK_CONVERT} by ${getExpeditorDebugString(ctx)} : ${getQueryDebugString(ctx)}`);
 	await processConversionRequest(ctx);
 });
-BOT.hears(getOriginRegExes(), async (ctx) => {
-	console.debug(`Recognized link by ${generateFromDebugString(ctx)} : ${ctx.match.length < 1 ? "(nothing)" : ctx.match}`);
+BOT.hears(getOriginRegExes(), async function (ctx) {
+	console.debug(`Recognized link by ${getExpeditorDebugString(ctx)} : ${getQueryDebugString(ctx)}`);
 	await processConversionRequest(ctx);
 });
-
+BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
+	console.debug(`Incoming inline conversion query by ${getExpeditorDebugString(ctx)} : ${getQueryDebugString(ctx)}`);
+	const link: string = ctx.match.toString();
+	const map: WebLinkMap | null = findMatchingMap(ctx.match.toString(), WEB_LINKS);
+	if (map != null) {
+		const response = (await map.parseLink(new URL(link))).toString();
+		ctx.answerInlineQuery([InlineQueryResultBuilder.article(map.name, `Convert ${map.name} link ✨`).text(response)]);
+	}
+});
 
 /**
  * Lifecycle handling
