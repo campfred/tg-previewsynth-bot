@@ -1,13 +1,17 @@
 {
   "tasks": {
+    "install": "deno install --allow-import",
     "dev": "deno run --allow-import --allow-net --allow-read --allow-env --watch main.ts",
     "lint": "deno lint",
     "test": "deno test --allow-net main_test.ts",
+    "cache": "deno cache --allow-import main.ts",
     "start": "deno run --allow-import --allow-net --allow-read --allow-env main.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@std/dotenv": "jsr:@std/dotenv",
-    "@std/yaml": "jsr:@std/yaml"
+    "@std/yaml": "jsr:@std/yaml",
+    "grammy": "https://deno.land/x/grammy@v1.32.0/mod.ts",
+    "grammy_types": "https://deno.land/x/grammy_types@v3.16.0/message.ts"
   }
 }

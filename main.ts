@@ -1,10 +1,9 @@
 import "@std/dotenv/load";
 import { parse } from "@std/yaml";
-import { Bot, CommandContext, Context, GrammyError, HearsContext, HttpError, InlineQueryContext, InlineQueryResultBuilder } from "https://deno.land/x/grammy@v1.32.0/mod.ts";
+import { Bot, CommandContext, Context, GrammyError, HearsContext, HttpError, InlineQueryContext, InlineQueryResultBuilder } from "grammy";
+import { Message } from "grammy_types";
 import { Configuration, BotConfig, WebLinkMap } from "./types.ts";
 import { findMatchingMap } from "./utils.ts";
-import { Message } from "https://deno.land/x/grammy_types@v3.16.0/message.ts";
-import { BotError } from "https://deno.land/x/grammy@v1.32.0/bot.ts";
 
 const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || "config.yaml";
 
@@ -80,11 +79,12 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 
 	// Check if link matches in map
 	await ctx.react("🤔");
-	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match, WEB_LINKS);
+	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match.toString(), WEB_LINKS);
 	if (matchingMap) {
 		console.debug("Found the following match : " + matchingMap?.name);
-		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match));
-		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match)).toString() && ctx.chat.type === "private") ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
+		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match.toString()));
+		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match.toString())).toString() && ctx.chat.type === "private")
+			ctx.reply(`Hmm... That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
 		else {
 			await ctx.react("👀");
 			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
@@ -202,7 +202,7 @@ BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
 function getUpdatesChatID(): number {
 	return CONFIG.about.status_updates ? CONFIG.about.status_updates.chat : CONFIG.about.owner;
 }
-BOT.catch((err) => {
+BOT.catch((err): void => {
 	const ctx = err.ctx;
 	let error_message: string = `Error while handling update ${ctx.update.update_id} :`;
 	const e = err.error;
