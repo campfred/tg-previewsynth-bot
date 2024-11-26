@@ -10,6 +10,11 @@ links:
       - https://furaffinity.net
     destination: https://xfuraffinity.net
     enabled: true
+  - name: Reddit
+    origins:
+      - https://reddit.com
+    destination: https://rxddit.com
+    enabled: true
   - name: Bluesky
     origins:
       - https://bsky.app
