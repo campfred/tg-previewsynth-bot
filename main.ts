@@ -162,13 +162,7 @@ BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
 	response += `\nYou may also use me directly while typing a new message in another chat. Simply start by mentioning me (${BOT.botInfo.username}) followed by a space! 😉`;
 	response += "\n";
 	response += "\n<blockquote>The links I recognize at the moment are :";
-	let firstLink: boolean = true;
-	for (const webLink of WEB_LINKS) {
-		if (webLink.enabled) {
-			response += `${firstLink ? "" : "\n"}<b>${webLink.name}</b> : ${webLink.origins.map((origin: URL): string => origin.hostname)} → ${webLink.destination.hostname}`;
-			firstLink = false;
-		}
-	}
+	for (const webLink of WEB_LINKS) if (webLink.enabled) response += `\n<b>${webLink.name}</b> : ${webLink.origins.map((origin: URL): string => origin.hostname)} → ${webLink.destination.hostname}`;
 	response += "</blockquote>";
 	response += "\n";
 	response += `\nOf course, if there's a translation you'd like me to learn, feel free to suggest it as an issue <a href="${ABOUT.code_repo}/issues/new">on GitHub</a>! 🌐`;
