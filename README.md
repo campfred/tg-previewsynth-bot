@@ -6,12 +6,27 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ### Supported commands
 
+#### Public commands
+
 - `/start`
   > Welcomes user to using the bot and gives small usage example.
 - `/help`
   > Details usage and lists supported sites.
 - `/convert`
   > Converts a link (if supported) into an embed-friendly one for social messaging use.
+
+#### Admin commands
+
+- `/enable {name|origin|destination}`
+  > Enables converting a given web link mapping.
+- `/disable {name|origin|destination}`
+  > Disables converting a given web link mapping.
+- `/toggle {name|origin|destination}`
+  > Toggles converting a given web link mapping.
+- `/save`
+  > Saves configuration to disk.
+- `/reload`
+  > Reloads configuration from disk.
 
 ### General use cases
 
