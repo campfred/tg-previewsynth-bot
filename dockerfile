@@ -7,7 +7,7 @@ USER deno
 COPY ["deno.*", "./"]
 RUN deno task install
 
-COPY ["*.ts", "./"]
+COPY ["src", "./src"]
 RUN deno task cache
 
 CMD [ "task", "start"]
