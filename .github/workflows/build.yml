@@ -1,7 +1,13 @@
-name: Build
+name: Build container image
 on:
     push:
         branches: main
+        paths:
+            - src/**
+            - .env.example
+            - config.yaml.example
+            - deno.*
+            - dockerfile
     pull_request:
         branches: main
 
