@@ -1,13 +1,21 @@
+import { Context } from "grammy";
+
+export type LinkConfiguration = { name: string; origins: string[]; destination: string; enabled?: boolean };
+export type FeaturesConfiguration = { link_recognition: boolean };
+export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } };
+
 export type Configuration = {
-	about: { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } };
-	links: { name: string; origins: string[]; destination: string; enabled?: boolean }[];
-	features: { link_recognition: boolean };
+	links: LinkConfiguration[];
+	features: FeaturesConfiguration;
+	about: AboutConfiguration;
 };
 
 export interface BotConfig {
 	botDeveloper: number;
 	isDeveloper: boolean;
 }
+
+export type CustomContext = Context & { config: BotConfig };
 
 export class WebLinkMap {
 	name: string;
@@ -48,7 +56,7 @@ export class WebLinkMap {
 	public static filterOutSubdomains(link: URL): URL {
 		// if (!this.enabled) throw new Error("Map is disabled.");
 
-		console.debug(`Filtering out subdomains of link ${link} ...`);
+		console.debug(`Filtering out subdomains of link ${link} …`);
 		const filteredUrl: URL = new URL(link);
 		const hostnameParts: string[] = filteredUrl.hostname.split(".");
 		filteredUrl.hostname = hostnameParts[hostnameParts.length - 2] + "." + hostnameParts[hostnameParts.length - 1];
@@ -62,7 +70,7 @@ export class WebLinkMap {
 	 * @returns The expanded link.
 	 */
 	public static async expandLink(link: URL): Promise<URL> {
-		console.debug(`Expanding link ${link} ...`);
+		console.debug(`Expanding link ${link} …`);
 		const response: Response = await fetch(link);
 		const expandedUrl: URL = new URL(response.url);
 		response.body?.cancel();
@@ -76,7 +84,7 @@ export class WebLinkMap {
 	 * @returns The cleaned link.
 	 */
 	public static cleanLink(link: URL): URL {
-		console.debug(`Cleaning link ${link} ...`);
+		console.debug(`Cleaning link ${link} …`);
 		const linkCleaned = new URL(link.origin + link.pathname);
 		console.debug(`Cleaned link : ${link} -> ${linkCleaned}`);
 		return linkCleaned;
@@ -90,7 +98,7 @@ export class WebLinkMap {
 	 */
 	public convertLink(link: URL): URL {
 		if (this.isSupported(link)) {
-			console.debug(`Converting link from ${link} to point to ${this.destination} ...`);
+			console.debug(`Converting link from ${link} to point to ${this.destination} …`);
 			const linkConverted = new URL(link);
 			linkConverted.protocol = this.destination.protocol;
 			linkConverted.hostname = this.destination.hostname;
