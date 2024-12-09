@@ -1,26 +1,9 @@
-import { Context } from "grammy";
+import { LinkConverter } from "../types/types.ts";
 
-export type LinkConfiguration = { name: string; origins: string[]; destination: string; enabled?: boolean };
-export type FeaturesConfiguration = { link_recognition: boolean };
-export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } };
-
-export type Configuration = {
-	links: LinkConfiguration[];
-	features: FeaturesConfiguration;
-	about: AboutConfiguration;
-};
-
-export interface BotConfig {
-	botDeveloper: number;
-	isDeveloper: boolean;
-}
-
-export type CustomContext = Context & { config: BotConfig };
-
-export class WebLinkMap {
-	name: string;
-	origins: URL[];
-	destination: URL;
+export class SimpleLinkConverter implements LinkConverter {
+	readonly name: string;
+	readonly origins: URL[];
+	readonly destination: URL;
 	enabled: boolean = true;
 
 	/**
@@ -35,7 +18,9 @@ export class WebLinkMap {
 		this.origins = origins;
 		this.destination = destination;
 		this.enabled = enabled != undefined ? enabled : true;
-		console.debug(`Created ${this.name} ${WebLinkMap.name} object that converts to ${this.destination.hostname} from ${this.origins.map((origin: URL): string => origin.hostname)}. It is ${this.enabled ? "enabled" : "disabled"}.`);
+		console.debug(
+			`Created ${this.name} ${SimpleLinkConverter.name} object that converts to ${this.destination.hostname} from ${this.origins.map((origin: URL): string => origin.hostname)}. It is ${this.enabled ? "enabled" : "disabled"}.`,
+		);
 	}
 
 	/**
@@ -44,7 +29,8 @@ export class WebLinkMap {
 	 * @returns True if the link can be handled by this map.
 	 */
 	public isSupported(link: URL): boolean {
-		for (const origin of this.origins) if (WebLinkMap.filterOutSubdomains(link).hostname === origin.hostname) return true;
+		if (link.hostname === this.destination.hostname) return true;
+		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname)) return true;
 		return false;
 	}
 
@@ -55,7 +41,6 @@ export class WebLinkMap {
 	 */
 	public static filterOutSubdomains(link: URL): URL {
 		// if (!this.enabled) throw new Error("Map is disabled.");
-
 		console.debug(`Filtering out subdomains of link ${link} …`);
 		const filteredUrl: URL = new URL(link);
 		const hostnameParts: string[] = filteredUrl.hostname.split(".");
@@ -96,7 +81,7 @@ export class WebLinkMap {
 	 * @returns The converted link without query parameters.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
-	public convertLink(link: URL): URL {
+	public convertLink(link: URL): URL | Promise<URL | null> | null {
 		if (this.isSupported(link)) {
 			console.debug(`Converting link from ${link} to point to ${this.destination} …`);
 			const linkConverted = new URL(link);
@@ -109,11 +94,13 @@ export class WebLinkMap {
 	}
 
 	/**
-	 * parseLink
+	 * Parse a given link.
+	 * @param link Link to convert.
+	 * @returns Converted link.
 	 */
-	public async parseLink(link: URL): Promise<URL> {
+	public async parseLink(link: URL): Promise<URL | null> {
 		if (!this.enabled) throw new Error("Map is disabled.");
 
-		return this.convertLink(WebLinkMap.cleanLink(WebLinkMap.filterOutSubdomains(await WebLinkMap.expandLink(link))));
+		return this.convertLink(SimpleLinkConverter.cleanLink(SimpleLinkConverter.filterOutSubdomains(await SimpleLinkConverter.expandLink(link))));
 	}
 }

@@ -4,6 +4,23 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ## About
 
+### Supported links
+
+- FurAffinity
+  > furaffinity.net ➡️ xfuraffinity.net
+- Reddit
+  > reddit.com ➡️ rxddit.com
+- Bluesky
+  > bsky.app ➡️ fxbsky.app
+- Twitter
+  > twitter.com, x.com ➡️ fxtwitter.com
+- Instagram
+  > instagram.com ➡️ ddinstagram.com
+- TikTok
+  > tiktok.com ➡️ tfxktok.com
+- Music (through [Odesli's API](https://odesli.co))
+  > open.spotify.com, music.apple.com, music.youtube.com, listen.tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
+
 ### Supported commands
 
 #### Public commands
@@ -63,7 +80,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ## Upcoming improvements
 
-- Administration commands
-  - Toggle website status
-  - Toggle link recognition
-  - Save configuration to file
+- API-based link converters
+  - Odesli / SongLinks
+    - Optional _Special function_ button
+      - To expand the message with basic infos

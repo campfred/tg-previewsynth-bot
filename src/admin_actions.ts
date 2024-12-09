@@ -1,5 +1,5 @@
 import { CommandContext, Composer } from "grammy";
-import { CustomContext } from "../src/types.ts";
+import { CustomContext } from "./types/types.ts";
 import { ConfigurationManager } from "../src/config.ts";
 import { getExpeditorDebugString } from "../src/utils.ts";
 
@@ -24,7 +24,7 @@ function toggleMapAvailability(ctx: CommandContext<CustomContext>, state?: boole
 	console.debug(`Incoming /${COMMANDS.MAP_TOGGLE} by ${getExpeditorDebugString(ctx)} for « ${ctx.match} »`);
 	if (ctx.config.isDeveloper) {
 		ctx.react("🤔");
-		for (const map of config_manager.Link_Mappings)
+		for (const map of config_manager.Simple_Converters)
 			for (const origin of map.origins)
 				if (
 					map.name.trim().toLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
@@ -40,14 +40,14 @@ function toggleMapAvailability(ctx: CommandContext<CustomContext>, state?: boole
 	}
 }
 
-admin_actions.chatType("private").command(COMMANDS.CONFIG_SAVE, async (ctx) => {
+admin_actions.chatType("private").command(COMMANDS.CONFIG_SAVE, async function (ctx) {
 	console.debug(`Incoming /${COMMANDS.CONFIG_SAVE} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("🤔");
 	await config_manager.saveConfiguration();
 	ctx.react("🫡");
 	ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } });
 });
-admin_actions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async (ctx) => {
+admin_actions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async function (ctx) {
 	console.debug(`Incoming /${COMMANDS.CONFIG_RELOAD} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("🤔");
 	await config_manager.loadConfiguration();
