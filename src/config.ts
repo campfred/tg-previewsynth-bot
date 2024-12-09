@@ -62,8 +62,8 @@ export class ConfigurationManager {
 
 		const converters: APIbasedLinkConverter[] = [];
 		for (const api_config of api_configs)
-			for (const [key, value] of Object.entries(APIs)) {
-				if (api_config.name.trim().toLowerCase() === value.trim().toLowerCase())
+			for (const [_key, _value] of Object.entries(APIs)) {
+				if (api_config.name.trim().toLowerCase() === _value.trim().toLowerCase())
 					converters.push(
 						new OdesliMusicConverter(
 							// value.trim().charAt(0).toUpperCase() + value.trim().substring(1).toLowerCase(),

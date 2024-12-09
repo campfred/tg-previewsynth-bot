@@ -5,7 +5,6 @@ import { SimpleLinkConverter } from "./converters/simple.ts";
 import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString } from "./utils.ts";
 import { admin_actions } from "./admin_actions.ts";
 import { ConfigurationManager } from "./config.ts";
-import { APIbasedLinkConverter } from "./converters/music.ts";
 
 enum COMMANDS {
 	START = "start",
@@ -58,20 +57,30 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 	const matchingMap: SimpleLinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
 	if (matchingMap) {
 		console.debug("Found the following match : " + matchingMap?.name);
-		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match.toString()));
-		if (linkConverted.toString() === SimpleLinkConverter.cleanLink(new URL(ctx.match.toString())).toString() && ctx.chat.type === "private")
-			ctx.reply(`Hmm… That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
-		else {
-			await ctx.react("👀");
-			// if (ctx.chat.type === "private") await ctx.reply(`Lemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
-			// const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
-			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
-			// if (ctx.chat.type === "private")
-			// 	await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
-			// 		parse_mode: "HTML",
-			// 		reply_parameters: { message_id: message_with_original_link.message_id },
-			// 	});
-		}
+		const linkConverted: URL | null = await matchingMap.parseLink(new URL(ctx.match.toString()));
+		if (linkConverted)
+			if (linkConverted.toString() === SimpleLinkConverter.cleanLink(new URL(ctx.match.toString())).toString() && ctx.chat.type === "private")
+				ctx.reply(`Hmm… That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
+			else {
+				await ctx.react("👀");
+				// if (ctx.chat.type === "private") await ctx.reply(`Lemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
+				// const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
+				await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
+				// if (ctx.chat.type === "private")
+				// 	await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
+				// 		parse_mode: "HTML",
+				// 		reply_parameters: { message_id: message_with_original_link.message_id },
+				// 	});
+			}
+		else
+			ctx.reply(
+				`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${config_manager.About.code_repo}/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
+				{
+					parse_mode: "HTML",
+					reply_parameters: { message_id: ctx.msgId },
+					link_preview_options: { is_disabled: true },
+				},
+			);
 		return;
 	} else if (ctx.chat.type === "private") {
 		// Handle when link isn't known in map
@@ -177,8 +186,11 @@ BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
 	const url: URL = new URL(ctx.match.toString());
 	const converter: LinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
 	if (converter != null) {
-		const response: string = (await converter.parseLink(new URL(link))).toString();
-		ctx.answerInlineQuery([InlineQueryResultBuilder.article(converter.name, `Convert ${converter.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);
+		const converted_link: URL | null = await converter.parseLink(new URL(link));
+		if (converted_link) {
+			const response: string = converted_link.toString();
+			ctx.answerInlineQuery([InlineQueryResultBuilder.article(converter.name, `Convert ${converter.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);
+		}
 	} else ctx.answerInlineQuery([]);
 });
 

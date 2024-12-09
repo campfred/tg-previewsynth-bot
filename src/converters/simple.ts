@@ -81,7 +81,7 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @returns The converted link without query parameters.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
-	public convertLink(link: URL): URL | Promise<URL> {
+	public convertLink(link: URL): URL | Promise<URL | null> | null {
 		if (this.isSupported(link)) {
 			console.debug(`Converting link from ${link} to point to ${this.destination} …`);
 			const linkConverted = new URL(link);
@@ -98,7 +98,7 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @param link Link to convert.
 	 * @returns Converted link.
 	 */
-	public async parseLink(link: URL): Promise<URL> {
+	public async parseLink(link: URL): Promise<URL | null> {
 		if (!this.enabled) throw new Error("Map is disabled.");
 
 		return this.convertLink(SimpleLinkConverter.cleanLink(SimpleLinkConverter.filterOutSubdomains(await SimpleLinkConverter.expandLink(link))));

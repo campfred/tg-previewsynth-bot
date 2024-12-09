@@ -35,6 +35,6 @@ export interface LinkConverter {
 	enabled: boolean;
 
 	isSupported(link: URL): boolean;
-	convertLink(link: URL): URL | Promise<URL>;
-	parseLink(link: URL): Promise<URL>;
+	convertLink(link: URL): URL | Promise<URL | null> | null;
+	parseLink(link: URL): Promise<URL | null>;
 }
