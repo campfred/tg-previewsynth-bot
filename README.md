@@ -63,7 +63,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ## Upcoming improvements
 
-- Administration commands
-  - Toggle website status
-  - Toggle link recognition
-  - Save configuration to file
+- API-based link converters
+  - Odesli / SongLinks
+    - Optional _Special function_ button
+      - To expand the message with basic infos

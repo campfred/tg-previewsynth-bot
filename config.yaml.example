@@ -34,7 +34,11 @@ links:
   - name: TikTok
     origins:
       - https://tiktok.com
-    destination: https://vxtiktok.com
+    destination: https://tfxktok.com
     enabled: true
+apis:
+  - name: Odesli
+    enabled: true
+    # api_key: ***
 features:
   link_recognition: true

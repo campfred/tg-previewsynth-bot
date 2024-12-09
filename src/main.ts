@@ -1,10 +1,12 @@
 import "@std/dotenv/load";
 import { Bot, CommandContext, GrammyError, HearsContext, HttpError, InlineQueryResultBuilder, NextFunction } from "grammy";
 import { Message } from "grammy_types";
-import { WebLinkMap, CustomContext } from "./types.ts";
-import { findMatchingMap, getExpeditorDebugString, getQueryDebugString } from "./utils.ts";
+import { CustomContext } from "./types/types.ts";
+import { SimpleLinkConverter } from "./converters/simple.ts";
+import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString } from "./utils.ts";
 import { admin_actions } from "./admin_actions.ts";
 import { ConfigurationManager } from "./config.ts";
+import { APIbasedLinkConverter } from "./converters/music.ts";
 
 enum COMMANDS {
 	START = "start",
@@ -22,8 +24,8 @@ await config_manager.loadConfiguration();
  * @returns A strings array containing all the supported hostnames for detection
  */
 function getOriginRegExes(): RegExp[] {
-	return config_manager.Link_Mappings.filter((map: WebLinkMap): boolean => map.enabled) // Filter out maps that are not enabled
-		.flatMap((map: WebLinkMap): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
+	return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
+		.flatMap((map: SimpleLinkConverter): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
 }
 
 /**
@@ -41,23 +43,33 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 		return;
 	}
 
+	try {
+		// Try casting it as a URL as a filter for bad requests.
+		new URL(ctx.match.toString());
+	} catch (error) {
+		console.error(`Received link is invalid (${ctx.match}), silently aborting processing it.`);
+		console.error(error);
+		return;
+	}
+
 	// Check if link matches in map
 	await ctx.react("🤔");
-	const matchingMap: WebLinkMap | null = findMatchingMap(ctx.match.toString(), config_manager.Link_Mappings);
+	const url: URL = new URL(ctx.match.toString());
+	const matchingMap: SimpleLinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
 	if (matchingMap) {
 		console.debug("Found the following match : " + matchingMap?.name);
 		const linkConverted: URL = await matchingMap.parseLink(new URL(ctx.match.toString()));
-		if (linkConverted.toString() === WebLinkMap.cleanLink(new URL(ctx.match.toString())).toString() && ctx.chat.type === "private")
+		if (linkConverted.toString() === SimpleLinkConverter.cleanLink(new URL(ctx.match.toString())).toString() && ctx.chat.type === "private")
 			ctx.reply(`Hmm… That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
 		else {
 			await ctx.react("👀");
-			if (ctx.chat.type === "private") await ctx.reply(`Oh I know that! 👀\nIt's a link from ${matchingMap?.name}!\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
-			const linkConvertedMessage: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
-			if (ctx.chat.type === "private")
-				await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
-					parse_mode: "HTML",
-					reply_parameters: { message_id: linkConvertedMessage.message_id },
-				});
+			if (ctx.chat.type === "private") await ctx.reply(`Oh a ${matchingMap?.name} link! 👀\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
+			const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
+			// if (ctx.chat.type === "private")
+			// 	await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
+			// 		parse_mode: "HTML",
+			// 		reply_parameters: { message_id: message_with_original_link.message_id },
+			// 	});
 		}
 		return;
 	} else if (ctx.chat.type === "private") {
@@ -127,7 +139,7 @@ BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
 	response += `\nYou may also use me directly while typing a new message in another chat. Simply start by mentioning me (${BOT.botInfo.username}) followed by a space! 😉`;
 	response += "\n";
 	response += "\n<blockquote>The links I recognize at the moment are :";
-	for (const link_map of config_manager.Link_Mappings) if (link_map.enabled) response += `\n<b>${link_map.name}</b> : ${link_map.origins.map((origin: URL): string => origin.hostname)} → ${link_map.destination.hostname}`;
+	for (const link_map of config_manager.Simple_Converters) if (link_map.enabled) response += `\n<b>${link_map.name}</b> : ${link_map.origins.map((origin: URL): string => origin.hostname)} → ${link_map.destination.hostname}`;
 	response += "</blockquote>";
 	response += "\n";
 	response += `\nOf course, if there's a translation you'd like me to learn, feel free to suggest it as an issue <a href="${config_manager.About.code_repo}/issues/new">on GitHub</a>! 🌐`;
@@ -148,10 +160,21 @@ BOT.hears(getOriginRegExes(), async function (ctx) {
 BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
 	console.debug(`Incoming inline conversion query by ${getExpeditorDebugString(ctx)} : ${getQueryDebugString(ctx)}`);
 	const link: string = ctx.match.toString();
-	const map: WebLinkMap | null = findMatchingMap(ctx.match.toString(), config_manager.Link_Mappings);
-	if (map != null) {
-		const response = (await map.parseLink(new URL(link))).toString();
-		ctx.answerInlineQuery([InlineQueryResultBuilder.article(map.name, `Convert ${map.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);
+
+	try {
+		// Try casting it as a URL as a filter for bad requests.
+		new URL(ctx.match.toString());
+	} catch (error) {
+		console.error(`Received link is invalid (${ctx.match}), silently aborting processing it.`);
+		console.error(error);
+		return;
+	}
+
+	const url: URL = new URL(ctx.match.toString());
+	const converter: SimpleLinkConverter | APIbasedLinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
+	if (converter != null) {
+		const response: string = (await converter.parseLink(new URL(link))).toString();
+		ctx.answerInlineQuery([InlineQueryResultBuilder.article(converter.name, `Convert ${converter.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);
 	} else ctx.answerInlineQuery([]);
 });
 

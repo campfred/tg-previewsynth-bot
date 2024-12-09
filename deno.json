@@ -10,6 +10,7 @@
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@std/dotenv": "jsr:@std/dotenv",
+    "@std/log": "jsr:@std/log@^0.224.11",
     "@std/yaml": "jsr:@std/yaml",
     "grammy": "https://deno.land/x/grammy@v1.32.0/mod.ts",
     "grammy_types": "https://deno.land/x/grammy_types@v3.16.0/message.ts"
