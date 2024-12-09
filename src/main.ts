@@ -25,7 +25,7 @@ await config_manager.loadConfiguration();
 function getOriginRegExes(): RegExp[] {
 	// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
 	return config_manager.All_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
-		.flatMap((map: SimpleLinkConverter): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
+		.flatMap((map: SimpleLinkConverter): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", "\\.")}.*`, "gi"))); // Map and flatten the hostnames
 }
 
 /**
