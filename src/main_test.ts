@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { SimpleLinkConverter } from "./converters/simple.ts";
+import { OdesliMusicConverter } from "./converters/music.ts";
 
 type TestData = {
 	Map: SimpleLinkConverter;
@@ -45,10 +46,18 @@ Deno.test("linkConversionWithSubdomainsAndParams", async (): Promise<void> => {
 	assertEquals(await TestFurAffinity.Map.parseLink(TestFurAffinity.Links.Alternate), TestFurAffinity.Links.Converted);
 });
 
-Deno.test(`TikTok-specific test case`, async (): Promise<void> => {
-	const Map: SimpleLinkConverter = new SimpleLinkConverter("TikTok", [new URL("https://tiktok.com/"), new URL("https://vm.tiktok.com/")], new URL("https://vxtiktok.com/"));
+Deno.test("TikTok-specific test case", async (): Promise<void> => {
+	const Converter: SimpleLinkConverter = new SimpleLinkConverter("TikTok", [new URL("https://tiktok.com/"), new URL("https://vm.tiktok.com/")], new URL("https://vxtiktok.com/"));
 	const TikTokShareLink = new URL("https://vm.tiktok.com/ZMhtQT3Yf/");
 	const TikTokConvertedLink = new URL("https://vxtiktok.com/@mokastagelight/video/7427030188069883179");
 
-	assertEquals(await Map.parseLink(TikTokShareLink), TikTokConvertedLink);
+	assertEquals(await Converter.parseLink(TikTokShareLink), TikTokConvertedLink);
+});
+
+Deno.test("Music-specific test case", async (): Promise<void> => {
+	const Converter: OdesliMusicConverter = new OdesliMusicConverter("Odesli", [new URL("https://open.spotify.com")], new URL("https://song.link"));
+	const SpotifyShareLink = new URL("https://open.spotify.com/intl-fr/track/4zbInBD4rY7tYPJ16LVxdh?si=3ca28df1bfa044db");
+	const OdesliConvertedLink = new URL("https://song.link/s/4zbInBD4rY7tYPJ16LVxdh");
+
+	assertEquals(await Converter.parseLink(SpotifyShareLink), OdesliConvertedLink);
 });

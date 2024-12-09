@@ -17,6 +17,12 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 		if (base_url !== undefined) this.base_url = new URL(base_url);
 	}
 
+	/**
+	 * Converts a given link to the destination website, removing query parameters if necessary.
+	 * @param link - The link to convert.
+	 * @returns The converted link without query parameters.
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	 */
 	public override async convertLink(link: URL): Promise<URL> {
 		const request_url: URL = this.base_url;
 		request_url.searchParams.append("songIfSingle", "true");
@@ -24,9 +30,9 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 		console.debug(`Sending request to ${request_url} …`);
 
 		const response: OdesliResponse = await (await fetch(request_url.toString())).json();
-		console.debug("Received response from API : ", response);
+		// console.debug("Received response from API : ", response);
 		const new_url: URL = new URL(response.pageUrl);
-		console.debug("Converted music link : ", new_url);
+		console.debug("Converted music link : ", new_url.toString());
 		return new_url;
 	}
 

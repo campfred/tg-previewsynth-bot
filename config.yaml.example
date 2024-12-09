@@ -39,6 +39,6 @@ links:
 apis:
   - name: Odesli
     enabled: true
-    # api_key: ***
+    # api_key: *** # Not using an API key grants you only 10 reqs. per minute
 features:
   link_recognition: true

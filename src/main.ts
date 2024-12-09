@@ -1,7 +1,6 @@
 import "@std/dotenv/load";
 import { Bot, CommandContext, GrammyError, HearsContext, HttpError, InlineQueryResultBuilder, NextFunction } from "grammy";
-import { Message } from "grammy_types";
-import { CustomContext } from "./types/types.ts";
+import { CustomContext, LinkConverter } from "./types/types.ts";
 import { SimpleLinkConverter } from "./converters/simple.ts";
 import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString } from "./utils.ts";
 import { admin_actions } from "./admin_actions.ts";
@@ -24,7 +23,8 @@ await config_manager.loadConfiguration();
  * @returns A strings array containing all the supported hostnames for detection
  */
 function getOriginRegExes(): RegExp[] {
-	return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
+	// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
+	return config_manager.All_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
 		.flatMap((map: SimpleLinkConverter): RegExp[] => map.origins.map((origin): RegExp => new RegExp(`${origin.protocol}\/\/.*${origin.hostname.replaceAll(".", ".")}.*`, "gi"))); // Map and flatten the hostnames
 }
 
@@ -63,8 +63,9 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 			ctx.reply(`Hmm… That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
 		else {
 			await ctx.react("👀");
-			if (ctx.chat.type === "private") await ctx.reply(`Oh a ${matchingMap?.name} link! 👀\nLemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
-			const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
+			// if (ctx.chat.type === "private") await ctx.reply(`Lemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
+			// const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
+			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
 			// if (ctx.chat.type === "private")
 			// 	await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
 			// 		parse_mode: "HTML",
@@ -89,7 +90,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 // https://grammy.dev/guide/context#transformative-context-flavors
 const BOT = new Bot<CustomContext>(Deno.env.get("TG_PREVIEW_BOT_TOKEN") || "");
 // await BOT.api.sendMessage(getUpdatesChatID(), "Bot is booting up… ⏳");
-BOT.use((ctx: CustomContext, next: NextFunction) => {
+BOT.use(function (ctx: CustomContext, next: NextFunction) {
 	ctx.config = {
 		botDeveloper: config_manager.About.owner,
 		isDeveloper: ctx.from?.id === config_manager.About.owner,
@@ -135,12 +136,15 @@ BOT.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, function
 BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
 	console.debug(`Incoming /${COMMANDS.HELP} by ${getExpeditorDebugString(ctx)}`);
 	let response: string = "Oh, you'll see. I'm a simple Synth!";
+	response += "\n";
 	response += `\nEither send me a link I recognize or use the /${COMMANDS.LINK_CONVERT} command to convert it into an embed-friendly one. ✨`;
 	response += `\nYou may also use me directly while typing a new message in another chat. Simply start by mentioning me (${BOT.botInfo.username}) followed by a space! 😉`;
 	response += "\n";
 	response += "\n<blockquote>The links I recognize at the moment are :";
-	for (const link_map of config_manager.Simple_Converters) if (link_map.enabled) response += `\n<b>${link_map.name}</b> : ${link_map.origins.map((origin: URL): string => origin.hostname)} → ${link_map.destination.hostname}`;
+	for (const converter of config_manager.All_Converters) if (converter.enabled) response += `\n<b>${converter.name}</b> : ${converter.origins.map((origin: URL): string => origin.hostname)} → ${converter.destination.hostname}`;
 	response += "</blockquote>";
+	response += "\n";
+	response += "\nBy the way, if a preview doesn't generate, check with @WebpageBot. It's the one handling link preview generation within the app. 💡";
 	response += "\n";
 	response += `\nOf course, if there's a translation you'd like me to learn, feel free to suggest it as an issue <a href="${config_manager.About.code_repo}/issues/new">on GitHub</a>! 🌐`;
 	ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } });
@@ -171,7 +175,7 @@ BOT.inlineQuery(getOriginRegExes(), async function (ctx) {
 	}
 
 	const url: URL = new URL(ctx.match.toString());
-	const converter: SimpleLinkConverter | APIbasedLinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
+	const converter: LinkConverter | null = findMatchingConverter(url, config_manager.Simple_Converters, config_manager.API_Converters);
 	if (converter != null) {
 		const response: string = (await converter.parseLink(new URL(link))).toString();
 		ctx.answerInlineQuery([InlineQueryResultBuilder.article(converter.name, `Convert ${converter.name} link ✨`).text(response, { link_preview_options: { show_above_text: true } })]);

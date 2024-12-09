@@ -30,7 +30,7 @@ export class SimpleLinkConverter implements LinkConverter {
 	 */
 	public isSupported(link: URL): boolean {
 		if (link.hostname === this.destination.hostname) return true;
-		for (const origin of this.origins) if (link.hostname === origin.hostname) return true;
+		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname)) return true;
 		return false;
 	}
 

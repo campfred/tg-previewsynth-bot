@@ -40,14 +40,14 @@ function toggleMapAvailability(ctx: CommandContext<CustomContext>, state?: boole
 	}
 }
 
-admin_actions.chatType("private").command(COMMANDS.CONFIG_SAVE, async (ctx) => {
+admin_actions.chatType("private").command(COMMANDS.CONFIG_SAVE, async function (ctx) {
 	console.debug(`Incoming /${COMMANDS.CONFIG_SAVE} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("🤔");
 	await config_manager.saveConfiguration();
 	ctx.react("🫡");
 	ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } });
 });
-admin_actions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async (ctx) => {
+admin_actions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async function (ctx) {
 	console.debug(`Incoming /${COMMANDS.CONFIG_RELOAD} by ${getExpeditorDebugString(ctx)}`);
 	ctx.react("🤔");
 	await config_manager.loadConfiguration();

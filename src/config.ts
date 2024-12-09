@@ -19,12 +19,16 @@ export class ConfigurationManager {
 		return this._instance || (this._instance = new this());
 	}
 
-	get Simple_Converters(): LinkConverter[] {
+	get Simple_Converters(): SimpleLinkConverter[] {
 		return this._links;
 	}
 
 	get API_Converters(): APIbasedLinkConverter[] {
 		return this._apis;
+	}
+
+	get All_Converters(): LinkConverter[] {
+		return [...this._links, ...this._apis];
 	}
 
 	get Features(): FeaturesConfiguration {
@@ -39,7 +43,7 @@ export class ConfigurationManager {
 		console.debug("Reading links configuration…");
 		console.debug(links);
 
-		const converters: SimpleLinkConverter[] = links.map((link: LinkConfiguration) => {
+		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration) {
 			console.debug(`Creating ${SimpleLinkConverter.name} config for ${link.name} …`);
 			return new SimpleLinkConverter(
 				link.name.trim(),
@@ -62,7 +66,8 @@ export class ConfigurationManager {
 				if (api_config.name.trim().toLowerCase() === value.trim().toLowerCase())
 					converters.push(
 						new OdesliMusicConverter(
-							value.trim().charAt(0).toUpperCase() + value.trim().substring(1).toLowerCase(),
+							// value.trim().charAt(0).toUpperCase() + value.trim().substring(1).toLowerCase(),
+							"Music",
 							OdesliOrigins.map((origin) => {
 								console.debug(`Adding Odesli support for ${origin}`);
 								return new URL(origin);

@@ -11,13 +11,15 @@ export function findMatchingConverter(url: URL, simple_converters: SimpleLinkCon
 			console.debug(`Found ${api_converter.name}!`);
 			return api_converter;
 		}
+	console.debug(`Didn't find a matching API-based converter. :(`);
+
 	for (const simple_converter of simple_converters)
 		if (simple_converter.isSupported(url)) {
 			console.debug(`Found ${simple_converter.name}!`);
 			return simple_converter;
 		}
+	console.debug(`Didn't find a matching simple link converter. :(`);
 
-	console.debug(`Didn't find a matching ${SimpleLinkConverter.name}. :(`);
 	return null;
 }
 
