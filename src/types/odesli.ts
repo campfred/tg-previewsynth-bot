@@ -6,7 +6,7 @@ export const OdesliOrigins: string[] = [
 	"https://open.spotify.com",
 	"https://music.apple.com",
 	"https://music.youtube.com",
-	"https://listen.tidal.com",
+	"https://tidal.com",
 	"https://pandora.com",
 	"https://deezer.com",
 	"https://soundcloud.com",
