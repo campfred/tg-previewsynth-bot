@@ -147,7 +147,7 @@ BOT.chatType("private").command(COMMANDS.HELP, function (ctx) {
 	let response: string = "Oh, you'll see. I'm a simple Synth!";
 	response += "\n";
 	response += `\nEither send me a link I recognize or use the /${COMMANDS.LINK_CONVERT} command to convert it into an embed-friendly one. ✨`;
-	response += `\nYou may also use me directly while typing a new message in another chat. Simply start by mentioning me (${BOT.botInfo.username}) followed by a space! 😉`;
+	response += `\nIf you're in another chat where I am not present, simply start by mentioning me (@${BOT.botInfo.username}) followed by a space and you'll be using my service in-line style! 😉`;
 	response += "\n";
 	response += "\n<blockquote>The links I recognize at the moment are :";
 	for (const converter of config_manager.All_Converters) if (converter.enabled) response += `\n<b>${converter.name}</b> : ${converter.origins.map((origin: URL): string => origin.hostname)} → ${converter.destination.hostname}`;

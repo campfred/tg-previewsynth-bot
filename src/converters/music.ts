@@ -31,7 +31,8 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 
 		try {
 			const response: OdesliResponse = await (await fetch(request_url.toString())).json();
-			// console.debug("Received response from API : ", response);
+			console.debug("Received response from API!");
+			console.debug("Response contains a page's URL : ", "pageUrl" in response);
 			const new_url: URL = new URL(response.pageUrl);
 			console.debug("Converted music link : ", new_url.toString());
 			return new_url;
