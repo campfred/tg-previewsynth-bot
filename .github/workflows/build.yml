@@ -8,8 +8,8 @@ on:
             - config.yaml.example
             - deno.*
             - dockerfile
-    pull_request:
-        branches: main
+        tags:
+            - "*"
 
 env:
     REGISTRY: ghcr.io
