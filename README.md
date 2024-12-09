@@ -52,8 +52,8 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
       1. Pull image
          > `docker pull ghcr.io/campfred/tg-previewsynth-bot:main`
       2. Run image
-         > With env variable : `docker run campfred/tg-previewsynth-bot --read-only --volume $PWD/config.yaml:/app/config.yaml --env TG_PREVIEW_BOT_TOKEN=$TG_PREVIEW_BOT_TOKEN`
-         > With .env file : `docker run campfred/tg-previewsynth-bot --read-only --volume $PWD/config.yaml:/app/config.yaml --read-only --volume $PWD/.env:/app/.env`
+         > With env variable : `docker run -d --read-only --volume $PWD/config.yaml:/app/config.yaml --env TG_PREVIEW_BOT_TOKEN=$TG_PREVIEW_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main`
+         > With .env file : `docker run -d --read-only --volume $PWD/config.yaml:/app/config.yaml --read-only --volume $PWD/.env:/app/.env ghcr.io/campfred/tg-previewsynth-bot:main`
    2. Local
       1. Install dependancies
          > `deno task install`
