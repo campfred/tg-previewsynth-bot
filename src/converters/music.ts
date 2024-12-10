@@ -24,7 +24,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
 	public override async convertLink(link: URL): Promise<URL | null> {
-		const request_url: URL = this.base_url;
+		const request_url: URL = new URL(this.base_url);
 		request_url.searchParams.append("songIfSingle", "true");
 		request_url.searchParams.append("url", encodeURI(SimpleLinkConverter.cleanLink(link).toString()));
 		console.debug(`Sending request to ${request_url} …`);
