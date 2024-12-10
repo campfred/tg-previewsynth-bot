@@ -116,25 +116,32 @@ export class ConfigurationManager {
 
 	async loadConfiguration() {
 		console.debug(`Loading configuration from disk at ${PATH_CONFIG_FILE} …`);
-		const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE));
+		try {
+			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE));
 
-		this._links = this.parse_simple_converters_from_config(config.links);
-		console.info("Loaded simple link convertions configuration!");
-		console.table(config.links);
-		console.table(this._links);
+			this._links = this.parse_simple_converters_from_config(config.links);
+			console.info("Loaded simple link convertions configuration!");
+			console.table(config.links);
+			console.table(this._links);
 
-		this._apis = this.parse_api_based_converters_from_config(config.apis);
-		console.info("Loaded api-based link convertions configuration!");
-		console.table(config.apis);
-		console.table(this._apis);
+			this._apis = this.parse_api_based_converters_from_config(config.apis);
+			console.info("Loaded api-based link convertions configuration!");
+			console.table(config.apis);
+			console.table(this._apis);
 
-		this._features = config.features;
-		console.info("Loaded features configuration!");
-		console.table(this._features);
+			this._features = config.features;
+			console.info("Loaded features configuration!");
+			console.table(this._features);
 
-		this._about = config.about;
-		console.info("Loaded about configuration!");
-		console.table(this._about);
+			this._about = config.about;
+			console.info("Loaded about configuration!");
+			console.table(this._about);
+		} catch (error) {
+			console.error(error);
+			console.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue?");
+			Deno.exitCode = 1;
+			Deno.exit();
+		}
 	}
 
 	async saveConfiguration() {
