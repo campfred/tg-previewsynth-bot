@@ -1,7 +1,7 @@
 name: Build container image
 on:
     push:
-        branches: main
+        # branches: main
         paths:
             - src/**
             - .env.example
