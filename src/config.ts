@@ -66,7 +66,6 @@ export class ConfigurationManager {
 				if (api_config.name.trim().toLowerCase() === _value.trim().toLowerCase())
 					converters.push(
 						new OdesliMusicConverter(
-							// value.trim().charAt(0).toUpperCase() + value.trim().substring(1).toLowerCase(),
 							"Music",
 							OdesliOrigins.map((origin) => {
 								console.debug(`Adding Odesli support for ${origin}`);

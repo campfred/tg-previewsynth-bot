@@ -63,14 +63,7 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 				ctx.reply(`Hmm… That link already looks fine to me. 🤔`, { reply_parameters: { message_id: ctx.msgId } });
 			else {
 				await ctx.react("👀");
-				// if (ctx.chat.type === "private") await ctx.reply(`Lemme convert that for you real quick… ✨`, { reply_parameters: { message_id: ctx.msgId } });
-				// const message_with_original_link: Message = await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
 				await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } });
-				// if (ctx.chat.type === "private")
-				// 	await ctx.reply("<i>There you go!</i> 😊\nHopefully @WebpageBot will create an embedded preview soon if it's not already there! ✨", {
-				// 		parse_mode: "HTML",
-				// 		reply_parameters: { message_id: message_with_original_link.message_id },
-				// 	});
 			}
 		else
 			ctx.reply(
@@ -98,7 +91,6 @@ async function processConversionRequest(ctx: CommandContext<CustomContext> | Hea
 
 // https://grammy.dev/guide/context#transformative-context-flavors
 const BOT = new Bot<CustomContext>(Deno.env.get("TG_PREVIEW_BOT_TOKEN") || "");
-// await BOT.api.sendMessage(getUpdatesChatID(), "Bot is booting up… ⏳");
 BOT.use(function (ctx: CustomContext, next: NextFunction) {
 	ctx.config = {
 		botDeveloper: config_manager.About.owner,
