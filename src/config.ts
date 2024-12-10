@@ -143,8 +143,13 @@ export class ConfigurationManager {
 		console.debug(config);
 
 		console.debug("Writing configuration to disk…");
-		await Deno.writeTextFile(PATH_CONFIG_FILE, stringify(config));
-		console.info("Configuration saved!");
+		try {
+			await Deno.writeTextFile(PATH_CONFIG_FILE, stringify(config));
+			console.info("Configuration saved!");
+		} catch (error) {
+			console.error(error);
+			console.error("Could not save configuration data.\nCould there be a permissions issue?");
+		}
 	}
 }
 
