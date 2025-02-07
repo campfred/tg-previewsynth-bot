@@ -20,6 +20,10 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   > tiktok.com ➡️ tfxktok.com
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
+- YouTube
+  > youtube.com ➡️ yfxtube.com
+- YouTu.be
+  > youtu.be ➡️ fxyoutu.be
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
