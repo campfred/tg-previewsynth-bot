@@ -18,6 +18,8 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   > instagram.com ➡️ ddinstagram.com
 - TikTok
   > tiktok.com ➡️ tfxktok.com
+- Furtrack
+  > furtrack.com ➡️ furtrack.owo.lgbt
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
