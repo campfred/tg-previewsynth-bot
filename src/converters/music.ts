@@ -56,7 +56,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 	 */
 	public override async parseLink (link: URL): Promise<URL | null>
 	{
-		if (!this.enabled) throw new Error("Map is disabled.")
+		if (!this.enabled) throw new Error("Converter is disabled.")
 
 		return this.convertLink(this.cleanLink(await this.expandLink(link)))
 	}

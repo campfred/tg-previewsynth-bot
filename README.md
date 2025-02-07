@@ -8,6 +8,8 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 - FurAffinity
   > furaffinity.net ➡️ xfuraffinity.net
+- Furtrack
+  > furtrack.com ➡️ furtrack.owo.lgbt
 - Reddit
   > reddit.com ➡️ rxddit.com
 - Bluesky
@@ -18,8 +20,6 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   > instagram.com ➡️ ddinstagram.com
 - TikTok
   > tiktok.com ➡️ tfxktok.com
-- Furtrack
-  > furtrack.com ➡️ furtrack.owo.lgbt
 - YouTube
   > youtube.com ➡️ yfxtube.com
 - YouTu.be
@@ -67,16 +67,16 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ### Steps
 
-1. Create configuration file (use [config.yaml.example](config.yaml.example) as a complete example)
+1. Create [config.yaml](config.yaml) configuration file (use [config.yaml.example](config.yaml.example) as a complete example)
 2. Set environment variables
-   > `export TG_PREVIEW_BOT_TOKEN={YOUR_BOT_TOKEN_FROM_@BOTFATHER}` or use `.env` file (use [.env.example](.env.example) as a complete example)
+   > `export PREVIEWSYNTH_TG_BOT_TOKEN={YOUR_BOT_TOKEN_FROM_@BOTFATHER}` or use `.env` file (use [.env.example](.env.example) as a complete example)
 3. Run application
    1. Container
       1. Pull image
          > `docker pull ghcr.io/campfred/tg-previewsynth-bot:main`
       2. Run image
-         > With env variable : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env TG_PREVIEW_BOT_TOKEN=$TG_PREVIEW_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main`
-         > With .env file : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --read-only --volume $PWD/.env:/app/.env ghcr.io/campfred/tg-previewsynth-bot:main`
+         > With env variable : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env PREVIEWSYNTH_TG_BOT_TOKEN=$PREVIEWSYNTH_TG_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main`
+         > With .env file : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env-file $PWD/.env ghcr.io/campfred/tg-previewsynth-bot:main`
          > > [!note]
          > > The suggested command mounts the configuration file as a read-only resource with option `--read-only`.
          > > If you plan on using the `/save` command, you may want to leave that option (`--read-only`) out.
@@ -86,6 +86,13 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
       2. Run app
          > `deno task start`
 4. Use it!
+
+### Available environment variables
+
+| name                            | default         | description                                                   |
+| ------------------------------- | --------------- | ------------------------------------------------------------- |
+| `PREVIEWSYNTH_TG_BOT_TOKEN`     | `null`          | Telegram bot token from [@BotFather](https://BotFather.t.me). |
+| `PREVIEWSYNTH_CONFIG_FILE_PATH` | `./config.yaml` | Path to the configuration file.                               |
 
 ## Upcoming improvements
 

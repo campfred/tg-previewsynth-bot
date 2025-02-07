@@ -12,7 +12,7 @@ export class SimpleLinkConverter implements LinkConverter
 	enabled: boolean = true;
 
 	/**
-	 * Creates a WebLinkMap object representing a mapping between links for a website.
+	 * Creates a LinkConverter object representing a mapping between links for a website.
 	 * @param name Friendly name of the website.
 	 * @param origins Original URLs that will be converted.
 	 * @param destination Destination URLs for conversions.
@@ -72,7 +72,7 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public static filterOutSubdomains (link: URL): URL
 	{
-		// if (!this.enabled) throw new Error("Map is disabled.");
+		// if (!this.enabled) throw new Error("Converter is disabled.");
 		console.debug(`Filtering out subdomains of link ${ link } …`)
 		const filteredUrl: URL = new URL(link)
 		const hostnameParts: string[] = filteredUrl.hostname.split(".")
@@ -149,7 +149,7 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public async parseLink (link: URL): Promise<URL | null>
 	{
-		if (!this.enabled) throw new Error("Map is disabled.")
+		if (!this.enabled) throw new Error("Converter is disabled.")
 
 		return this.convertLink(this.cleanLink(SimpleLinkConverter.filterOutSubdomains(await this.expandLink(link))))
 	}

@@ -3,7 +3,7 @@ import { SimpleLinkConverter, SimpleLinkConverterSettings } from "./converters/s
 import { OdesliMusicConverter } from "./converters/music.ts"
 
 type TestData = {
-	Map: SimpleLinkConverter
+	Converter: SimpleLinkConverter
 	Links: {
 		Reduced: URL
 		Full: URL
@@ -15,7 +15,7 @@ type TestData = {
 }
 
 const TestFurAffinity: TestData = {
-	Map: new SimpleLinkConverter("FurAffinity", [new URL("https://furaffinity.net/")], new URL("https://xfuraffinity.net/")),
+	Converter: new SimpleLinkConverter("FurAffinity", [new URL("https://furaffinity.net/")], new URL("https://xfuraffinity.net/")),
 	Links: {
 		Reduced: new URL("https://furaffinity.net/view/58904471/"),
 		Full: new URL("https://www.furaffinity.net/view/58904471/"),
@@ -33,22 +33,22 @@ Deno.test("subdomainsFiltering", (): void =>
 
 Deno.test("linkExpanding", async (): Promise<void> =>
 {
-	assertEquals(await TestFurAffinity.Map.expandLink(TestFurAffinity.Links.Reduced), TestFurAffinity.Links.Full)
+	assertEquals(await TestFurAffinity.Converter.expandLink(TestFurAffinity.Links.Reduced), TestFurAffinity.Links.Full)
 })
 
 Deno.test("linkCleaning", (): void =>
 {
-	assertEquals(TestFurAffinity.Map.cleanLink(TestFurAffinity.Links.Dirty), TestFurAffinity.Links.Full)
+	assertEquals(TestFurAffinity.Converter.cleanLink(TestFurAffinity.Links.Dirty), TestFurAffinity.Links.Full)
 })
 
 Deno.test("linkConversion", (): void =>
 {
-	assertEquals(TestFurAffinity.Map.convertLink(SimpleLinkConverter.filterOutSubdomains(TestFurAffinity.Links.Full)), TestFurAffinity.Links.Converted)
+	assertEquals(TestFurAffinity.Converter.convertLink(SimpleLinkConverter.filterOutSubdomains(TestFurAffinity.Links.Full)), TestFurAffinity.Links.Converted)
 })
 
 Deno.test("linkConversionWithSubdomainsAndParams", async (): Promise<void> =>
 {
-	assertEquals(await TestFurAffinity.Map.parseLink(TestFurAffinity.Links.Alternate), TestFurAffinity.Links.Converted)
+	assertEquals(await TestFurAffinity.Converter.parseLink(TestFurAffinity.Links.Alternate), TestFurAffinity.Links.Converted)
 })
 
 Deno.test("TikTok-specific test case", async (): Promise<void> =>

@@ -4,6 +4,8 @@ import { SimpleLinkConverter } from "./converters/simple.ts"
 import { APIbasedLinkConverter, OdesliMusicConverter } from "./converters/music.ts"
 import { OdesliOrigins } from "./types/odesli.ts"
 
+const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
+
 export class ConfigurationManager
 {
 	private static _instance: ConfigurationManager
@@ -49,6 +51,7 @@ export class ConfigurationManager
 
 	private parse_simple_converters_from_config (links: LinkConfiguration[]): SimpleLinkConverter[]
 	{
+		// TODO Handle path restrictions like / watch for YT and / p /:id for FurTrack
 		console.debug("Reading links configuration…")
 		console.debug(links)
 
@@ -71,6 +74,7 @@ export class ConfigurationManager
 
 	private parse_api_based_converters_from_config (api_configs: APIConfiguration[]): APIbasedLinkConverter[]
 	{
+		// TODO Change config to be a dict instead of an array, so it goes like apis.odesli = true
 		console.debug("Reading APIs configuration…")
 
 		const converters: APIbasedLinkConverter[] = []
@@ -161,9 +165,9 @@ export class ConfigurationManager
 		} catch (error)
 		{
 			console.error(error)
-			console.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue?")
-			Deno.exitCode = 1
-			Deno.exit()
+			console.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue? Maybe it wasn't mounted properly?")
+			throw new Error("Can't read config")
+
 		}
 	}
 
@@ -182,8 +186,13 @@ export class ConfigurationManager
 		{
 			console.error(error)
 			console.error("Could not save configuration data.\nCould there be a permissions issue?")
+			throw new Error("Can't write config")
+
 		}
 	}
-}
 
-const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || "config.yaml"
+	getConfigurationJson (): string
+	{
+		return stringify({ links: this.save_simple_converters_to_config(), apis: this.save_api_based_converters_to_config(), features: this.Features, about: this.About })
+	}
+}
