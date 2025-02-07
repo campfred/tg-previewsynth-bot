@@ -36,6 +36,11 @@ links:
       - https://tiktok.com
     destination: https://tfxktok.com
     enabled: true
+  - name: Furtrack
+    origins:
+      - https://furtrack.com
+    destination: https://furtrack.owo.lgbt
+    enabled: true
 apis:
   - name: Odesli
     enabled: true
