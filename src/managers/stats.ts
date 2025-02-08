@@ -8,7 +8,7 @@ export type ConversionStats = [ConversionMethodStats, ConversionTypeStats, LinkC
 export type ConversionScenarioStats = [number, number, number]
 
 /**
- * Class that keeps track of a few stats like how many conversions and how many inline queries did it do.
+ * Manager that keeps track of a few stats like how many conversions and how many inline queries did it do.
  * It's more for curiosity than anything tbh.
  */
 export class StatsManager

@@ -1,9 +1,9 @@
 import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.32.0/context.ts"
 import { CustomContext, LinkConverter } from "./types/types.ts"
 import { SimpleLinkConverter } from "./converters/simple.ts"
-import { APIbasedLinkConverter } from "./converters/music.ts"
+import { APILinkConverter } from "./converters/music.ts"
 
-export function findMatchingConverter (url: URL, simple_converters: SimpleLinkConverter[], api_converters: APIbasedLinkConverter[]): LinkConverter | null
+export function findMatchingConverter (url: URL, simple_converters: SimpleLinkConverter[], api_converters: APILinkConverter[]): LinkConverter | null
 {
 	console.debug(`Searching a converter for ${ url.origin } …`)
 

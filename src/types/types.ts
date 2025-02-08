@@ -44,6 +44,9 @@ export enum ConversionMethods
 	INLINE = "Inline"
 }
 
+/**
+ * Interface of a basic link converter.
+ */
 export interface LinkConverter
 {
 	readonly name: string

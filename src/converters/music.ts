@@ -2,13 +2,13 @@ import { OdesliResponse } from "../types/odesli.ts"
 import { ConversionTypes, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
 
-export interface APIbasedLinkConverter extends LinkConverter
+export interface APILinkConverter extends LinkConverter
 {
 	readonly base_url: URL
 	readonly api_key: string
 }
 
-export class OdesliMusicConverter extends SimpleLinkConverter implements APIbasedLinkConverter
+export class OdesliMusicConverter extends SimpleLinkConverter implements APILinkConverter
 {
 	override readonly type: ConversionTypes = ConversionTypes.API;
 	readonly base_url: URL = new URL("/v1-alpha.1/links", "https://api.song.link");
