@@ -1,55 +1,44 @@
 import { parse, stringify } from "@std/yaml"
-import { AboutConfiguration, APIConfiguration, APIs, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "./types/types.ts"
-import { SimpleLinkConverter } from "./converters/simple.ts"
-import { APIbasedLinkConverter, OdesliMusicConverter } from "./converters/music.ts"
-import { OdesliOrigins } from "./types/odesli.ts"
+import { AboutConfiguration, APIConfiguration, APIs, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
+import { SimpleLinkConverter } from "../converters/simple.ts"
+import { APIbasedLinkConverter, OdesliMusicConverter } from "../converters/music.ts"
+import { OdesliOrigins } from "../types/odesli.ts"
+import { UserFromGetMe } from "https://deno.land/x/grammy_types@v3.16.0/manage.ts"
 
 const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
 
+// TODO Add comments
 export class ConfigurationManager
 {
-	private static _instance: ConfigurationManager
-	private _links: LinkConverter[] = [];
-	private _apis: APIbasedLinkConverter[] = [];
-	private _features!: FeaturesConfiguration
-	private _about!: AboutConfiguration
+	private static _Instance: ConfigurationManager
+	private _SimpleConverters: SimpleLinkConverter[] = [];
+	private _APIConverterss: APIbasedLinkConverter[] = [];
+	private _Features!: FeaturesConfiguration
+	private _About!: AboutConfiguration
+	private _BotInfo!: UserFromGetMe
 
-	private constructor ()
-	{
-		// this.loadConfiguration();
-	}
+	private constructor () { }
 
-	static get Instance (): ConfigurationManager
-	{
-		return this._instance || (this._instance = new this())
-	}
+	static get Instance (): ConfigurationManager { return this._Instance || (this._Instance = new this()) }
 
-	get Simple_Converters (): SimpleLinkConverter[]
-	{
-		return this._links
-	}
 
-	get API_Converters (): APIbasedLinkConverter[]
-	{
-		return this._apis
-	}
+	set BotInfo (botInfo: UserFromGetMe) { this._BotInfo = botInfo }
 
-	get All_Converters (): LinkConverter[]
-	{
-		return [...this._links, ...this._apis]
-	}
 
-	get Features (): FeaturesConfiguration
-	{
-		return this._features
-	}
+	get BotInfo (): UserFromGetMe { return this._BotInfo }
 
-	get About (): AboutConfiguration
-	{
-		return this._about
-	}
 
-	private parse_simple_converters_from_config (links: LinkConfiguration[]): SimpleLinkConverter[]
+	get SimpleConverters (): SimpleLinkConverter[] { return this._SimpleConverters }
+
+	get APIConverters (): APIbasedLinkConverter[] { return this._APIConverterss }
+
+	get AllConverters (): LinkConverter[] { return [...this._SimpleConverters, ...this._APIConverterss] }
+
+	get Features (): FeaturesConfiguration { return this._Features }
+
+	get About (): AboutConfiguration { return this._About }
+
+	private parseSimpleConvertersInConfig (links: LinkConfiguration[]): SimpleLinkConverter[]
 	{
 		// TODO Handle path restrictions like / watch for YT and / p /:id for FurTrack
 		console.debug("Reading links configuration…")
@@ -72,7 +61,7 @@ export class ConfigurationManager
 		return converters
 	}
 
-	private parse_api_based_converters_from_config (api_configs: APIConfiguration[]): APIbasedLinkConverter[]
+	private parseAPIConvertersInConfig (api_configs: APIConfiguration[]): APIbasedLinkConverter[]
 	{
 		// TODO Change config to be a dict instead of an array, so it goes like apis.odesli = true
 		console.debug("Reading APIs configuration…")
@@ -101,12 +90,12 @@ export class ConfigurationManager
 		return converters
 	}
 
-	private save_simple_converters_to_config (): LinkConfiguration[]
+	private saveSimpleConvertersInConfig (): LinkConfiguration[]
 	{
 		console.debug("Parsing simple link converters into configuration…")
 
 		const link_configs: LinkConfiguration[] = []
-		for (const link_map of this._links)
+		for (const link_map of this._SimpleConverters)
 		{
 			const config_link: LinkConfiguration = {
 				name: link_map.name.trim(),
@@ -121,12 +110,12 @@ export class ConfigurationManager
 		return link_configs
 	}
 
-	private save_api_based_converters_to_config (): APIConfiguration[]
+	private saveAPIConvertersInConfig (): APIConfiguration[]
 	{
 		console.debug("Parsing api-based link converters into configuration…")
 
 		const api_configs: APIConfiguration[] = []
-		for (const api_map of this._apis)
+		for (const api_map of this._APIConverterss)
 		{
 			const config: APIConfiguration = { name: api_map.name, enabled: api_map.enabled }
 			if (api_map.api_key !== undefined) config.api_key = api_map.api_key
@@ -138,28 +127,28 @@ export class ConfigurationManager
 		return api_configs
 	}
 
-	async loadConfiguration ()
+	async loadConfig ()
 	{
 		console.debug(`Loading configuration from disk at ${ PATH_CONFIG_FILE } …`)
 		try
 		{
 			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE))
 
-			this._links = this.parse_simple_converters_from_config(config.links)
+			this._SimpleConverters = this.parseSimpleConvertersInConfig(config.links)
 			console.info("Loaded simple link convertions configuration!")
 			// console.table(config.links);
 			// console.table(this._links);
 
-			this._apis = this.parse_api_based_converters_from_config(config.apis)
+			this._APIConverterss = this.parseAPIConvertersInConfig(config.apis)
 			console.info("Loaded api-based link convertions configuration!")
 			// console.table(config.apis);
 			// console.table(this._apis);
 
-			this._features = config.features
+			this._Features = config.features
 			console.info("Loaded features configuration!")
 			// console.table(this._features);
 
-			this._about = config.about
+			this._About = config.about
 			console.info("Loaded about configuration!")
 			// console.table(this._about);
 		} catch (error)
@@ -171,16 +160,16 @@ export class ConfigurationManager
 		}
 	}
 
-	async saveConfiguration ()
+	async saveConfig ()
 	{
-		const config: Configuration = { links: this.save_simple_converters_to_config(), apis: this.save_api_based_converters_to_config(), features: this.Features, about: this.About }
+		const config: Configuration = { links: this.saveSimpleConvertersInConfig(), apis: this.saveAPIConvertersInConfig(), features: this.Features, about: this.About }
 		console.debug("Generated configuration!")
 		console.debug(config)
 
 		console.debug("Writing configuration to disk…")
 		try
 		{
-			await Deno.writeTextFile(PATH_CONFIG_FILE, stringify(config))
+			await Deno.writeTextFile(PATH_CONFIG_FILE, this.getConfigurationJson())
 			console.info("Configuration saved!")
 		} catch (error)
 		{
@@ -193,6 +182,6 @@ export class ConfigurationManager
 
 	getConfigurationJson (): string
 	{
-		return stringify({ links: this.save_simple_converters_to_config(), apis: this.save_api_based_converters_to_config(), features: this.Features, about: this.About })
+		return stringify({ links: this.saveSimpleConvertersInConfig(), apis: this.saveAPIConvertersInConfig(), features: this.Features, about: this.About })
 	}
 }

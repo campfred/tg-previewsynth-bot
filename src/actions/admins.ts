@@ -1,7 +1,7 @@
 import { CommandContext, Composer } from "grammy"
-import { CustomContext } from "./types/types.ts"
-import { ConfigurationManager } from "../src/config.ts"
-import { getExpeditorDebugString } from "../src/utils.ts"
+import { CustomContext } from "../types/types.ts"
+import { ConfigurationManager } from "../managers/config.ts"
+import { getExpeditorDebugString } from "../utils.ts"
 
 enum COMMANDS
 {
@@ -27,7 +27,7 @@ function toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?
 	if (ctx.config.isDeveloper)
 	{
 		ctx.react("🤔")
-		for (const map of config_manager.Simple_Converters)
+		for (const map of config_manager.SimpleConverters)
 			for (const origin of map.origins)
 				if (
 					map.name.trim().toLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
@@ -50,11 +50,12 @@ admin_actions.chatType("private").command(COMMANDS.CONFIG_SAVE, async function (
 	ctx.react("🤔")
 	try
 	{
-		await config_manager.saveConfiguration()
+		await config_manager.saveConfig()
 		ctx.react("🫡")
 		ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
 	} catch (error)
 	{
+		console.error(error)
 		ctx.react("💔")
 		ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ config_manager.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 	}
@@ -67,11 +68,12 @@ admin_actions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async function
 	ctx.react("🤔")
 	try
 	{
-		await config_manager.loadConfiguration()
+		await config_manager.loadConfig()
 		ctx.react("🫡")
 		ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
 	} catch (error)
 	{
+		console.error(error)
 		ctx.react("💔")
 		ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 	}

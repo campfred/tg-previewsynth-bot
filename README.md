@@ -67,7 +67,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ### Steps
 
-1. Create [config.yaml](config.yaml) configuration file (use [config.yaml.example](config.yaml.example) as a complete example)
+1. Create [config.yaml](config.yaml) configuration file (use [example.config.yaml](example.config.yaml) as a complete example)
 2. Set environment variables
    > `export PREVIEWSYNTH_TG_BOT_TOKEN={YOUR_BOT_TOKEN_FROM_@BOTFATHER}` or use `.env` file (use [.env.example](.env.example) as a complete example)
 3. Run application

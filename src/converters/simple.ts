@@ -1,10 +1,11 @@
-import { LinkConverter } from "../types/types.ts"
+import { ConversionTypes, LinkConverter } from "../types/types.ts"
 
 export type SimpleLinkConverterSettings = { expand?: boolean; preserveSearchParams?: string[] }
 
 export class SimpleLinkConverter implements LinkConverter
 {
 	readonly name: string
+	readonly type: ConversionTypes = ConversionTypes.SIMPLE;
 	readonly origins: URL[]
 	readonly destination: URL
 	readonly expand: boolean = true;
@@ -128,7 +129,7 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @returns The converted link without query parameters.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
-	public convertLink (link: URL): URL | Promise<URL | null> | null
+	public convertLink (link: URL): URL | Promise<URL>
 	{
 		if (this.isSupported(link))
 		{
@@ -147,10 +148,11 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @param link Link to convert.
 	 * @returns Converted link.
 	 */
-	public async parseLink (link: URL): Promise<URL | null>
+	public async parseLink (link: URL): Promise<URL>
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
 
-		return this.convertLink(this.cleanLink(SimpleLinkConverter.filterOutSubdomains(await this.expandLink(link))))
+		const newLink: URL = await this.convertLink(this.cleanLink(SimpleLinkConverter.filterOutSubdomains(await this.expandLink(link))))
+		return newLink
 	}
 }

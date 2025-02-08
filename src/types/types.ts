@@ -8,7 +8,7 @@ export type APIConfiguration = {
 	api_key?: string
 	base_url?: string
 }
-export type FeaturesConfiguration = { link_recognition: boolean }
+export type FeaturesConfiguration = { link_recognition: boolean, stats: boolean }
 export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } }
 
 export type Configuration = {
@@ -31,9 +31,23 @@ export interface BotConfig
 
 export type CustomContext = Context & { config: BotConfig }
 
+export enum ConversionTypes
+{
+	SIMPLE = "Simple",
+	API = "API"
+}
+
+export enum ConversionMethods
+{
+	COMMAND = "Command",
+	CONVO = "Conversational",
+	INLINE = "Inline"
+}
+
 export interface LinkConverter
 {
 	readonly name: string
+	readonly type: ConversionTypes
 	readonly origins: URL[]
 	readonly destination: URL
 	readonly expand: boolean

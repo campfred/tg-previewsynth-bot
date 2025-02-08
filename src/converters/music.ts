@@ -1,5 +1,5 @@
 import { OdesliResponse } from "../types/odesli.ts"
-import { LinkConverter } from "../types/types.ts"
+import { ConversionTypes, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
 
 export interface APIbasedLinkConverter extends LinkConverter
@@ -10,6 +10,7 @@ export interface APIbasedLinkConverter extends LinkConverter
 
 export class OdesliMusicConverter extends SimpleLinkConverter implements APIbasedLinkConverter
 {
+	override readonly type: ConversionTypes = ConversionTypes.API;
 	readonly base_url: URL = new URL("/v1-alpha.1/links", "https://api.song.link");
 	readonly api_key: string = "";
 
@@ -26,7 +27,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 	 * @returns The converted link without query parameters.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
-	public override async convertLink (link: URL): Promise<URL | null>
+	public override async convertLink (link: URL): Promise<URL>
 	{
 		const request_url: URL = new URL(this.base_url)
 		request_url.searchParams.append("songIfSingle", "true")
@@ -46,7 +47,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 			console.error(error)
 			console.error(`Error with ${ this.name } API, maybe the link doesn't belong to a known song.`)
 		}
-		return null
+		throw new Error("Unhandled link")
 	}
 
 	/**
@@ -54,10 +55,11 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 	 * @param link Link to convert.
 	 * @returns Converted link.
 	 */
-	public override async parseLink (link: URL): Promise<URL | null>
+	public override async parseLink (link: URL): Promise<URL>
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
 
-		return this.convertLink(this.cleanLink(await this.expandLink(link)))
+		const newLink: URL = await this.convertLink(this.cleanLink(await this.expandLink(link)))
+		return newLink
 	}
 }
