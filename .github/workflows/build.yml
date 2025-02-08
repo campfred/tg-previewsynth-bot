@@ -26,7 +26,7 @@ env:
     REGISTRY: ghcr.io
     IMAGE_NAME: ${{ github.repository }}
 
-jobs:
+jobs: # TODO Add job to compile binary of the bot with Deno compile https://youtu.be/ZsDqTQs3_G0
     test:
         name: Test
         runs-on: ubuntu-latest
