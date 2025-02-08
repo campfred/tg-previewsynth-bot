@@ -104,12 +104,12 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	}
 }
 
-export const main_actions = new Composer<CustomContext>()
+export const MainActions = new Composer<CustomContext>()
 
 /**
  * Start command
  */
-main_actions.chatType("private").command(COMMANDS.START, function (ctx)
+MainActions.chatType("private").command(COMMANDS.START, function (ctx)
 {
 	console.debug(`Incoming /${ COMMANDS.START } by ${ getExpeditorDebugString(ctx) }`)
 	ctx.react("👀")
@@ -127,7 +127,7 @@ main_actions.chatType("private").command(COMMANDS.START, function (ctx)
 /**
  * Healthcheck ping command
  */
-main_actions.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, function (ctx)
+MainActions.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING, function (ctx)
 {
 	console.debug(`Incoming /${ COMMANDS.PING } by ${ getExpeditorDebugString(ctx) }`)
 	ctx.react("⚡")
@@ -138,7 +138,7 @@ main_actions.chatType(["private", "group", "supergroup"]).command(COMMANDS.PING,
 /**
  * Get help instructions
  */
-main_actions.chatType("private").command(COMMANDS.HELP, function (ctx)
+MainActions.chatType("private").command(COMMANDS.HELP, function (ctx)
 {
 	console.debug(`Incoming /${ COMMANDS.HELP } by ${ getExpeditorDebugString(ctx) }`)
 	let response: string = "Oh, you'll see. I'm a simple Synth!"
@@ -160,7 +160,7 @@ main_actions.chatType("private").command(COMMANDS.HELP, function (ctx)
 /**
  * Convert link
  */
-main_actions.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async function (ctx)
+MainActions.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async function (ctx)
 {
 	console.debug(`Incoming /${ COMMANDS.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 	await processConversionRequest(ctx, ConversionMethods.COMMAND)
@@ -169,13 +169,13 @@ main_actions.command([COMMANDS.LINK_CONVERT, COMMANDS.LINK_EMBED], async functio
 /**
  * Detects and sends link replacements
  */
-main_actions.hears(getOriginRegExes(), async function (ctx)
+MainActions.hears(getOriginRegExes(), async function (ctx)
 {
 	console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 	await processConversionRequest(ctx, ConversionMethods.CONVO)
 })
 
-main_actions.inlineQuery(getOriginRegExes(), async function (ctx)
+MainActions.inlineQuery(getOriginRegExes(), async function (ctx)
 {
 	console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 	const link: string = ctx.match.toString()

@@ -1,9 +1,9 @@
 import "@std/dotenv/load"
 import { Bot, GrammyError, HttpError, NextFunction } from "grammy"
 import { CustomContext } from "./types/types.ts"
-import { admin_actions } from "./actions/admins.ts"
+import { AdminActions } from "./actions/admins.ts"
 import { ConfigurationManager } from "./managers/config.ts"
-import { MAIN_COMMANDS_LIST, main_actions } from "./actions/main.ts"
+import { MAIN_COMMANDS_LIST, MainActions } from "./actions/main.ts"
 
 const config_manager: ConfigurationManager = ConfigurationManager.Instance
 try
@@ -26,8 +26,8 @@ BOT.use(function (ctx: CustomContext, next: NextFunction)
 	}
 	next()
 })
-BOT.use(admin_actions)
-BOT.use(main_actions)
+BOT.use(AdminActions)
+BOT.use(MainActions)
 BOT.api.setMyCommands(MAIN_COMMANDS_LIST)
 config_manager.BotInfo = BOT.botInfo
 

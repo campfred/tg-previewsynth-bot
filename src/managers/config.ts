@@ -5,7 +5,7 @@ import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"
 import { OdesliOrigins } from "../types/odesli.ts"
 import { UserFromGetMe } from "https://deno.land/x/grammy_types@v3.16.0/manage.ts"
 
-const PATH_CONFIG_FILE = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
+const PATH_CONFIG_FILE: string = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
 
 /**
  * Manager that handles everything related to the configuration including loading and saving it.

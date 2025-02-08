@@ -14,6 +14,7 @@ export type ConversionScenarioStats = [number, number, number]
 export class StatsManager
 {
 	private static _Instance: StatsManager
+	private _StartTime: Temporal.Instant = Temporal.Now.instant()
 	private _Commands: CommandStats = {}
 	private _ConversionMethods: ConversionMethodStats = {}
 	private _ConversionTypes: ConversionTypeStats = {}
@@ -26,6 +27,11 @@ export class StatsManager
 	 * Returns instance of StatsManager.
 	 */
 	static get Instance (): StatsManager { return this._Instance || (this._Instance = new this()) }
+
+
+	public get StartTime (): Temporal.Instant { return this._StartTime }
+
+	public get UpTime (): Temporal.ComparisonResult { return Temporal.Instant.compare(this._StartTime, Temporal.Now.instant()) }
 
 
 	/**
