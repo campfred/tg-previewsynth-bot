@@ -3,24 +3,25 @@ import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export type LinkConfiguration = { name: string; origins: string[]; destination: string, enabled?: boolean, settings?: SimpleLinkConverterSettings }
 export type APIConfiguration = {
-	name: string
-	enabled: boolean
+	enabled?: boolean
 	api_key?: string
 	base_url?: string
+	// TODO Implement a more flexible wayt to add unsupported APIs like having a JSON path to retrieve the resulting URL
 }
+export type APIsConfiguration = { [api: string]: APIConfiguration }
 export type FeaturesConfiguration = { link_recognition: boolean, stats: boolean }
 export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } }
 
 export type Configuration = {
 	links: LinkConfiguration[]
-	apis: APIConfiguration[]
+	apis: APIsConfiguration
 	features: FeaturesConfiguration
 	about: AboutConfiguration
 }
 
 export enum APIs
 {
-	ODESLI = "Odesli",
+	ODESLI = "odesli",
 }
 
 export interface BotConfig

@@ -81,7 +81,7 @@ Deno.test("YouTube-specific test case", async function (): Promise<void>
 	assertEquals(ConvertedLink, ExpectedLink)
 })
 
-Deno.test("YouTube-specific constraint", async function (): Promise<void>
+Deno.test("YouTube-specific constraint", function (): void
 {
 	const Converter: SimpleLinkConverter = new SimpleLinkConverter("YouTube", [new URL("https://youtube.com/watch")], new URL("https://yfxtube.com/watch"), youtubeConversionSettings)
 	const ShortLink = new URL("https://www.youtube.com/shorts/_r53PoMVZTQ?feature=share")
@@ -108,7 +108,7 @@ Deno.test("Music-specific test case", async (): Promise<void> =>
 	assertEquals(await Converter.parseLink(SpotifyShareLink), OdesliConvertedLink)
 })
 
-Deno.test("FurTrack-specific constraint", async function (): Promise<void>
+Deno.test("FurTrack-specific constraint", function (): void
 {
 	const Converter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], new URL("https://furtrack.owo.lgbt/p/"))
 	const NavLink = new URL("https://www.furtrack.com/index/event:furxmas2025/880404")

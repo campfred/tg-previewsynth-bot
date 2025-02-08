@@ -1,5 +1,5 @@
 import { parse, stringify } from "@std/yaml"
-import { AboutConfiguration, APIConfiguration, APIs, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
+import { AboutConfiguration, APIConfiguration, APIsConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
 import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"
 import { OdesliOrigins } from "../types/odesli.ts"
@@ -14,7 +14,7 @@ export class ConfigurationManager
 {
 	private static _Instance: ConfigurationManager
 	private _SimpleConverters: SimpleLinkConverter[] = [];
-	private _APIConverterss: APILinkConverter[] = [];
+	private _APIConverters: APILinkConverter[] = [];
 	private _Features!: FeaturesConfiguration
 	private _About!: AboutConfiguration
 	private _BotInfo!: UserFromGetMe
@@ -44,12 +44,12 @@ export class ConfigurationManager
 	/**
 	 * Returns the API-based converters currently handled.
 	 */
-	get APIConverters (): APILinkConverter[] { return this._APIConverterss }
+	get APIConverters (): APILinkConverter[] { return this._APIConverters }
 
 	/**
 	 * Returns all of the converters currently handled.
 	 */
-	get AllConverters (): LinkConverter[] { return [...this._SimpleConverters, ...this._APIConverterss] }
+	get AllConverters (): LinkConverter[] { return [...this._SimpleConverters, ...this._APIConverters] }
 
 	/**
 	 * Returns the current configuration for features.
@@ -90,33 +90,28 @@ export class ConfigurationManager
 
 	/**
 	 * Processes api conversion configs into link converters.
-	 * @param api_configs API link conversion configurations to process
+	 * @param apiConfigs API link conversion configurations to process
 	 * @returns API converters
 	 */
-	private parseAPIConvertersInConfig (api_configs: APIConfiguration[]): APILinkConverter[]
+	private parseAPIConvertersInConfig (apiConfigs: APIsConfiguration): APILinkConverter[]
 	{
-		// TODO Change config to be a dict instead of an array, so it goes like apis.odesli.enabled = true
+		const converters: APILinkConverter[] = []
 		console.debug("Reading APIs configuration…")
 
-		const converters: APILinkConverter[] = []
-		for (const api_config of api_configs)
-			for (const [_key, _value] of Object.entries(APIs))
-			{
-				if (api_config.name.trim().toLowerCase() === _value.trim().toLowerCase())
-				{
-					const musicConverter = new OdesliMusicConverter(
-						"Music",
-						OdesliOrigins.map((origin): URL =>
-						{
-							console.debug(`Adding Odesli support for ${ origin }`)
-							return new URL(origin)
-						}),
-						new URL("https://song.link"),
-					)
-					api_config.enabled ? musicConverter.enable() : musicConverter.disable()
-					converters.push(musicConverter)
-				}
-			}
+		if ("odesli" in apiConfigs)
+		{
+			console.debug("Found Odesli API configuration!")
+			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
+
+			const musicConverter = new OdesliMusicConverter(
+				"Music",
+				OdesliOrigins.map((origin): URL => new URL(origin)),
+				new URL("https://song.link"),
+			)
+			odesliConfig.enabled ? musicConverter.enable() : musicConverter.disable()
+
+			converters.push(musicConverter)
+		}
 
 		console.info("Parsed APIs configuration!")
 		return converters
@@ -130,7 +125,7 @@ export class ConfigurationManager
 	{
 		console.debug("Parsing simple link converters into configuration…")
 
-		const link_configs: LinkConfiguration[] = []
+		const linkConfigs: LinkConfiguration[] = []
 		for (const link_map of this._SimpleConverters)
 		{
 			const config_link: LinkConfiguration = {
@@ -139,32 +134,33 @@ export class ConfigurationManager
 				destination: link_map.destination.toString().trim(),
 				enabled: link_map.enabled,
 			}
-			link_configs.push(config_link)
+			linkConfigs.push(config_link)
 		}
 
 		console.debug("Web link maps parsed into configuration!")
-		return link_configs
+		return linkConfigs
 	}
 
 	/**
 	 * Translates current API converters into API configurations.
 	 * @returns API configurations
 	 */
-	private saveAPIConvertersInConfig (): APIConfiguration[]
+	private saveAPIConvertersInConfig (): APIsConfiguration
 	{
 		console.debug("Parsing api-based link converters into configuration…")
+		const apiConfigs: APIsConfiguration = {}
 
-		const api_configs: APIConfiguration[] = []
-		for (const api_map of this._APIConverterss)
+		for (const api of this._APIConverters)
 		{
-			const config: APIConfiguration = { name: api_map.name, enabled: api_map.enabled }
-			if (api_map.api_key !== undefined) config.api_key = api_map.api_key
-			if (api_map.base_url !== undefined) config.base_url = api_map.base_url.toString()
-			api_configs.push(config)
+			const config: APIConfiguration = {}
+			if (!api.enabled) config.enabled = api.enabled
+			if (api.api_key !== undefined) config.api_key = api.api_key
+
+			apiConfigs[api.name.toLowerCase()] = config
 		}
 
-		console.debug("Web link maps parsed into configuration!")
-		return api_configs
+		console.debug("API link converters translated into configuration!")
+		return apiConfigs
 	}
 
 	/**
@@ -191,7 +187,7 @@ export class ConfigurationManager
 			// console.table(config.links);
 			// console.table(this._links);
 
-			this._APIConverterss = this.parseAPIConvertersInConfig(config.apis)
+			this._APIConverters = this.parseAPIConvertersInConfig(config.apis)
 			console.info("Loaded api-based link convertions configuration!")
 			// console.table(config.apis);
 			// console.table(this._apis);
