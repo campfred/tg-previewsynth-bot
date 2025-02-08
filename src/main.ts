@@ -1,7 +1,7 @@
 import "@std/dotenv/load"
 import { Bot, GrammyError, HttpError, NextFunction } from "grammy"
 import { CustomContext } from "./types/types.ts"
-import { AdminActions } from "./actions/admins.ts"
+import { AdminActions } from "./actions/admin.ts"
 import { ConfigurationManager } from "./managers/config.ts"
 import { MAIN_COMMANDS_LIST, MainActions } from "./actions/main.ts"
 
