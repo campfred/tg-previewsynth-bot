@@ -3,6 +3,7 @@ import { CustomContext } from "../types/types.ts"
 import { ConfigurationManager } from "../managers/config.ts"
 import { getExpeditorDebugString } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
+import { CacheManager } from "../managers/cache.ts"
 
 enum COMMANDS
 {
@@ -12,10 +13,12 @@ enum COMMANDS
 	MAP_DISABLE = "disable",
 	MAP_TOGGLE = "toggle",
 	STATS = "stats",
+	CACHE_CLEAR = "clear",
 }
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const STATS: StatsManager = StatsManager.Instance
+const CACHE: CacheManager = CacheManager.Instance
 
 export const AdminActions = new Composer<CustomContext>()
 
@@ -120,10 +123,21 @@ AdminActions.command(COMMANDS.STATS, (ctx) =>
 		message += "<b>Links</b>\n"
 		Object.entries(STATS.LinkConversionUsage).map(([link, count]: [string, number]): string => message += `${ link } : ${ count }\n`)
 
-		message += "\n"
-
+		message += `I got ${ CACHE.size } link conversions in my backpocket ready to go. 🎒\n`
 		message += `I've been up for ${ STATS.UpTime.toLocaleString("en") } btw! 🚀`
 
 		ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+	}
+})
+
+AdminActions.chatType("private").command(COMMANDS.CACHE_CLEAR, (ctx) =>
+{
+	if (ctx.config.isDeveloper)
+	{
+		console.debug(`Incoming /${ COMMANDS.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
+		ctx.react("🔥")
+		const cacheSize: number = CACHE.size
+		CACHE.clear()
+		ctx.reply(`Cache cleared! 🧹\nIt's all nice and tidy now!~\n\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 	}
 })

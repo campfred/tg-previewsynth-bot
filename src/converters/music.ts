@@ -1,6 +1,9 @@
+import { CacheManager } from "../managers/cache.ts"
 import { OdesliResponse } from "../types/odesli.ts"
 import { ConversionTypes, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
+
+const CACHE: CacheManager = CacheManager.Instance
 
 export interface APILinkConverter extends LinkConverter
 {
@@ -29,6 +32,11 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	 */
 	public override async convertLink (link: URL): Promise<URL>
 	{
+		// Check if link is already cached and return it if it is
+		const cachedLink: URL | undefined = CACHE.get(link)
+		if (cachedLink) return cachedLink
+
+		// Convert the link when it's not cached
 		const request_url: URL = new URL(this.base_url)
 		request_url.searchParams.append("songIfSingle", "true")
 		request_url.searchParams.append("url", encodeURI(this.cleanLink(link).toString()))

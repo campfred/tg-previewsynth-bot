@@ -1,4 +1,7 @@
+import { CacheManager } from "../managers/cache.ts"
 import { ConversionTypes, LinkConverter } from "../types/types.ts"
+
+const CACHE: CacheManager = CacheManager.Instance
 
 export type SimpleLinkConverterSettings = { expand?: boolean; preserveSearchParams?: string[] }
 
@@ -133,6 +136,11 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		if (this.isSupported(link))
 		{
+			// Check if link is already cached and return it if it is
+			const cachedLink: URL | undefined = CACHE.get(link)
+			if (cachedLink) return cachedLink
+
+			// Convert the link when it's not cached
 			console.debug(`Converting link from ${ link } to point to ${ this.destination } …`)
 			const newLink = new URL(link)
 			newLink.protocol = this.destination.protocol
