@@ -5,7 +5,7 @@ import { getExpeditorDebugString } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { CacheManager } from "../managers/cache.ts"
 
-enum COMMANDS
+export enum ADMIN_COMMANDS
 {
 	CONFIG_SAVE = "save",
 	CONFIG_RELOAD = "reload",
@@ -31,7 +31,7 @@ function toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?
 {
 	if (ctx.config.isDeveloper)
 	{
-		console.debug(`Incoming /${ COMMANDS.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
+		console.debug(`Incoming /${ ADMIN_COMMANDS.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
 		ctx.react("🤔")
 		for (const map of CONFIG.SimpleConverters)
 			for (const origin of map.origins)
@@ -50,11 +50,11 @@ function toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?
 	}
 }
 
-AdminActions.chatType("private").command(COMMANDS.CONFIG_SAVE, async function (ctx)
+AdminActions.chatType("private").command(ADMIN_COMMANDS.CONFIG_SAVE, async function (ctx)
 {
 	if (ctx.config.isDeveloper)
 	{
-		console.debug(`Incoming /${ COMMANDS.CONFIG_SAVE } by ${ getExpeditorDebugString(ctx) }`)
+		console.debug(`Incoming /${ ADMIN_COMMANDS.CONFIG_SAVE } by ${ getExpeditorDebugString(ctx) }`)
 		ctx.react("⚡")
 		try
 		{
@@ -70,12 +70,12 @@ AdminActions.chatType("private").command(COMMANDS.CONFIG_SAVE, async function (c
 	}
 })
 
-AdminActions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async function (ctx)
+AdminActions.chatType("private").command(ADMIN_COMMANDS.CONFIG_RELOAD, async function (ctx)
 {
 	// TODO Actually redo the listened messages for links
 	if (ctx.config.isDeveloper)
 	{
-		console.debug(`Incoming /${ COMMANDS.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)
+		console.debug(`Incoming /${ ADMIN_COMMANDS.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)
 		ctx.react("⚡")
 		try
 		{
@@ -91,53 +91,72 @@ AdminActions.chatType("private").command(COMMANDS.CONFIG_RELOAD, async function 
 	}
 })
 
-AdminActions.chatType("private").command(COMMANDS.MAP_ENABLE, (ctx) => toggleConverterAvailability(ctx, true))
+AdminActions.chatType("private").command(ADMIN_COMMANDS.MAP_ENABLE, (ctx) => toggleConverterAvailability(ctx, true))
 
-AdminActions.chatType("private").command(COMMANDS.MAP_DISABLE, (ctx) => toggleConverterAvailability(ctx, false))
+AdminActions.chatType("private").command(ADMIN_COMMANDS.MAP_DISABLE, (ctx) => toggleConverterAvailability(ctx, false))
 
-AdminActions.chatType("private").command(COMMANDS.MAP_TOGGLE, (ctx) => toggleConverterAvailability(ctx))
+AdminActions.chatType("private").command(ADMIN_COMMANDS.MAP_TOGGLE, (ctx) => toggleConverterAvailability(ctx))
 
-// for (const map of CONFIG.LinkConverterpings) {
-// 	admin_actions.callbackQuery(`${COMMANDS.MAP_ENABLE} ${map.destination.hostname}`, (ctx) => toggleConverterAvailability(ctx, true));
-// 	admin_actions.callbackQuery(`${COMMANDS.MAP_DISABLE} ${map.destination.hostname}`, (ctx) => toggleConverterAvailability(ctx, false));
-// }
-
-AdminActions.command(COMMANDS.STATS, (ctx) =>
+AdminActions.command(ADMIN_COMMANDS.STATS, (ctx) =>
 {
 	if (ctx.config.isDeveloper)
 	{
-		console.debug(`Incoming /${ COMMANDS.STATS } by ${ getExpeditorDebugString(ctx) }`)
+		console.debug(`Incoming /${ ADMIN_COMMANDS.STATS } by ${ getExpeditorDebugString(ctx) }`)
 		ctx.react("🤓")
-		let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }\n\n`
+		let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }\n`
 
-		message += "<b>Command usage</b\n"
-		Object.entries(STATS.CommandsUsage).map(([command, count]: [string, number]): string => message += `/${ command } : ${ count }\n`)
+		if (STATS.CommandsUsage.size > 0)
+		{
+			message += "\n<blockquote><b>Command usage</b>"
+			for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
+			message += "</blockquote>"
+		}
 
-		message += "<b>Conversion methods</b>\n"
-		Object.entries(STATS.ConversionMethodsUsage).map(([method, count]: [string, number]): string => message += `${ method } : ${ count }\n`)
+		if (STATS.ConversionMethodsUsage.size > 0)
+		{
+			message += "\n<blockquote><b>Conversion methods</b>"
+			for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
+			message += "</blockquote>"
+		}
 
-		// message += "<b>Conversion types</b>\n"
-		// deno-lint-ignore no-irregular-whitespace
-		// Object.entries(STATS.ConversionTypeUsage).map(([type, count]: [string, number]): string => message += `${ type } : ${ count }\n`)
+		// if (STATS.ConversionTypeUsage.size > 0)
+		// {
+		// 	message += "\n<blockquote><b>Conversion types</b>"
+		// 	for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
+		// 	message += "</blockquote>"
+		// }
 
-		message += "<b>Links</b>\n"
-		Object.entries(STATS.LinkConversionUsage).map(([link, count]: [string, number]): string => message += `${ link } : ${ count }\n`)
+		if (STATS.LinkConversionUsage.size > 0)
+		{
+			message += "\n<blockquote><b>Links</b>"
+			for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
+			message += "</blockquote>"
+		}
 
-		message += `I got ${ CACHE.size } link conversions in my backpocket ready to go. 🎒\n`
-		message += `I've been up for ${ STATS.UpTime.toLocaleString("en") } btw! 🚀`
+		if (CACHE.size > 0)
+		{
+			message += "\n<blockquote><b>Cache</b>"
+			message += `\n${ CACHE.size } links cached`
+			message += `\n${ STATS.CacheHits } hits`
+			message += `\n${ STATS.CacheMisses } misses`
+			message += `\n${ Math.round(STATS.CacheHitRatio * 100) }% hit ratio`
+			message += "</blockquote>"
+		}
+
+		message += `\nBtw, I've been up for ${ STATS.UpTime.round({ largestUnit: "auto", smallestUnit: "seconds" }).toLocaleString("en") }! 🚀`
 
 		ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 	}
 })
 
-AdminActions.chatType("private").command(COMMANDS.CACHE_CLEAR, (ctx) =>
+AdminActions.chatType("private").command(ADMIN_COMMANDS.CACHE_CLEAR, (ctx) =>
 {
 	if (ctx.config.isDeveloper)
 	{
-		console.debug(`Incoming /${ COMMANDS.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
+		console.debug(`Incoming /${ ADMIN_COMMANDS.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
 		ctx.react("🔥")
 		const cacheSize: number = CACHE.size
 		CACHE.clear()
-		ctx.reply(`Cache cleared! 🧹\nIt's all nice and tidy now!~\n\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+		ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 	}
 })

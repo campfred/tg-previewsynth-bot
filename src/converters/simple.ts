@@ -27,28 +27,33 @@ export class SimpleLinkConverter implements LinkConverter
 		this.name = name
 		this.origins = origins
 		this.destination = destination
-		console.debug(`Created ${ this.name } ${ SimpleLinkConverter.name } object that converts to ${ this.destination.hostname } from ${ this.origins.map((origin: URL): string => origin.hostname) }`)
+		console.debug(`Created ${ this.name } ${ SimpleLinkConverter.name }\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
 		this.expand = settings?.expand != undefined ? settings.expand : true
-		if (!this.expand) console.debug("Link expansion is disabled.")
+		if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
 		if (settings?.preserveSearchParams) this.preserveSearchParams = settings?.preserveSearchParams
-		if (this.preserveSearchParams.length > 0) console.debug("Preserving search parameters :", this.preserveSearchParams?.toString())
+		if (this.preserveSearchParams.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveSearchParams?.toString())
 	}
 
 	/**
 	 * Disables the converter.
 	 */
-	public disable (): void
-	{
-		this.enabled = false
-	}
+	public disable (): void { this.enabled = false }
 
 	/**
 	 * Enables the converter.
 	 */
-	public enable (): void
-	{
-		this.enabled = true
-	}
+	public enable (): void { this.enabled = true }
+
+	/**
+	 * Toggles the converter.
+	 */
+	public toggle (): void { this.enabled = !this.enabled }
+
+	/**
+	 * Sets the converter's state.
+	 * @param state The state to set.
+	 */
+	public setEnabled (state: boolean): void { this.enabled = state }
 
 	/**
 	 * Checks if a given link can be handled by this map.
@@ -57,27 +62,28 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public isSupported (link: URL): boolean
 	{
+		console.debug(`Checking if link is supported by converter for ${ this.name } …`)
+
 		// Gate in case it's disabled
-		console.debug("Checking if converter is enabled…")
-		console.debug(this.enabled)
+		console.debug("Checking if converter is enabled…" + this.enabled)
 		if (!this.enabled) return false
 
-		console.debug("Checking if link is already converted…")
-		if (link.hostname === this.destination.hostname) return true
+		const isAlreadyConverted: boolean = link.hostname === this.destination.hostname
+		console.debug("Checking if link is already converted…" + isAlreadyConverted)
+		if (isAlreadyConverted) return true
 
-		console.debug("Checking if link path starts with the destination path…")
-		console.debug(link.pathname, this.destination.pathname)
+		console.debug("Checking if link path starts with the destination path…", link.pathname, this.destination.pathname)
 		if (link.pathname.startsWith(this.destination.pathname))
 		{
 			console.debug("Checking if link ends with one of the supported origins…")
 			for (const origin of this.origins)
 			{
-				console.debug(link.hostname, origin.hostname)
-				if (link.hostname.endsWith(origin.hostname)) return true
+				const endsWithSupportedOrigin: boolean = link.hostname.endsWith(origin.hostname)
+				console.debug("\t➥ " + origin.hostname, endsWithSupportedOrigin)
+				if (endsWithSupportedOrigin) return true
 			}
 		}
 
-		console.debug("Welp, I don't think it's supported.")
 		return false
 	}
 
@@ -89,11 +95,11 @@ export class SimpleLinkConverter implements LinkConverter
 	public static filterOutSubdomains (link: URL): URL
 	{
 		// if (!this.enabled) throw new Error("Converter is disabled.");
-		console.debug(`Filtering out subdomains of link ${ link } …`)
+		console.debug(`Filtering out subdomains of link…\n\t${ link }`)
 		const filteredUrl: URL = new URL(link)
 		const hostnameParts: string[] = filteredUrl.hostname.split(".")
 		filteredUrl.hostname = hostnameParts[hostnameParts.length - 2] + "." + hostnameParts[hostnameParts.length - 1]
-		console.debug(`Filtered out subdomains of link :\n\t  ${ link }\n\t➥ ${ filteredUrl }`)
+		console.debug(`\t➥ ${ filteredUrl }`)
 		return filteredUrl
 	}
 
@@ -105,17 +111,18 @@ export class SimpleLinkConverter implements LinkConverter
 	public async expandLink (link: URL): Promise<URL>
 	{
 		if (!this.expand) return link
-		console.debug(`Expanding link ${ link } …`)
+		console.debug(`Expanding link …\n\t${ link }`)
 		try
 		{
 			const response: Response = await fetch(link)
 			const newLink: URL = new URL(response.url)
 			response.body?.cancel()
-			console.debug(`Expanded link :\n\t  ${ link }\n\t➥ ${ newLink }`)
+			console.debug(`\t➥ ${ newLink }`)
 			return newLink
 		} catch (error)
 		{
-			console.error("Error while expanding URL :", error)
+			console.error(error)
+			console.error("Error while expanding URL.")
 			throw error
 		}
 	}
@@ -127,14 +134,14 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public cleanLink (link: URL): URL
 	{
-		console.debug(`Cleaning link ${ link } …`)
+		console.debug(`Cleaning link…\n\t${ link }`)
 		const newLink = new URL(link.origin + link.pathname)
 		for (const searchParam of this.preserveSearchParams)
 		{
 			const value: string | null = link.searchParams.get(searchParam)
 			if (value != null) newLink.searchParams.append(searchParam, value)
 		}
-		console.debug(`Cleaned link :\n\t  ${ link }\n\t➥ ${ newLink }`)
+		console.debug(`\t➥ ${ newLink }`)
 		return newLink
 	}
 
@@ -142,37 +149,42 @@ export class SimpleLinkConverter implements LinkConverter
 	 * Converts a given link to the destination website, removing query parameters if necessary.
 	 * @param link - The link to convert.
 	 * @returns The converted link without query parameters.
-	 * @throws Error if the link is unsupported or conversion is not needed.
-	 */
+	*/
 	public convertLink (link: URL): URL | Promise<URL>
 	{
-		if (this.isSupported(link))
-		{
-			// Check if link is already cached and return it if it is
-			const cachedLink: URL | undefined = CACHE.get(link)
-			if (cachedLink) return cachedLink
+		console.debug(`Converting link…\n\t${ link }`)
 
-			// Convert the link when it's not cached
-			console.debug(`Converting link from ${ link } to point to ${ this.destination } …`)
-			const newLink = new URL(link)
-			newLink.protocol = this.destination.protocol
-			newLink.hostname = this.destination.hostname
-			newLink.port = this.destination.port
-			console.debug(`Converted link :\n\t  ${ link }\n\t➥ ${ newLink }`)
-			return newLink
-		} else throw Error("Unsupported link")
+		const newLink = new URL(link)
+		newLink.protocol = this.destination.protocol
+		newLink.hostname = this.destination.hostname
+		newLink.port = this.destination.port
+		console.debug(`\t➥ ${ newLink }`)
+
+		return newLink
 	}
 
 	/**
 	 * Parse a given link.
 	 * @param link Link to convert.
 	 * @returns Converted link.
-	 */
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	*/
 	public async parseLink (link: URL): Promise<URL>
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
+		if (!this.isSupported(link)) throw Error("Unsupported link")
 
-		const newLink: URL = await this.convertLink(this.cleanLink(SimpleLinkConverter.filterOutSubdomains(await this.expandLink(link))))
-		return newLink
+		const originalLinkCleaned: URL = this.cleanLink(link)
+		const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned)
+		if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
+
+		const originalLinkExpanded: URL = await this.expandLink(originalLinkCleaned)
+		const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded)
+		if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
+
+		const convertedLink: URL = await this.convertLink(originalLinkExpanded)
+		CACHE.add(originalLinkCleaned, convertedLink)
+		CACHE.add(originalLinkExpanded, convertedLink)
+		return convertedLink
 	}
 }

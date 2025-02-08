@@ -74,14 +74,16 @@ export class ConfigurationManager
 		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration): SimpleLinkConverter
 		{
 			console.debug(`Creating ${ SimpleLinkConverter.name } config for ${ link.name } …`)
-			const simpleConverter = new SimpleLinkConverter(
+
+			const converter = new SimpleLinkConverter(
 				link.name.trim(),
 				link.origins.map((origin: string) => new URL(origin.trim())),
 				new URL(link.destination.trim()),
 				link.settings,
 			)
-			link.enabled ? simpleConverter.enable() : simpleConverter.disable()
-			return simpleConverter
+			converter.setEnabled(link.enabled || true)
+
+			return converter
 		})
 
 		console.info(`Parsed links configuration!`)
@@ -103,14 +105,14 @@ export class ConfigurationManager
 			console.debug("Found Odesli API configuration!")
 			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
 
-			const musicConverter = new OdesliMusicConverter(
+			const converter = new OdesliMusicConverter(
 				"Music",
 				OdesliOrigins.map((origin): URL => new URL(origin)),
 				new URL("https://song.link"),
 			)
-			odesliConfig.enabled ? musicConverter.enable() : musicConverter.disable()
+			converter.setEnabled(odesliConfig.enabled || true)
 
-			converters.push(musicConverter)
+			converters.push(converter)
 		}
 
 		console.info("Parsed APIs configuration!")
@@ -173,32 +175,49 @@ export class ConfigurationManager
 	}
 
 	/**
+	 * Prints the list of all the converters in the console.
+	 */
+	printConvertersListInConsole (): void
+	{
+		console.debug("Links I recognize at the moment")
+		for (const converter of this.AllConverters) console.debug(`${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }${ converter.enabled ? "" : " (disabled)" }`)
+	}
+
+	/**
+	 * Generates a string with the list of all the converters formatted to use in a message.
+	 * @returns String to use in a message
+	 */
+	getConvertersListForMessage (): string
+	{
+		let message: string = "\n<blockquote><b>Links I recognize at the moment</b>"
+		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }`
+		message += "</blockquote>"
+		return message
+	}
+
+	/**
 	 * Load configuration from file and processes it.
 	 */
 	async loadConfig (): Promise<void>
 	{
-		console.debug(`Loading configuration from disk at ${ PATH_CONFIG_FILE } …`)
+		console.debug(`Loading configuration from disk at ${ PATH_CONFIG_FILE }…`)
 		try
 		{
 			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE)) as Configuration
 
 			this._SimpleConverters = this.parseSimpleConvertersInConfig(config.links)
 			console.info("Loaded simple link convertions configuration!")
-			// console.table(config.links);
-			// console.table(this._links);
 
 			this._APIConverters = this.parseAPIConvertersInConfig(config.apis)
 			console.info("Loaded api-based link convertions configuration!")
-			// console.table(config.apis);
-			// console.table(this._apis);
 
 			this._Features = config.features
 			console.info("Loaded features configuration!")
-			// console.table(this._features);
 
 			this._About = config.about
 			console.info("Loaded about configuration!")
-			// console.table(this._about);
+
+			this.printConvertersListInConsole()
 		} catch (error)
 		{
 			console.error(error)

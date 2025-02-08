@@ -1,9 +1,6 @@
-import { CacheManager } from "../managers/cache.ts"
 import { OdesliResponse } from "../types/odesli.ts"
 import { ConversionTypes, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
-
-const CACHE: CacheManager = CacheManager.Instance
 
 export interface APILinkConverter extends LinkConverter
 {
@@ -32,42 +29,28 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	 */
 	public override async convertLink (link: URL): Promise<URL>
 	{
-		// Check if link is already cached and return it if it is
-		const cachedLink: URL | undefined = CACHE.get(link)
-		if (cachedLink) return cachedLink
-
-		// Convert the link when it's not cached
-		const request_url: URL = new URL(this.base_url)
-		request_url.searchParams.append("songIfSingle", "true")
-		request_url.searchParams.append("url", encodeURI(this.cleanLink(link).toString()))
-		console.debug(`Sending request to ${ request_url } …`)
-
-		try
+		if (this.isSupported(link))
 		{
-			const response: OdesliResponse = await (await fetch(request_url.toString())).json()
-			console.debug("Received response from API!")
-			console.debug("Response contains a page's URL : ", "pageUrl" in response)
-			const new_url: URL = new URL(response.pageUrl)
-			console.debug("Converted music link : ", new_url.toString())
-			return new_url
-		} catch (error)
-		{
-			console.error(error)
-			console.error(`Error with ${ this.name } API, maybe the link doesn't belong to a known song.`)
-		}
-		throw new Error("Unhandled link")
-	}
+			console.debug(`Converting link…\n\t${ link }`)
 
-	/**
-	 * Parse a given link.
-	 * @param link Link to convert.
-	 * @returns Converted link.
-	 */
-	public override async parseLink (link: URL): Promise<URL>
-	{
-		if (!this.enabled) throw new Error("Converter is disabled.")
+			const requestURL: URL = new URL(this.base_url)
+			requestURL.searchParams.append("songIfSingle", "true")
+			requestURL.searchParams.append("url", encodeURI(this.cleanLink(link).toString()))
 
-		const newLink: URL = await this.convertLink(this.cleanLink(await this.expandLink(link)))
-		return newLink
+			try
+			{
+				console.debug(`Sending request to API…`)
+				console.debug(`\t➥ GET ${ requestURL }`)
+				const response: OdesliResponse = await (await fetch(requestURL.toString())).json()
+				const newLink: URL = new URL(response.pageUrl)
+				console.debug(`\t\t➥ ${ newLink }`)
+				return newLink
+			} catch (error)
+			{
+				console.error(error)
+				console.error(`Error with ${ this.name } API, maybe the link doesn't belong to a known song.`)
+				throw new Error("API error")
+			}
+		} else throw new Error("Unhandled link")
 	}
 }

@@ -3,9 +3,9 @@ import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export type LinkConfiguration = { name: string; origins: string[]; destination: string, enabled?: boolean, settings?: SimpleLinkConverterSettings }
 export type APIConfiguration = {
-	enabled?: boolean
-	api_key?: string
 	base_url?: string
+	api_key?: string
+	enabled?: boolean
 	// TODO Implement a more flexible wayt to add unsupported APIs like having a JSON path to retrieve the resulting URL
 }
 export type APIsConfiguration = { [api: string]: APIConfiguration }
@@ -61,8 +61,5 @@ export interface LinkConverter
 	disable (): void
 	enable (): void
 	isSupported (link: URL): boolean
-	expandLink (link: URL): Promise<URL>
-	cleanLink (link: URL): URL
-	convertLink (link: URL): URL | Promise<URL | null> | null
 	parseLink (link: URL): Promise<URL | null>
 }

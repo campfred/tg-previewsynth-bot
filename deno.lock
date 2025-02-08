@@ -54,6 +54,7 @@
   "redirects": {
     "https://deno.land/x/grammy/mod.ts": "https://deno.land/x/grammy@v1.32.0/mod.ts",
     "https://deno.land/x/grammy_emoji/mod.ts": "https://deno.land/x/grammy_emoji@v1.2.0/mod.ts",
+    "https://deno.land/x/sleep/mod.ts": "https://deno.land/x/sleep@v1.3.0/mod.ts",
     "https://lib.deno.dev/x/grammy@v1/mod.ts": "https://deno.land/x/grammy@v1.31.3/mod.ts"
   },
   "remote": {
@@ -135,7 +136,9 @@
     "https://deno.land/x/grammy_types@v3.16.0/passport.ts": "19820e7d6c279521f8bc8912d6a378239f73d4ab525453808994b5f44ef95215",
     "https://deno.land/x/grammy_types@v3.16.0/payment.ts": "10063563b3de6fe00f701a2efb13b3c6630e840e0b17f415d59730deeff1400c",
     "https://deno.land/x/grammy_types@v3.16.0/settings.ts": "f8ff810da6f1007ed24cd504809bf46820229c395ff9bfc3e5c8ceaef5b2aae1",
-    "https://deno.land/x/grammy_types@v3.16.0/update.ts": "71cc0d5ec860149b71415ba03282b1d7edd0466b36e2789521a3b3a3d7796493"
+    "https://deno.land/x/grammy_types@v3.16.0/update.ts": "71cc0d5ec860149b71415ba03282b1d7edd0466b36e2789521a3b3a3d7796493",
+    "https://deno.land/x/sleep@v1.3.0/mod.ts": "e9955ecd3228a000e29d46726cd6ab14b65cf83904e9b365f3a8d64ec61c1af3",
+    "https://deno.land/x/sleep@v1.3.0/sleep.ts": "b6abaca093b094b0c2bba94f287b19a60946a8d15764d168f83fcf555f5bb59e"
   },
   "workspace": {
     "dependencies": [
