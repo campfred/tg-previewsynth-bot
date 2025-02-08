@@ -68,7 +68,6 @@ export class ConfigurationManager
 	 */
 	private parseSimpleConvertersInConfig (links: LinkConfiguration[]): SimpleLinkConverter[]
 	{
-		// TODO Handle path restrictions like / watch for YT and / p /:id for FurTrack
 		console.debug("Reading links configuration…")
 		console.debug(links)
 
@@ -185,7 +184,7 @@ export class ConfigurationManager
 		console.debug(`Loading configuration from disk at ${ PATH_CONFIG_FILE } …`)
 		try
 		{
-			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE))
+			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE)) as Configuration
 
 			this._SimpleConverters = this.parseSimpleConvertersInConfig(config.links)
 			console.info("Loaded simple link convertions configuration!")

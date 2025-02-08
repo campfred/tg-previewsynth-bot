@@ -57,14 +57,26 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public isSupported (link: URL): boolean
 	{
-		console.debug("Checking if link is already converted...")
+		// Gate in case it's disabled
+		console.debug("Checking if converter is enabled…")
+		console.debug(this.enabled)
+		if (!this.enabled) return false
+
+		console.debug("Checking if link is already converted…")
 		if (link.hostname === this.destination.hostname) return true
-		console.debug("Checking if link ends with one of the supported origins...")
-		for (const origin of this.origins)
+
+		console.debug("Checking if link path starts with the destination path…")
+		console.debug(link.pathname, this.destination.pathname)
+		if (link.pathname.startsWith(this.destination.pathname))
 		{
-			console.debug(link.hostname, origin.hostname)
-			if (link.hostname.endsWith(origin.hostname)) return true
+			console.debug("Checking if link ends with one of the supported origins…")
+			for (const origin of this.origins)
+			{
+				console.debug(link.hostname, origin.hostname)
+				if (link.hostname.endsWith(origin.hostname)) return true
+			}
 		}
+
 		console.debug("Welp, I don't think it's supported.")
 		return false
 	}

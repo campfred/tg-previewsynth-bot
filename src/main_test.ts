@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert"
+import { assert, assertEquals } from "@std/assert"
 import { SimpleLinkConverter, SimpleLinkConverterSettings } from "./converters/simple.ts"
 import { OdesliMusicConverter } from "./converters/music.ts"
 
@@ -71,7 +71,7 @@ Deno.test("Reddit-specific test case", async function (): Promise<void>
 })
 
 const youtubeConversionSettings: SimpleLinkConverterSettings = { expand: false, preserveSearchParams: ["v", "t"] }
-Deno.test("YouTube-specific test case", async function ()
+Deno.test("YouTube-specific test case", async function (): Promise<void>
 {
 	const Converter: SimpleLinkConverter = new SimpleLinkConverter("YouTube", [new URL("https://youtube.com/watch")], new URL("https://yfxtube.com/watch"), youtubeConversionSettings)
 	const ShareLink = new URL("https://www.youtube.com/watch?v=0yiwxIuXmdk&t=355s")
@@ -79,6 +79,14 @@ Deno.test("YouTube-specific test case", async function ()
 
 	const ConvertedLink: URL | null = await Converter.parseLink(ShareLink)
 	assertEquals(ConvertedLink, ExpectedLink)
+})
+
+Deno.test("YouTube-specific constraint", async function (): Promise<void>
+{
+	const Converter: SimpleLinkConverter = new SimpleLinkConverter("YouTube", [new URL("https://youtube.com/watch")], new URL("https://yfxtube.com/watch"), youtubeConversionSettings)
+	const ShortLink = new URL("https://www.youtube.com/shorts/_r53PoMVZTQ?feature=share")
+
+	assert(!Converter.isSupported(ShortLink))
 })
 
 Deno.test("YouTu.be-specific test case", async function ()
@@ -98,4 +106,12 @@ Deno.test("Music-specific test case", async (): Promise<void> =>
 	const OdesliConvertedLink = new URL("https://song.link/s/4zbInBD4rY7tYPJ16LVxdh")
 
 	assertEquals(await Converter.parseLink(SpotifyShareLink), OdesliConvertedLink)
+})
+
+Deno.test("FurTrack-specific constraint", async function (): Promise<void>
+{
+	const Converter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], new URL("https://furtrack.owo.lgbt/p/"))
+	const NavLink = new URL("https://www.furtrack.com/index/event:furxmas2025/880404")
+
+	assert(!Converter.isSupported(NavLink))
 })
