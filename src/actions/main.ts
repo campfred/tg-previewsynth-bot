@@ -124,7 +124,7 @@ export class MainActions implements BotActions
 				if (BOT.Itself.botInfo.can_join_groups && BOT.Itself.botInfo.can_read_all_group_messages) response += "\nI'll also do the same in groups and channels you add me in."
 			}
 			response += "\n"
-			response += `\n<blockquote><b>💡 Wanna know which links I'll recognize?</b>`
+			response += `\n<blockquote><b>💡 Wanna know which links I'll recognize?</b>`
 			response += `\nUse the / ${ MainCommands.HELP } command!</blockquote>`
 			response += "\n"
 			response += `\nAnyway, I wish you a nice day! 🎶`
@@ -174,7 +174,7 @@ export class MainActions implements BotActions
 				response += "</blockquote>"
 			}
 			response += "\n"
-			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
+			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
 			response += `\nFeel free to suggest it as an issue <a href = "${ CONFIG.About.code_repo }/issues/new">on GitHub</a>!</blockquote>`
 			await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			STATS.countCommand(MainCommands.HELP)
@@ -193,7 +193,7 @@ export class MainActions implements BotActions
 	/**
 	 * Adds proactive features to the bot that runs without any command triggers.
 	 */
-	private addProactiveFeatures ()
+	private async addProactiveFeatures ()
 	{
 		if (!BOT.Itself.botInfo.can_join_groups) console.warn("Bot cannot join groups! Bot will be available only in private chats until allowed.")
 		else if (!BOT.Itself.botInfo.can_read_all_group_messages) console.warn("Bot cannot read group messages! Bot will not be able to convert links in groups until allowed.")
@@ -208,7 +208,7 @@ export class MainActions implements BotActions
 		})
 	}
 
-	private addInlineFeatures ()
+	private async addInlineFeatures ()
 	{
 		if (!BOT.Itself.botInfo.supports_inline_queries) console.warn("Bot does not support inline queries! Inline features will not be available until enabled.")
 
@@ -241,7 +241,7 @@ export class MainActions implements BotActions
 				if (convertedLink)
 				{
 					const convertedLinkText: string = convertedLink.toString()
-					const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link ✨`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
+					const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link 🔄️`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
 					await ctx.answerInlineQuery([queryResult])
 					STATS.countConversion(converter, ConversionMethods.INLINE)
 				}

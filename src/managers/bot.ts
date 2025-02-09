@@ -33,6 +33,8 @@ export class BotManager
 			|| ""
 		)
 
+		await this._Bot.init()
+
 		this._Bot.catch((err): void =>
 		{
 			const ctx = err.ctx
