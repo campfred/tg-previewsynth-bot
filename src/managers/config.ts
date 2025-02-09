@@ -215,13 +215,38 @@ export class ConfigurationManager
 	}
 
 	/**
+	 * Prints the list of all the features in the console.
+	 */
+	printFeaturesListInConsole (): void
+	{
+		console.debug("Features I enabled at the moment :")
+		console.debug(` -  Link recognition: ${ this.Features.link_recognition }`)
+		console.debug(` -  Inline queries: ${ this.Features.inline_queries }`)
+		console.debug(` -  Stats: ${ this.Features.stats }`)
+	}
+
+	/**
 	 * Generates a string with the list of all the converters formatted to use in a message.
 	 * @returns String to use in a message
 	 */
 	getConvertersListForMessage (): string
 	{
-		let message: string = "\n<blockquote><b>Links I recognize at the moment</b>"
+		let message: string = "\n<blockquote><b>🔗 Links I recognize at the moment</b>"
 		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }`
+		message += "</blockquote>"
+		return message
+	}
+
+	/**
+	 * Generates a string with the list of all the features formatted to use in a message.
+	 * @returns String to use in a message
+	 */
+	getFeaturesListForMessage (): string
+	{
+		let message: string = "\n<blockquote><b>🛠️ Features I enabled at the moment</b>"
+		message += `\nLink recognition: ${ this.Features.link_recognition }`
+		message += `\nInline queries: ${ this.Features.inline_queries }`
+		message += `\nStats: ${ this.Features.stats }`
 		message += "</blockquote>"
 		return message
 	}

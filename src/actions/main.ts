@@ -102,8 +102,8 @@ export class MainActions implements BotActions
 	constructor ()
 	{
 		this.addCommands()
-		this.addInlineFeatures()
-		this.addProactiveFeatures()
+		if (CONFIG.Features.link_recognition) this.addProactiveFeatures()
+		if (CONFIG.Features.inline_queries && BOT.Itself.botInfo.supports_inline_queries) this.addInlineFeatures()
 	}
 
 	private addCommands (): void
@@ -121,7 +121,7 @@ export class MainActions implements BotActions
 			{
 				response += "\n"
 				response += "\nSend me a link I recognize here and I'll respond with an embed-friendly + tracking-free version. ✨"
-				if (BOT.Itself.botInfo.can_join_groups) response += "\nI'll also do the same in groups and channels you add me in."
+				if (BOT.Itself.botInfo.can_join_groups && BOT.Itself.botInfo.can_read_all_group_messages) response += "\nI'll also do the same in groups and channels you add me in."
 			}
 			response += "\n"
 			response += `\n<blockquote><b>💡 Wanna know which links I'll recognize?</b>`
@@ -195,6 +195,9 @@ export class MainActions implements BotActions
 	 */
 	private addProactiveFeatures ()
 	{
+		if (!BOT.Itself.botInfo.can_join_groups) console.warn("Bot cannot join groups! Bot will be available only in private chats until allowed.")
+		else if (!BOT.Itself.botInfo.can_read_all_group_messages) console.warn("Bot cannot read group messages! Bot will not be able to convert links in groups until allowed.")
+
 		/**
 		 * Detects and sends link replacements
 		 */
@@ -207,6 +210,11 @@ export class MainActions implements BotActions
 
 	private addInlineFeatures ()
 	{
+		if (!BOT.Itself.botInfo.supports_inline_queries) console.warn("Bot does not support inline queries! Inline features will not be available until enabled.")
+
+		/**
+		 * Detects and suggests link replacements
+		 */
 		this.Composer.inlineQuery(CONFIG.getAllLinksOriginsRegexes(), async function (ctx)
 		{
 			console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
@@ -223,21 +231,24 @@ export class MainActions implements BotActions
 				ctx.answerInlineQuery([])
 			}
 
-			ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Thinking… ⏳`).text("")])
+			// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Thinking… ⏳`).text("")])
 			const url: URL = new URL(ctx.match.toString())
 			const converter: LinkConverter | null = findMatchingConverter(url, CONFIG.AllConverters)
 			if (converter)
 			{
-				ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
+				// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
 				const convertedLink: URL | null = await converter.parseLink(new URL(link))
 				if (convertedLink)
 				{
 					const convertedLinkText: string = convertedLink.toString()
 					const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link ✨`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
-					ctx.answerInlineQuery([queryResult])
+					await ctx.answerInlineQuery([queryResult])
 					STATS.countConversion(converter, ConversionMethods.INLINE)
 				}
 			} else ctx.answerInlineQuery([])
 		})
+
+		// Handle when no link is given
+		this.Composer.on("inline_query", (ctx) => ctx.answerInlineQuery([]))
 	}
 }

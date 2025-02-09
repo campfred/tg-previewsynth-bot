@@ -59,7 +59,7 @@ export class BotManager
 
 		await this._Bot.api.sendMessage(
 			CONFIG.StatusUpdatesChatID,
-			"Bot online! 🎉" + CONFIG.getConvertersListForMessage(),
+			`<b>Bot online! 🎉</b>\n${ CONFIG.getConvertersListForMessage() }\n${ CONFIG.getFeaturesListForMessage() }`,
 			{ parse_mode: "HTML", ...CONFIG.StatusUpdatesMessagesOptions }
 		)
 		console.info("Bot online!")
