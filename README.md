@@ -15,7 +15,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Bluesky
   > bsky.app ➡️ fxbsky.app
 - Twitter
-  > twitter.com, x.com ➡️ fxtwitter.com
+  > twitter.com, x.com ➡️ xcancel.com
 - Instagram
   > instagram.com ➡️ ddinstagram.com
 - TikTok

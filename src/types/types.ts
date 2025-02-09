@@ -9,7 +9,7 @@ export type APIConfiguration = {
 	// TODO Implement a more flexible wayt to add unsupported APIs like having a JSON path to retrieve the resulting URL
 }
 export type APIsConfiguration = { [api: string]: APIConfiguration }
-export type FeaturesConfiguration = { link_recognition: boolean, stats: boolean }
+export type FeaturesConfiguration = { link_recognition: boolean, inline_queries: boolean, stats: boolean }
 export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } }
 
 export type Configuration = {
@@ -28,6 +28,7 @@ export interface BotConfig
 {
 	botDeveloper: number
 	isDeveloper: boolean
+	codeRepoURL: URL
 }
 
 export type CustomContext = Context & { config: BotConfig }
@@ -66,5 +67,6 @@ export interface LinkConverter
 
 export interface BotActions
 {
+	readonly Name: string
 	readonly Composer: Composer<CustomContext>
 }

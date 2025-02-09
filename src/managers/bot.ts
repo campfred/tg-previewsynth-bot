@@ -1,5 +1,5 @@
 import { Bot, GrammyError, HttpError, NextFunction } from "grammy"
-import { CustomContext } from "../types/types.ts"
+import { BotActions, CustomContext } from "../types/types.ts"
 import { ConfigurationManager } from "./config.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
@@ -52,6 +52,7 @@ export class BotManager
 			ctx.config = {
 				botDeveloper: CONFIG.About.owner,
 				isDeveloper: ctx.from?.id === CONFIG.About.owner,
+				codeRepoURL: new URL(CONFIG.About.code_repo)
 			}
 			next()
 		})
@@ -65,13 +66,23 @@ export class BotManager
 	}
 
 	/**
+	 * Load a composer into the bot.
+	 * @param actionsComposer The composer to load.
+	 */
+	loadActionsComposer (actionsComposer: BotActions): void
+	{
+		this._Bot.use(actionsComposer.Composer)
+		console.debug(`Loaded composer ${ actionsComposer.Name }!`)
+	}
+
+	/**
 	 * Stops the bot and sends a message to the status updates chat.
 	 */
-	async notifyShutdownThenStop (reason: string): Promise<void>
+	notifyShutdownThenStop (reason: string): void
 	{
 		console.info(`Bot shutting down! (${ reason })`)
-		this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, "Bot shutting down! 💤", CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
-		await this._Bot.stop()
+		if (this._Bot.isInited()) this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, "Bot shutting down! 💤", CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
+		if (this._Bot.isRunning()) this._Bot.stop()
 	}
 
 	async reload (): Promise<void>

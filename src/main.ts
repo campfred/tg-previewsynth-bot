@@ -5,6 +5,7 @@ import { ConfigurationManager } from "./managers/config.ts"
 // import { MAIN_COMMANDS_LIST, MainActions } from "./actions/main.ts"
 import { BotManager } from "./managers/bot.ts"
 import { AdminActions } from "./actions/admin.ts"
+import { MainActions, MainCommandsDetails } from "./actions/main.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const BOT: BotManager = BotManager.Instance
@@ -37,8 +38,8 @@ for (let seconds = 1; seconds <= waitTime; seconds++)
 	await sleep(1)
 }
 await BOT.init()
-BOT.Itself.use(new AdminActions().Composer)
-// BOT.Itself.use(AdminActions)
-// BOT.Itself.use(MainActions)
-// BOT.Itself.api.setMyCommands(MAIN_COMMANDS_LIST)
+BOT.loadActionsComposer(new AdminActions())
+BOT.loadActionsComposer(new MainActions())
+BOT.Itself.api.setMyCommands(MainCommandsDetails)
 BOT.Itself.start()
+console.info("Bot started! Have fun! 🚀")

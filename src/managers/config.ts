@@ -81,8 +81,7 @@ export class ConfigurationManager
 	 */
 	private parseSimpleConvertersInConfig (links: LinkConfiguration[]): SimpleLinkConverter[]
 	{
-		console.debug("Reading links configuration…")
-		console.debug(links)
+		console.debug("Loading links configuration…")
 
 		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration): SimpleLinkConverter
 		{
@@ -111,11 +110,11 @@ export class ConfigurationManager
 	private parseAPIConvertersInConfig (apiConfigs: APIsConfiguration): APILinkConverter[]
 	{
 		const converters: APILinkConverter[] = []
-		console.debug("Reading APIs configuration…")
+		console.debug("Loading APIs configuration…")
 
 		if ("odesli" in apiConfigs)
 		{
-			console.debug("\tt➥ Odesli")
+			console.debug("\t➥ Odesli")
 			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
 
 			const converter = new OdesliMusicConverter(
@@ -137,7 +136,7 @@ export class ConfigurationManager
 	 * Get all the origins' hostnames.
 	 * @returns A strings array containing all the supported hostnames for detection
 	 */
-	ConversionOriginRegexes (): RegExp[]
+	getAllLinksOriginsRegexes (): RegExp[]
 	{
 		console.debug("Generating regular expressions for supported origins…")
 		// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
@@ -157,7 +156,7 @@ export class ConfigurationManager
 	 */
 	private saveSimpleConvertersInConfig (): LinkConfiguration[]
 	{
-		console.debug("Parsing simple link converters into configuration…")
+		// console.debug("Parsing simple link converters into configuration…")
 
 		const linkConfigs: LinkConfiguration[] = []
 		for (const link_map of this._SimpleConverters)
@@ -171,7 +170,7 @@ export class ConfigurationManager
 			linkConfigs.push(config_link)
 		}
 
-		console.debug("Web link maps parsed into configuration!")
+		console.debug("Loaded links configuration!")
 		return linkConfigs
 	}
 
@@ -193,7 +192,7 @@ export class ConfigurationManager
 			apiConfigs[api.name.toLowerCase()] = config
 		}
 
-		console.debug("API link converters translated into configuration!")
+		console.debug("Loaded APIs configuration!")
 		return apiConfigs
 	}
 
@@ -211,8 +210,8 @@ export class ConfigurationManager
 	 */
 	printConvertersListInConsole (): void
 	{
-		console.debug("Links I recognize at the moment")
-		for (const converter of this.AllConverters) console.debug(`${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }${ converter.enabled ? "" : " (disabled)" }`)
+		console.debug("Links I recognize at the moment :")
+		for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }${ converter.enabled ? "" : " (disabled)" }`)
 	}
 
 	/**
