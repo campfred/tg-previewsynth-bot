@@ -27,7 +27,8 @@ export class SimpleLinkConverter implements LinkConverter
 		this.name = name
 		this.origins = origins
 		this.destination = destination
-		console.debug(`Created ${ this.name } ${ SimpleLinkConverter.name }\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
+		console.debug(`Created ${ this.name } ${ SimpleLinkConverter.name }`)
+		console.debug(`\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
 		this.expand = settings?.expand != undefined ? settings.expand : true
 		if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
 		if (settings?.preserveSearchParams) this.preserveSearchParams = settings?.preserveSearchParams

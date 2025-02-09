@@ -19,8 +19,6 @@ export class ConfigurationManager
 	private _About!: AboutConfiguration
 	private _BotInfo!: UserFromGetMe
 
-	private constructor () { }
-
 	/**
 	 * Get the instance of the config manager.
 	 */
@@ -35,6 +33,21 @@ export class ConfigurationManager
 	 * Returns the bot's informations that was previously obtained from Telegram.
 	 */
 	get BotInfo (): UserFromGetMe { return this._BotInfo }
+
+	/**
+	 * Returns the chat ID where the bot sends status updates.
+	 */
+	get StatusUpdatesChatID (): number { return this._About.status_updates ? this._About.status_updates.chat : this._About.owner }
+
+	/**
+	 * Returns the topic ID where the bot sends status updates.
+	 */
+	get StatusUpdatesTopicID (): number | undefined { return this._About.status_updates?.topic }
+
+	/**
+	 * Returns the message options to send status updates in the right topic.
+	 */
+	get StatusUpdatesMessagesOptions (): { message_thread_id?: number } { return this.StatusUpdatesTopicID ? { message_thread_id: this.StatusUpdatesTopicID } : {} }
 
 	/**
 	 * Returns the simple link converters currently handled.
@@ -73,7 +86,7 @@ export class ConfigurationManager
 
 		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration): SimpleLinkConverter
 		{
-			console.debug(`Creating ${ SimpleLinkConverter.name } config for ${ link.name } …`)
+			// console.debug(`Creating ${ SimpleLinkConverter.name } config for ${ link.name } …`)
 
 			const converter = new SimpleLinkConverter(
 				link.name.trim(),
@@ -86,7 +99,7 @@ export class ConfigurationManager
 			return converter
 		})
 
-		console.info(`Parsed links configuration!`)
+		console.info(`\t➥ ${ converters.length } link converters`)
 		return converters
 	}
 
@@ -102,7 +115,7 @@ export class ConfigurationManager
 
 		if ("odesli" in apiConfigs)
 		{
-			console.debug("Found Odesli API configuration!")
+			console.debug("\tt➥ Odesli")
 			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
 
 			const converter = new OdesliMusicConverter(
@@ -115,8 +128,27 @@ export class ConfigurationManager
 			converters.push(converter)
 		}
 
-		console.info("Parsed APIs configuration!")
+
+		console.info(`\t➥ ${ converters.length } api converters`)
 		return converters
+	}
+
+	/**
+	 * Get all the origins' hostnames.
+	 * @returns A strings array containing all the supported hostnames for detection
+	 */
+	ConversionOriginRegexes (): RegExp[]
+	{
+		console.debug("Generating regular expressions for supported origins…")
+		// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
+		const regExes: RegExp[] = this.AllConverters.filter((map: LinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
+			.flatMap((map: LinkConverter): RegExp[] => map.origins.map((origin): RegExp =>
+			{
+				const regEx: RegExp = new RegExp(`${ origin.protocol }\/\/.*${ origin.hostname.replaceAll(".", "\\.") }.*`, "gi")
+				console.debug(`\t➥ ${ regEx }`)
+				return regEx
+			}))
+		return regExes
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import { Context } from "grammy"
+import { Composer, Context } from "grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export type LinkConfiguration = { name: string; origins: string[]; destination: string, enabled?: boolean, settings?: SimpleLinkConverterSettings }
@@ -62,4 +62,9 @@ export interface LinkConverter
 	enable (): void
 	isSupported (link: URL): boolean
 	parseLink (link: URL): Promise<URL | null>
+}
+
+export interface BotActions
+{
+	readonly Composer: Composer<CustomContext>
 }
