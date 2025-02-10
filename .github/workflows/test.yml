@@ -1,0 +1,30 @@
+name: Build container image
+on:
+    pull_request:
+        branches:
+            - main
+        types:
+            - opened
+            - reopened
+            - synchronize
+        paths:
+            - src/**
+            - "*.example"
+            - deno.*
+
+jobs:
+    test:
+        name: Test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Clone repository
+              uses: actions/checkout@v4
+
+            - name: Install Deno
+              uses: denoland/setup-deno@v2
+              with:
+                  deno-version: v2.x
+
+            - name: Test step
+              run: "deno task test"

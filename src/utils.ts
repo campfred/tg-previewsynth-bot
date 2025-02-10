@@ -1,32 +1,27 @@
-import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.32.0/context.ts";
-import { CustomContext, LinkConverter } from "./types/types.ts";
-import { SimpleLinkConverter } from "./converters/simple.ts";
-import { APIbasedLinkConverter } from "./converters/music.ts";
+import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.32.0/context.ts"
+import { CustomContext, LinkConverter } from "./types/types.ts"
 
-export function findMatchingConverter(url: URL, simple_converters: SimpleLinkConverter[], api_converters: APIbasedLinkConverter[]): LinkConverter | null {
-	console.debug(`Searching a converter for ${url.origin} …`);
+export function findMatchingConverter (url: URL, converters: LinkConverter[]): LinkConverter | undefined
+{
+	console.debug(`Searching a matching converter…`)
 
-	for (const api_converter of api_converters)
-		if (api_converter.isSupported(url)) {
-			console.debug(`Found ${api_converter.name}!`);
-			return api_converter;
+	for (const converter of converters)
+		if (converter.isSupported(url))
+		{
+			console.debug(`\t➥ Found ${ converter.name }!`)
+			return converter
 		}
-	console.debug(`Didn't find a matching API-based converter. :(`);
+	console.debug(`\t➥ Didn't find a matching link converter. :(`)
 
-	for (const simple_converter of simple_converters)
-		if (simple_converter.isSupported(url)) {
-			console.debug(`Found ${simple_converter.name}!`);
-			return simple_converter;
-		}
-	console.debug(`Didn't find a matching simple link converter. :(`);
-
-	return null;
+	return undefined
 }
 
-export function getExpeditorDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext> | CallbackQueryContext<CustomContext>): string {
-	return `${ctx.from?.first_name}${ctx.config.isDeveloper ? " [Developer]" : ""} (@${ctx.from?.username + " / "}${ctx.from?.id})`;
+export function getExpeditorDebugString (ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext> | CallbackQueryContext<CustomContext>): string
+{
+	return `${ ctx.from?.first_name }${ ctx.config.isDeveloper ? " [Developer]" : "" } (@${ ctx.from?.username + " / " }${ ctx.from?.id })`
 }
 
-export function getQueryDebugString(ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext>): string | RegExpMatchArray {
-	return ctx.match.length < 1 ? "(nothing)" : ctx.match;
+export function getQueryDebugString (ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext>): string | RegExpMatchArray
+{
+	return ctx.match.length < 1 ? "(nothing)" : ctx.match
 }

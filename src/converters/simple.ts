@@ -1,26 +1,83 @@
-import { LinkConverter } from "../types/types.ts";
+import { CacheManager } from "../managers/cache.ts"
+import { ConversionTypes, LinkConverter } from "../types/types.ts"
 
-export class SimpleLinkConverter implements LinkConverter {
-	readonly name: string;
-	readonly origins: URL[];
-	readonly destination: URL;
+const CACHE: CacheManager = CacheManager.Instance
+
+export type SimpleLinkConverterSettings = { expand?: boolean; preserveSearchParams?: string[] }
+
+export class SimpleLinkConverter implements LinkConverter
+{
+	readonly name: string
+	readonly type: ConversionTypes = ConversionTypes.SIMPLE;
+	readonly origins: URL[]
+	readonly originRegExps: RegExp[]
+	readonly destination: URL
+	readonly expand: boolean = true;
+	readonly preserveSearchParams: string[] = [];
 	enabled: boolean = true;
 
 	/**
-	 * Creates a WebLinkMap object representing a mapping between links for a website.
+	 * Creates a LinkConverter object representing a mapping between links for a website.
 	 * @param name Friendly name of the website.
 	 * @param origins Original URLs that will be converted.
 	 * @param destination Destination URLs for conversions.
-	 * @param enabled Toggles the website's support in functions or not.
+	 * @param settings Provides a few settings to fine tune the conversion process. Including disabling expanding links and preserving search parameters.
 	 */
-	constructor(name: string, origins: URL[], destination: URL, enabled?: boolean) {
-		this.name = name;
-		this.origins = origins;
-		this.destination = destination;
-		this.enabled = enabled != undefined ? enabled : true;
-		console.debug(
-			`Created ${this.name} ${SimpleLinkConverter.name} object that converts to ${this.destination.hostname} from ${this.origins.map((origin: URL): string => origin.hostname)}. It is ${this.enabled ? "enabled" : "disabled"}.`,
-		);
+	constructor (name: string, origins: URL[], originsRegExp: RegExp[], destination: URL, settings?: SimpleLinkConverterSettings)
+	{
+		this.name = name
+		this.origins = origins
+		this.originRegExps = originsRegExp
+		this.destination = destination
+		console.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
+		// console.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
+		this.expand = settings?.expand != undefined ? settings.expand : true
+		if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
+		if (settings?.preserveSearchParams) this.preserveSearchParams = settings?.preserveSearchParams
+		if (this.preserveSearchParams.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveSearchParams?.toString())
+	}
+
+	/**
+	 * Disables the converter.
+	 */
+	public disable (): void { this.enabled = false }
+
+	/**
+	 * Enables the converter.
+	 */
+	public enable (): void { this.enabled = true }
+
+	/**
+	 * Toggles the converter.
+	 */
+	public toggle (): void { this.enabled = !this.enabled }
+
+	/**
+	 * Sets the converter's state.
+	 * @param state The state to set.
+	 */
+	public setEnabled (state: boolean): void { this.enabled = state }
+
+	/**
+	 * Finds matching origin URLs for a given link. Array will be empty if no origin matches the link.
+	 * @param link Link URL to find matching origin URLs for
+	 * @returns Array of matching origin URLs
+	 */
+	private findMatchingOrigin (link: URL): URL | undefined
+	{
+		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname) && link.pathname.startsWith(origin.pathname)) return origin
+		return undefined
+	}
+
+	/**
+	 * Finds matching origin patterns for a given link. Array will be empty if no origin regex matches the link.
+	 * @param link Link URL to find matching origin patterns for
+	 * @returns Array of matching origin regular expressions
+	 */
+	private findMatchingOriginRegExp (link: URL): RegExp | undefined
+	{
+		for (const originRegExp of this.originRegExps) if (originRegExp.test(link.toString())) return originRegExp
+		return undefined
 	}
 
 	/**
@@ -28,10 +85,26 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @param link The link to check support for.
 	 * @returns True if the link can be handled by this map.
 	 */
-	public isSupported(link: URL): boolean {
-		if (link.hostname === this.destination.hostname) return true;
-		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname)) return true;
-		return false;
+	public isSupported (link: URL): boolean
+	{
+		if (!this.enabled) return false // Gate in case it's disabled
+
+		console.debug(`Checking if link is supported by converter for ${ this.name }…`)
+
+		const isAlreadyConverted: boolean = link.hostname === this.destination.hostname
+		console.debug("\t➥ Link is already converted :", isAlreadyConverted)
+		if (isAlreadyConverted) { return true }
+
+
+		const hasMatchingOrigin: boolean = this.findMatchingOrigin(link) != undefined
+		console.debug("\t➥ Link matches one of the supported origin URLs :", hasMatchingOrigin)
+		if (hasMatchingOrigin) return true
+
+		const hasMatchingOriginRegExp: boolean = this.findMatchingOriginRegExp(link) != undefined
+		console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
+		if (hasMatchingOriginRegExp) return true
+
+		return false
 	}
 
 	/**
@@ -39,14 +112,15 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @param link The link to remove subdomains from.
 	 * @returns The link with subdomains removed.
 	 */
-	public static filterOutSubdomains(link: URL): URL {
-		// if (!this.enabled) throw new Error("Map is disabled.");
-		console.debug(`Filtering out subdomains of link ${link} …`);
-		const filteredUrl: URL = new URL(link);
-		const hostnameParts: string[] = filteredUrl.hostname.split(".");
-		filteredUrl.hostname = hostnameParts[hostnameParts.length - 2] + "." + hostnameParts[hostnameParts.length - 1];
-		console.debug(`Filtered out subdomains of link : ${link} -> ${filteredUrl}`);
-		return filteredUrl;
+	public static filterOutSubdomains (link: URL): URL
+	{
+		// if (!this.enabled) throw new Error("Converter is disabled.");
+		console.debug(`Filtering out subdomains of link…\n\t${ link }`)
+		const filteredUrl: URL = new URL(link)
+		const hostnameParts: string[] = filteredUrl.hostname.split(".")
+		filteredUrl.hostname = hostnameParts[hostnameParts.length - 2] + "." + hostnameParts[hostnameParts.length - 1]
+		console.debug(`\t➥ ${ filteredUrl }`)
+		return filteredUrl
 	}
 
 	/**
@@ -54,13 +128,23 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @param link The link to expand.
 	 * @returns The expanded link.
 	 */
-	public static async expandLink(link: URL): Promise<URL> {
-		console.debug(`Expanding link ${link} …`);
-		const response: Response = await fetch(link);
-		const expandedUrl: URL = new URL(response.url);
-		response.body?.cancel();
-		console.debug(`Expanded link : ${link} -> ${expandedUrl}`);
-		return expandedUrl;
+	public async expandLink (link: URL): Promise<URL>
+	{
+		if (!this.expand) return link
+		console.debug(`Expanding link …\n\t${ link }`)
+		try
+		{
+			const response: Response = await fetch(link)
+			const newLink: URL = new URL(response.url)
+			response.body?.cancel()
+			console.debug(`\t➥ ${ newLink }`)
+			return newLink
+		} catch (error)
+		{
+			console.error(error)
+			console.error("Error while expanding URL.")
+			throw error
+		}
 	}
 
 	/**
@@ -68,39 +152,77 @@ export class SimpleLinkConverter implements LinkConverter {
 	 * @param link The link to clean.
 	 * @returns The cleaned link.
 	 */
-	public static cleanLink(link: URL): URL {
-		console.debug(`Cleaning link ${link} …`);
-		const linkCleaned = new URL(link.origin + link.pathname);
-		console.debug(`Cleaned link : ${link} -> ${linkCleaned}`);
-		return linkCleaned;
+	public cleanLink (link: URL): URL
+	{
+		console.debug(`Cleaning link…\n\t${ link }`)
+		const newLink = new URL(link.origin + link.pathname)
+		for (const searchParam of this.preserveSearchParams)
+		{
+			const value: string | null = link.searchParams.get(searchParam)
+			if (value != null) newLink.searchParams.append(searchParam, value)
+		}
+		console.debug(`\t➥ ${ newLink }`)
+		return newLink
 	}
 
 	/**
 	 * Converts a given link to the destination website, removing query parameters if necessary.
 	 * @param link - The link to convert.
 	 * @returns The converted link without query parameters.
-	 * @throws Error if the link is unsupported or conversion is not needed.
-	 */
-	public convertLink(link: URL): URL | Promise<URL | null> | null {
-		if (this.isSupported(link)) {
-			console.debug(`Converting link from ${link} to point to ${this.destination} …`);
-			const linkConverted = new URL(link);
-			linkConverted.protocol = this.destination.protocol;
-			linkConverted.hostname = this.destination.hostname;
-			linkConverted.port = this.destination.port;
-			console.debug(`Converted link : ${link} -> ${linkConverted}`);
-			return linkConverted;
-		} else throw Error("Unsupported link");
+	*/
+	public convertLink (link: URL): URL | Promise<URL>
+	{
+		console.debug(`Converting link…\n\t${ link }`)
+
+		const matchingOrigin: URL | undefined = this.findMatchingOrigin(link)
+		if (matchingOrigin)
+		{
+			const newLink = new URL(link)
+			newLink.protocol = this.destination.protocol
+			newLink.hostname = this.destination.hostname
+			newLink.port = this.destination.port
+			console.debug(`\t➥ ${ newLink }`)
+
+			return newLink
+		}
+
+		const matchesOriginRegExp: RegExp | undefined = this.findMatchingOriginRegExp(link)
+		if (matchesOriginRegExp)
+		{
+			const newLink = new URL(link.toString().replace(matchesOriginRegExp, this.destination.toString())) // This is not working at the moment.
+			console.debug(`\t➥ ${ newLink }`)
+
+			return newLink
+		}
+
+		throw new Error("Incompatible link")
 	}
 
 	/**
 	 * Parse a given link.
 	 * @param link Link to convert.
 	 * @returns Converted link.
-	 */
-	public async parseLink(link: URL): Promise<URL | null> {
-		if (!this.enabled) throw new Error("Map is disabled.");
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	*/
+	public async parseLink (link: URL): Promise<URL>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
 
-		return this.convertLink(SimpleLinkConverter.cleanLink(SimpleLinkConverter.filterOutSubdomains(await SimpleLinkConverter.expandLink(link))));
+		console.debug(`Parsing link ${ link }`)
+		if (this.isSupported(link))
+		{
+			const originalLinkCleaned: URL = this.cleanLink(link)
+			const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned)
+			if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
+
+			const originalLinkExpanded: URL = this.cleanLink(await this.expandLink(originalLinkCleaned))
+			const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded)
+			if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
+
+			const convertedLink: URL = await this.convertLink(originalLinkExpanded)
+			CACHE.add(originalLinkCleaned, convertedLink)
+			CACHE.add(originalLinkExpanded, convertedLink)
+			return convertedLink
+		} else throw Error("Unsupported link")
 	}
 }

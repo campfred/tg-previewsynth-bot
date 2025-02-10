@@ -1,20 +1,24 @@
-import { OdesliResponse } from "../types/odesli.ts";
-import { LinkConverter } from "../types/types.ts";
-import { SimpleLinkConverter } from "./simple.ts";
+import { OdesliResponse } from "../types/odesli.ts"
+import { ConversionTypes, LinkConverter } from "../types/types.ts"
+import { SimpleLinkConverter } from "./simple.ts"
 
-export interface APIbasedLinkConverter extends LinkConverter {
-	readonly base_url: URL;
-	readonly api_key: string;
+export interface APILinkConverter extends LinkConverter
+{
+	readonly base_url: URL
+	readonly api_key: string
 }
 
-export class OdesliMusicConverter extends SimpleLinkConverter implements APIbasedLinkConverter {
+export class OdesliMusicConverter extends SimpleLinkConverter implements APILinkConverter
+{
+	override readonly type: ConversionTypes = ConversionTypes.API;
 	readonly base_url: URL = new URL("/v1-alpha.1/links", "https://api.song.link");
 	readonly api_key: string = "";
 
-	constructor(name: string, origins: URL[], destination: URL, enabled?: boolean, base_url?: URL, api_key?: string) {
-		super(name, origins, destination, enabled ? enabled : true);
-		if (api_key !== undefined) this.api_key = api_key;
-		if (base_url !== undefined) this.base_url = new URL(base_url);
+	constructor (name: string, origins: URL[], destination: URL, base_url?: URL, api_key?: string)
+	{
+		super(name, origins, [], destination)
+		if (api_key !== undefined) this.api_key = api_key
+		if (base_url !== undefined) this.base_url = new URL(base_url)
 	}
 
 	/**
@@ -23,34 +27,30 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APIbase
 	 * @returns The converted link without query parameters.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	 */
-	public override async convertLink(link: URL): Promise<URL | null> {
-		const request_url: URL = new URL(this.base_url);
-		request_url.searchParams.append("songIfSingle", "true");
-		request_url.searchParams.append("url", encodeURI(SimpleLinkConverter.cleanLink(link).toString()));
-		console.debug(`Sending request to ${request_url} …`);
+	public override async convertLink (link: URL): Promise<URL>
+	{
+		if (this.isSupported(link))
+		{
+			console.debug(`Converting link…\n\t${ link }`)
 
-		try {
-			const response: OdesliResponse = await (await fetch(request_url.toString())).json();
-			console.debug("Received response from API!");
-			console.debug("Response contains a page's URL : ", "pageUrl" in response);
-			const new_url: URL = new URL(response.pageUrl);
-			console.debug("Converted music link : ", new_url.toString());
-			return new_url;
-		} catch (error) {
-			console.error(error);
-			console.error(`Error with ${this.name} API, maybe the link doesn't belong to a known song.`);
-		}
-		return null;
-	}
+			const requestURL: URL = new URL(this.base_url)
+			requestURL.searchParams.append("songIfSingle", "true")
+			requestURL.searchParams.append("url", encodeURI(this.cleanLink(link).toString()))
 
-	/**
-	 * Parse a given link.
-	 * @param link Link to convert.
-	 * @returns Converted link.
-	 */
-	public override async parseLink(link: URL): Promise<URL | null> {
-		if (!this.enabled) throw new Error("Map is disabled.");
-
-		return this.convertLink(SimpleLinkConverter.cleanLink(await SimpleLinkConverter.expandLink(link)));
+			try
+			{
+				console.debug(`Sending request to API…`)
+				console.debug(`\t➥ GET ${ requestURL }`)
+				const response: OdesliResponse = await (await fetch(requestURL.toString())).json()
+				const newLink: URL = new URL(response.pageUrl)
+				console.debug(`\t\t➥ ${ newLink }`)
+				return newLink
+			} catch (error)
+			{
+				console.error(error)
+				console.error(`Error with ${ this.name } API, maybe the link doesn't belong to a known song.`)
+				throw new Error("API error")
+			}
+		} else throw new Error("Unhandled link")
 	}
 }

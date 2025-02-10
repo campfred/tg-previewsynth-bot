@@ -5,45 +5,51 @@ about:
   #   chat: -12345678901234
   #   # topic: 1234 # Optional within status_updates
 links:
+  # - name: Example
+  #   origins:
+  #     - https://contoso.com
+  #   destination: https://example.com
+  #   enabled: false
+  #   settings:
+  #     expand: false
+  #     preserveSearchParams:
+  #       - id
+  #       - flavour
   - name: FurAffinity
     origins:
       - https://furaffinity.net
     destination: https://xfuraffinity.net
-    enabled: true
+  - name: FurTrack
+    origins:
+      - https://furtrack.com/p/
+    origins_regex:
+      - ^https:\/\/www\.furtrack\.com\/index\/(\w+:)?\w+(\(\w+\))?\/
+    destination: https://furtrack.owo.lgbt/p/
   - name: Reddit
     origins:
       - https://reddit.com
     destination: https://rxddit.com
-    enabled: true
   - name: Bluesky
     origins:
       - https://bsky.app
     destination: https://fxbsky.app
-    enabled: true
   - name: Twitter
     origins:
       - https://twitter.com
       - https://x.com
-    destination: https://fxtwitter.com
-    enabled: true
+    destination: https://girlcockx.com
   - name: Instagram
     origins:
       - https://instagram.com
     destination: https://ddinstagram.com
-    enabled: true
   - name: TikTok
     origins:
       - https://tiktok.com
     destination: https://tfxktok.com
-    enabled: true
-  - name: Furtrack
-    origins:
-      - https://furtrack.com
-    destination: https://furtrack.owo.lgbt
-    enabled: true
 apis:
-  - name: Odesli
+  odesli:
     enabled: true
     # api_key: *** # Not using an API key grants you only 10 reqs. per minute
 features:
   link_recognition: true
+  stats: true
