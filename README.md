@@ -99,4 +99,4 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   - Allow adding unsupported APIs to config
     > Probably through _config.yaml_.(apis.base_url+api_key+response_path)
 - Releases
-  - Add job to compile binary of the bot with Deno compile https://youtu.be/ZsDqTQs3_G0
+  - Add job to compile binary of the bot [with Deno compile](https://youtu.be/ZsDqTQs3_G0)

@@ -216,7 +216,7 @@ export class SimpleLinkConverter implements LinkConverter
 			const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned)
 			if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
 
-			const originalLinkExpanded: URL = await this.expandLink(originalLinkCleaned)
+			const originalLinkExpanded: URL = this.cleanLink(await this.expandLink(originalLinkCleaned))
 			const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded)
 			if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
 
