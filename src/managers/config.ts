@@ -85,11 +85,15 @@ export class ConfigurationManager
 
 		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration): SimpleLinkConverter
 		{
+			// Handle missing links that has zero origins set
+			if (!("origins" in link) && !("origins_regex" in link)) throw new Error("No origin set in link config")
+
 			// console.debug(`Creating ${ SimpleLinkConverter.name } config for ${ link.name } …`)
 
 			const converter = new SimpleLinkConverter(
 				link.name.trim(),
-				link.origins.map((origin: string) => new URL(origin.trim())),
+				"origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : [],
+				"origins_regex" in link ? link.origins_regex.map((originRegexString: string) => new RegExp(originRegexString.trim(), "gi")) : [],
 				new URL(link.destination.trim()),
 				link.settings,
 			)
@@ -119,7 +123,7 @@ export class ConfigurationManager
 
 			const converter = new OdesliMusicConverter(
 				"Music",
-				OdesliOrigins.map((origin): URL => new URL(origin)),
+				OdesliOrigins.map((origin): URL => new URL(origin.trim())),
 				new URL("https://song.link"),
 			)
 			converter.setEnabled(odesliConfig.enabled || true)
@@ -159,13 +163,14 @@ export class ConfigurationManager
 		// console.debug("Parsing simple link converters into configuration…")
 
 		const linkConfigs: LinkConfiguration[] = []
-		for (const link_map of this._SimpleConverters)
+		for (const converter of this._SimpleConverters)
 		{
 			const config_link: LinkConfiguration = {
-				name: link_map.name.trim(),
-				origins: link_map.origins.map((origin: URL): string => origin.toString().trim()),
-				destination: link_map.destination.toString().trim(),
-				enabled: link_map.enabled,
+				name: converter.name.trim(),
+				origins: converter.origins.map((origin: URL): string => origin.toString()),
+				origins_regex: converter.originsRegex.map((originRegex: RegExp): string => originRegex.source),
+				destination: converter.destination.toString().trim(),
+				enabled: converter.enabled,
 			}
 			linkConfigs.push(config_link)
 		}

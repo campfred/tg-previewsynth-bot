@@ -16,7 +16,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 
 	constructor (name: string, origins: URL[], destination: URL, base_url?: URL, api_key?: string)
 	{
-		super(name, origins, destination)
+		super(name, origins, [], destination)
 		if (api_key !== undefined) this.api_key = api_key
 		if (base_url !== undefined) this.base_url = new URL(base_url)
 	}

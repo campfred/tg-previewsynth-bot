@@ -1,7 +1,14 @@
 import { Composer, Context } from "grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
-export type LinkConfiguration = { name: string; origins: string[]; destination: string, enabled?: boolean, settings?: SimpleLinkConverterSettings }
+export type LinkConfiguration = {
+	name: string
+	origins: string[]
+	origins_regex: string[],
+	destination: string,
+	enabled?: boolean,
+	settings?: SimpleLinkConverterSettings
+}
 export type APIConfiguration = {
 	base_url?: string
 	api_key?: string
@@ -54,6 +61,7 @@ export interface LinkConverter
 	readonly name: string
 	readonly type: ConversionTypes
 	readonly origins: URL[]
+	readonly originsRegex: RegExp[]
 	readonly destination: URL
 	readonly expand: boolean
 	readonly preserveSearchParams: string[]

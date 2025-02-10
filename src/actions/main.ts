@@ -71,7 +71,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		}
 		else
 			ctx.reply(
-				`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${ CONFIG.About.code_repo }/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
+				`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${ ctx.config.codeRepoURL }/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
 				{
 					parse_mode: "HTML",
 					reply_parameters: { message_id: ctx.msgId },
@@ -84,7 +84,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		// Handle when link isn't known in map
 		await ctx.react("🗿")
 		await ctx.reply(
-			`Sorry, I don't have an equivalent for that website. 😥\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ CONFIG.About.code_repo }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
+			`Sorry, I don't have an equivalent for that website. 😥\n\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ ctx.config.codeRepoURL }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
 			{
 				parse_mode: "HTML",
 				reply_parameters: { message_id: ctx.msgId },
@@ -175,7 +175,7 @@ export class MainActions implements BotActions
 			}
 			response += "\n"
 			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
-			response += `\nFeel free to suggest it as an issue <a href = "${ CONFIG.About.code_repo }/issues/new">on GitHub</a>!</blockquote>`
+			response += `\nFeel free to suggest it as an issue <a href = "${ ctx.config.codeRepoURL }/issues/new">on GitHub</a>!</blockquote>`
 			await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			STATS.countCommand(MainCommands.HELP)
 		})
@@ -193,7 +193,7 @@ export class MainActions implements BotActions
 	/**
 	 * Adds proactive features to the bot that runs without any command triggers.
 	 */
-	private async addProactiveFeatures ()
+	private addProactiveFeatures (): void
 	{
 		if (!BOT.Itself.botInfo.can_join_groups) console.warn("Bot cannot join groups! Bot will be available only in private chats until allowed.")
 		else if (!BOT.Itself.botInfo.can_read_all_group_messages) console.warn("Bot cannot read group messages! Bot will not be able to convert links in groups until allowed.")
@@ -208,7 +208,7 @@ export class MainActions implements BotActions
 		})
 	}
 
-	private async addInlineFeatures ()
+	private addInlineFeatures (): void
 	{
 		if (!BOT.Itself.botInfo.supports_inline_queries) console.warn("Bot does not support inline queries! Inline features will not be available until enabled.")
 
