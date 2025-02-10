@@ -1,4 +1,4 @@
-import { CommandContext, Composer, HearsContext, InlineQueryResultBuilder } from "grammy"
+import { CommandContext, Composer, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "grammy"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter } from "../types/types.ts"
 import { BotCommand } from "https://deno.land/x/grammy_types@v3.16.0/manage.ts"
@@ -57,28 +57,25 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 
 	// Check if link matches in map
 	const url: URL = new URL(ctx.match.toString())
-	const converter: LinkConverter | null = findMatchingConverter(url, CONFIG.AllConverters)
+	const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 	if (converter)
 	{
 		await ctx.react("🤔")
-		console.debug("Found the following match : " + converter?.name)
-		const linkConverted: URL | null = await converter.parseLink(new URL(ctx.match.toString()))
-		if (linkConverted)
-		{
-			await ctx.react("👀")
-			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
-			STATS.countConversion(converter, method)
-		}
-		else
-			ctx.reply(
-				`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${ ctx.config.codeRepoURL }/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
-				{
-					parse_mode: "HTML",
-					reply_parameters: { message_id: ctx.msgId },
-					link_preview_options: { is_disabled: true },
-				},
-			)
-		return
+		console.debug(`${ converter?.name } will be used to convert requested link.`)
+		const linkConverted: URL = await converter.parseLink(new URL(ctx.match.toString()))
+		await ctx.react("👀")
+		await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
+		STATS.countConversion(converter, method)
+		// else
+		// 	ctx.reply(
+		// 		`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${ ctx.config.codeRepoURL }/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
+		// 		{
+		// 			parse_mode: "HTML",
+		// 			reply_parameters: { message_id: ctx.msgId },
+		// 			link_preview_options: { is_disabled: true },
+		// 		},
+		// 	)
+		// return
 	} else if (ctx.chat.type === "private")
 	{
 		// Handle when link isn't known in map
@@ -201,7 +198,7 @@ export class MainActions implements BotActions
 		/**
 		 * Detects and sends link replacements
 		 */
-		this.Composer.hears(CONFIG.getAllLinksOriginsRegexes(), async function (ctx)
+		this.Composer.hears([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: HearsContext<CustomContext>): Promise<void>
 		{
 			console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			await processConversionRequest(ctx, ConversionMethods.CONVO)
@@ -215,7 +212,7 @@ export class MainActions implements BotActions
 		/**
 		 * Detects and suggests link replacements
 		 */
-		this.Composer.inlineQuery(CONFIG.getAllLinksOriginsRegexes(), async function (ctx)
+		this.Composer.inlineQuery([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: InlineQueryContext<CustomContext>): Promise<void>
 		{
 			console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			const link: string = ctx.match.toString()
@@ -233,18 +230,15 @@ export class MainActions implements BotActions
 
 			// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Thinking… ⏳`).text("")])
 			const url: URL = new URL(ctx.match.toString())
-			const converter: LinkConverter | null = findMatchingConverter(url, CONFIG.AllConverters)
+			const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 			if (converter)
 			{
 				// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
-				const convertedLink: URL | null = await converter.parseLink(new URL(link))
-				if (convertedLink)
-				{
-					const convertedLinkText: string = convertedLink.toString()
-					const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link 🔄️`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
-					await ctx.answerInlineQuery([queryResult])
-					STATS.countConversion(converter, ConversionMethods.INLINE)
-				}
+				const convertedLink: URL = await converter.parseLink(new URL(link))
+				const convertedLinkText: string = convertedLink.toString()
+				const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link 🔄️`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
+				await ctx.answerInlineQuery([queryResult])
+				STATS.countConversion(converter, ConversionMethods.INLINE)
 			} else ctx.answerInlineQuery([])
 		})
 

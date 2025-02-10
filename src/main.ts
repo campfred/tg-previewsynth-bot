@@ -30,7 +30,7 @@ if (Deno.build.os != "windows")
 // }
 await CONFIG.loadConfig()
 
-const waitTime: number = 10
+const waitTime: number = 3
 console.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
 for (let seconds = 1; seconds <= waitTime; seconds++)
 {

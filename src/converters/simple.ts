@@ -10,7 +10,7 @@ export class SimpleLinkConverter implements LinkConverter
 	readonly name: string
 	readonly type: ConversionTypes = ConversionTypes.SIMPLE;
 	readonly origins: URL[]
-	readonly originsRegex: RegExp[]
+	readonly originRegExps: RegExp[]
 	readonly destination: URL
 	readonly expand: boolean = true;
 	readonly preserveSearchParams: string[] = [];
@@ -27,7 +27,7 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		this.name = name
 		this.origins = origins
-		this.originsRegex = originsRegex
+		this.originRegExps = originsRegex
 		this.destination = destination
 		console.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
 		// console.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
@@ -59,34 +59,27 @@ export class SimpleLinkConverter implements LinkConverter
 	public setEnabled (state: boolean): void { this.enabled = state }
 
 	/**
-	 * Checks if a given link matches a given origin URL.
-	 * @param link Link URL to check against
-	 * @param origin Origin URL to use as a reference
-	 * @returns Wether the link matches the origin or not
-	 */
-	private matchesOrigin (link: URL, origin: URL): boolean { return link.hostname.endsWith(origin.hostname) }
-
-	/**
 	 * Finds matching origin URLs for a given link. Array will be empty if no origin matches the link.
 	 * @param link Link URL to find matching origin URLs for
 	 * @returns Array of matching origin URLs
 	 */
-	private findMatchingOrigin (link: URL): URL | undefined { return this.origins.filter((origin: URL) => this.matchesOrigin(link, origin))[0] || undefined }
-
-	/**
-	 * Checks if a given link matches a given origin pattern.
-	 * @param link Link URL to check against
-	 * @param originRegex Origin regular expression to use as a reference
-	 * @returns Wether the link matches the origin pattern or not
-	 */
-	private matchesOriginRegex (link: URL, originRegex: RegExp): boolean { return originRegex.test(link.toString()) }
+	private findMatchingOrigin (link: URL): URL | undefined
+	{
+		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname) && link.pathname.startsWith(origin.pathname)) return origin
+		return undefined
+	}
 
 	/**
 	 * Finds matching origin patterns for a given link. Array will be empty if no origin regex matches the link.
 	 * @param link Link URL to find matching origin patterns for
 	 * @returns Array of matching origin regular expressions
 	 */
-	private findMatchingOriginRegex (link: URL): RegExp | undefined { return this.originsRegex.filter((originRegex: RegExp) => this.matchesOriginRegex(link, originRegex))[0] || undefined }
+	private findMatchingOriginRegex (link: URL): RegExp | undefined
+	{
+		console.debug(link.toString())
+		for (const originRegex of this.originRegExps) if (originRegex.test(link.toString())) return originRegex
+		return undefined
+	}
 
 	/**
 	 * Checks if a given link can be handled by this map.
@@ -95,28 +88,24 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public isSupported (link: URL): boolean
 	{
-		// Gate in case it's disabled
-		if (!this.enabled) return false
+		if (!this.enabled) return false // Gate in case it's disabled
 
 		console.debug(`Checking if link is supported by converter for ${ this.name }…`)
 
 		const isAlreadyConverted: boolean = link.hostname === this.destination.hostname
 		console.debug("\t➥ Link is already converted :", isAlreadyConverted)
-		if (isAlreadyConverted) return true
+		if (isAlreadyConverted) { return true }
 
 
 		const hasMatchingOrigin: boolean = this.findMatchingOrigin(link) != undefined
 		console.debug("\t➥ Link matches one of the supported origin URLs :", hasMatchingOrigin)
-		if (hasMatchingOrigin)
-		{
-			const isPathSupported: boolean = link.pathname.startsWith(this.destination.pathname)
-			console.debug("\t➥ Link's path starts with the destination's path :", isPathSupported)
-			if (isPathSupported) return true
-		}
+		if (hasMatchingOrigin) return true
 
-		const hasMatchingOriginRegex: boolean = this.findMatchingOriginRegex(link) != undefined // TODO Fix
+		const hasMatchingOriginRegex: boolean = this.findMatchingOriginRegex(link) != undefined
 		console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegex)
-		return hasMatchingOriginRegex
+		if (hasMatchingOriginRegex) return true
+
+		return false
 	}
 
 	/**
@@ -220,19 +209,22 @@ export class SimpleLinkConverter implements LinkConverter
 	public async parseLink (link: URL): Promise<URL>
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
-		if (!this.isSupported(link)) throw Error("Unsupported link")
 
-		const originalLinkCleaned: URL = this.cleanLink(link)
-		const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned)
-		if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
+		console.debug(`Parsing link ${ link }`)
+		if (this.isSupported(link))
+		{
+			const originalLinkCleaned: URL = this.cleanLink(link)
+			const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned)
+			if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
 
-		const originalLinkExpanded: URL = await this.expandLink(originalLinkCleaned)
-		const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded)
-		if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
+			const originalLinkExpanded: URL = await this.expandLink(originalLinkCleaned)
+			const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded)
+			if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
 
-		const convertedLink: URL = await this.convertLink(originalLinkExpanded)
-		CACHE.add(originalLinkCleaned, convertedLink)
-		CACHE.add(originalLinkExpanded, convertedLink)
-		return convertedLink
+			const convertedLink: URL = await this.convertLink(originalLinkExpanded)
+			CACHE.add(originalLinkCleaned, convertedLink)
+			CACHE.add(originalLinkExpanded, convertedLink)
+			return convertedLink
+		} else throw Error("Unsupported link")
 	}
 }

@@ -93,7 +93,7 @@ export class ConfigurationManager
 			const converter = new SimpleLinkConverter(
 				link.name.trim(),
 				"origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : [],
-				"origins_regex" in link ? link.origins_regex.map((originRegexString: string) => new RegExp(originRegexString.trim(), "gi")) : [],
+				"origins_regex" in link ? link.origins_regex.map((originRegexString: string) => new RegExp(originRegexString.trim(), "i")) : [],
 				new URL(link.destination.trim()),
 				link.settings,
 			)
@@ -137,21 +137,31 @@ export class ConfigurationManager
 	}
 
 	/**
-	 * Get all the origins' hostnames.
-	 * @returns A strings array containing all the supported hostnames for detection
+	 * Get all origin hostnames as regular expressions
+	 * @returns An array containing all the supported hostnames for detection through regular expressions
 	 */
-	getAllLinksOriginsRegexes (): RegExp[]
+	getAllLinksOriginsAsRegExps (): RegExp[]
 	{
 		console.debug("Generating regular expressions for supported origins…")
 		// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
-		const regExes: RegExp[] = this.AllConverters.filter((map: LinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
-			.flatMap((map: LinkConverter): RegExp[] => map.origins.map((origin): RegExp =>
-			{
-				const regEx: RegExp = new RegExp(`${ origin.protocol }\/\/.*${ origin.hostname.replaceAll(".", "\\.") }.*`, "gi")
-				console.debug(`\t➥ ${ regEx }`)
-				return regEx
-			}))
-		return regExes
+		// const originsAsRegExps: RegExp[] = this.AllConverters.filter((converter: LinkConverter): boolean => converter.enabled) // Filter out maps that are disabled
+		const originsAsRegExps: RegExp[] = this.AllConverters.flatMap(
+			(converter: LinkConverter): RegExp[] => converter.origins.map(
+				(origin): RegExp => new RegExp(`${ origin.protocol }\/\/.*${ origin.hostname.replaceAll(".", "\\.") }.*`, "i")
+			)
+		)
+		return originsAsRegExps
+	}
+
+	/**
+	 * Get all origin regular expressions
+	 * @returns An array containing all the supported regular expressions for detection
+	 */
+	getAllLinksOriginRegExps (): RegExp[]
+	{
+		console.debug("Gathering all supported origin regular expressions…")
+		const originRegExps: RegExp[] = this.AllConverters.flatMap((converter: LinkConverter): RegExp[] => converter.originRegExps)
+		return originRegExps
 	}
 
 	/**
@@ -168,7 +178,7 @@ export class ConfigurationManager
 			const config_link: LinkConfiguration = {
 				name: converter.name.trim(),
 				origins: converter.origins.map((origin: URL): string => origin.toString()),
-				origins_regex: converter.originsRegex.map((originRegex: RegExp): string => originRegex.source),
+				origins_regex: converter.originRegExps.map((originRegex: RegExp): string => originRegex.source),
 				destination: converter.destination.toString().trim(),
 				enabled: converter.enabled,
 			}
