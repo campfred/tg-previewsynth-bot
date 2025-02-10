@@ -11,9 +11,10 @@ export type LinkConfiguration = {
 }
 export type APIConfiguration = {
 	base_url?: string
+	// base_url: string
 	api_key?: string
+	// response_path: string
 	enabled?: boolean
-	// TODO Implement a more flexible wayt to add unsupported APIs like having a JSON path to retrieve the resulting URL
 }
 export type APIsConfiguration = { [api: string]: APIConfiguration }
 export type FeaturesConfiguration = { link_recognition: boolean, inline_queries: boolean, stats: boolean }

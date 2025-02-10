@@ -188,7 +188,7 @@ export class SimpleLinkConverter implements LinkConverter
 		}
 
 		const matchesOriginRegex: RegExp | undefined = this.findMatchingOriginRegex(link)
-		if (matchesOriginRegex) // TODO Finish this.
+		if (matchesOriginRegex)
 		{
 			const newLink = new URL(link.toString().replace(matchesOriginRegex, this.destination.toString())) // This is not working at the moment.
 			console.debug(`\t➥ ${ newLink }`)
@@ -197,7 +197,6 @@ export class SimpleLinkConverter implements LinkConverter
 		}
 
 		throw new Error("Incompatible link")
-
 	}
 
 	/**

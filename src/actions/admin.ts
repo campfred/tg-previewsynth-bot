@@ -157,7 +157,6 @@ export class AdminActions implements BotActions
 
 		this.Composer.chatType("private").command(AdminCommands.CONFIG_RELOAD, async function (ctx)
 		{
-			// TODO Actually redo the listened messages for links
 			if (ctx.config.isDeveloper)
 			{
 				console.debug(`Incoming /${ AdminCommands.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)

@@ -15,15 +15,11 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Bluesky
   > bsky.app ➡️ fxbsky.app
 - Twitter
-  > twitter.com, x.com ➡️ xcancel.com
+  > twitter.com, x.com ➡️ girlcockx.com
 - Instagram
   > instagram.com ➡️ ddinstagram.com
 - TikTok
   > tiktok.com ➡️ tfxktok.com
-- YouTube
-  > youtube.com ➡️ yfxtube.com
-- YouTu.be
-  > youtu.be ➡️ fxyoutu.be
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
@@ -100,3 +96,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   - Odesli / SongLinks
     - Optional _Special function_ button
       - To expand the message with basic infos
+  - Allow adding unsupported APIs to config
+    > Probably through _config.yaml_.(apis.base_url+api_key+response_path)
+- Releases
+  - Add job to compile binary of the bot with Deno compile https://youtu.be/ZsDqTQs3_G0

@@ -22,6 +22,8 @@ links:
   - name: FurTrack
     origins:
       - https://furtrack.com/p/
+    origins_regex:
+      - https:\/\/www\.furtrack\.com\/index\/.+\/
     destination: https://furtrack.owo.lgbt/p/
   - name: Reddit
     origins:
@@ -35,7 +37,7 @@ links:
     origins:
       - https://twitter.com
       - https://x.com
-    destination: https://xcancel.com
+    destination: https://girlcockx.com
   - name: Instagram
     origins:
       - https://instagram.com
@@ -44,24 +46,6 @@ links:
     origins:
       - https://tiktok.com
     destination: https://tfxktok.com
-  - name: YouTube
-    origins:
-      - https://youtube.com/watch
-    destination: https://yfxtube.com/watch
-    settings:
-      expand: false
-      preserveSearchParams:
-        - v
-        - t
-  - name: YouTu.be
-    origins:
-      - https://youtu.be
-    destination: https://fxyoutu.be
-    settings:
-      expand: false
-      preserveSearchParams:
-        - v
-        - t
 apis:
   odesli:
     enabled: true
