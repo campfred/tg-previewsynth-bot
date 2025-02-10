@@ -109,8 +109,8 @@ Deno.test("FurTrack-specific constraint", function (): void
 
 Deno.test("FurTrack-specific translation", async function (): Promise<void>
 {
-	const Converter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], [new RegExp("https:\/\/www\.furtrack\.com\/index\/.+\/", "i")], new URL("https://furtrack.owo.lgbt/p/"))
-	const NavLink = new URL("https://www.furtrack.com/index/event:furxmas2025/880404")
+	const Converter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], [/^https:\/\/www\.furtrack\.com\/index\/(\w+:)?\w+(\(\w+\))?\//i], new URL("https://furtrack.owo.lgbt/p/"))
+	const NavLink = new URL("https://www.furtrack.com/index/character:yin_(wolf)/880404")
 	const ConvertedLink = new URL("https://furtrack.owo.lgbt/p/880404")
 
 	assertEquals(await Converter.parseLink(NavLink), ConvertedLink)

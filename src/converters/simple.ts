@@ -23,11 +23,11 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @param destination Destination URLs for conversions.
 	 * @param settings Provides a few settings to fine tune the conversion process. Including disabling expanding links and preserving search parameters.
 	 */
-	constructor (name: string, origins: URL[], originsRegex: RegExp[], destination: URL, settings?: SimpleLinkConverterSettings)
+	constructor (name: string, origins: URL[], originsRegExp: RegExp[], destination: URL, settings?: SimpleLinkConverterSettings)
 	{
 		this.name = name
 		this.origins = origins
-		this.originRegExps = originsRegex
+		this.originRegExps = originsRegExp
 		this.destination = destination
 		console.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
 		// console.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destination.hostname }`)
@@ -74,10 +74,9 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @param link Link URL to find matching origin patterns for
 	 * @returns Array of matching origin regular expressions
 	 */
-	private findMatchingOriginRegex (link: URL): RegExp | undefined
+	private findMatchingOriginRegExp (link: URL): RegExp | undefined
 	{
-		console.debug(link.toString())
-		for (const originRegex of this.originRegExps) if (originRegex.test(link.toString())) return originRegex
+		for (const originRegExp of this.originRegExps) if (originRegExp.test(link.toString())) return originRegExp
 		return undefined
 	}
 
@@ -101,9 +100,9 @@ export class SimpleLinkConverter implements LinkConverter
 		console.debug("\t➥ Link matches one of the supported origin URLs :", hasMatchingOrigin)
 		if (hasMatchingOrigin) return true
 
-		const hasMatchingOriginRegex: boolean = this.findMatchingOriginRegex(link) != undefined
-		console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegex)
-		if (hasMatchingOriginRegex) return true
+		const hasMatchingOriginRegExp: boolean = this.findMatchingOriginRegExp(link) != undefined
+		console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
+		if (hasMatchingOriginRegExp) return true
 
 		return false
 	}
@@ -187,10 +186,10 @@ export class SimpleLinkConverter implements LinkConverter
 			return newLink
 		}
 
-		const matchesOriginRegex: RegExp | undefined = this.findMatchingOriginRegex(link)
-		if (matchesOriginRegex)
+		const matchesOriginRegExp: RegExp | undefined = this.findMatchingOriginRegExp(link)
+		if (matchesOriginRegExp)
 		{
-			const newLink = new URL(link.toString().replace(matchesOriginRegex, this.destination.toString())) // This is not working at the moment.
+			const newLink = new URL(link.toString().replace(matchesOriginRegExp, this.destination.toString())) // This is not working at the moment.
 			console.debug(`\t➥ ${ newLink }`)
 
 			return newLink

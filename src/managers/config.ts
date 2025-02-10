@@ -93,7 +93,7 @@ export class ConfigurationManager
 			const converter = new SimpleLinkConverter(
 				link.name.trim(),
 				"origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : [],
-				"origins_regex" in link ? link.origins_regex.map((originRegexString: string) => new RegExp(originRegexString.trim(), "i")) : [],
+				"origins_regex" in link ? link.origins_regex.map((originRegExpString: string) => new RegExp(originRegExpString.trim(), "i")) : [],
 				new URL(link.destination.trim()),
 				link.settings,
 			)
@@ -178,7 +178,7 @@ export class ConfigurationManager
 			const config_link: LinkConfiguration = {
 				name: converter.name.trim(),
 				origins: converter.origins.map((origin: URL): string => origin.toString()),
-				origins_regex: converter.originRegExps.map((originRegex: RegExp): string => originRegex.source),
+				origins_regex: converter.originRegExps.map((originRegExp: RegExp): string => originRegExp.source),
 				destination: converter.destination.toString().trim(),
 				enabled: converter.enabled,
 			}
