@@ -9,7 +9,11 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
   # - package-ecosystem: "deno"
   #   directory: "/"
   #   schedule:
-  #     interval: "weekly"
+  #     interval: "monthly"
