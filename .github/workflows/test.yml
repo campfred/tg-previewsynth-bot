@@ -1,4 +1,4 @@
-name: Build container image
+name: Test conversion use-cases
 on:
     pull_request:
         branches:
