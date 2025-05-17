@@ -23,7 +23,7 @@ links:
     origins:
       - https://furtrack.com/p/
     origins_regex:
-      - ^https:\/\/www\.furtrack\.com\/index\/(\w+:)?\w+(\(\w+\))?\/
+      - ^https:\/\/(www\.)?furtrack\.com\/(\w+\/)?(\w+[:/])?\w+(\(\w+\))?\/
     destination: https://furtrack.owo.lgbt/p/
   - name: Reddit
     origins:
