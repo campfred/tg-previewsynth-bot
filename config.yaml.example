@@ -28,7 +28,7 @@ links:
   - name: Reddit
     origins:
       - https://reddit.com
-    destination: https://rxddit.com
+    destination: https://vxreddit.com
   - name: Bluesky
     origins:
       - https://bsky.app
@@ -37,7 +37,7 @@ links:
     origins:
       - https://twitter.com
       - https://x.com
-    destination: https://girlcockx.com
+    destination: https://fxtwitter.com
   - name: Instagram
     origins:
       - https://instagram.com
