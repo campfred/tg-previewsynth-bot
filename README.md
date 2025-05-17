@@ -2,20 +2,24 @@
 
 Telegram bot to automatically convert links into embed-friendly ones for Telegram and other messaging platforms. ✨
 
-## About
+## General use cases
 
-### Supported links
+- Private chat with bot, by sending links directly or using the `/convert` command.
+- Anywhere on Telegram, by using in-line queries. Begin with the bot's handle (i.e. `@PreviewSynthBot`) followed by a link to convert, then select the command in the list that appears.
+- In any type of chats (private, groups, supergroups and channels) by sending links and the bot replying to said link with a converted one.
+
+## Supported links
 
 - FurAffinity
   > furaffinity.net ➡️ xfuraffinity.net
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
 - Reddit
-  > reddit.com ➡️ rxddit.com
+  > reddit.com ➡️ vxreddit.com
 - Bluesky
   > bsky.app ➡️ fxbsky.app
 - Twitter
-  > twitter.com, x.com ➡️ girlcockx.com
+  > twitter.com, x.com ➡️ fxtwitter.com
 - Instagram
   > instagram.com ➡️ ddinstagram.com
 - TikTok
@@ -23,9 +27,9 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
-### Supported commands
+## Supported commands
 
-#### Public commands
+### Public commands
 
 - `/start`
   > Welcomes user to using the bot and gives small usage example.
@@ -34,7 +38,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - `/convert`
   > Converts a link (if supported) into an embed-friendly one for social messaging use.
 
-#### Admin commands
+### Admin commands
 
 - `/enable {name|origin|destination}`
   > Enables converting a given web link mapping.
@@ -42,16 +46,14 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   > Disables converting a given web link mapping.
 - `/toggle {name|origin|destination}`
   > Toggles converting a given web link mapping.
+- `/stats` (if stats enabled, default `true`)
+  > Shows the bot's statistics.
+- `/clear`
+  > Clears the bot's cache.
 - `/save`
   > Saves configuration to disk.
 - `/reload`
   > Reloads configuration from disk.
-
-### General use cases
-
-- Private chat with bot, by sending links directly or using the `/convert` command.
-- Anywhere on Telegram, by using in-line queries. Begin with the bot's handle (i.e. `@PreviewSynthBot`) followed by a link to convert, then select the command in the list that appears.
-- In any type of chats (private, groups, supergroups and channels) by sending links and the bot replying to said link with a converted one.
 
 ## Deployment
 
