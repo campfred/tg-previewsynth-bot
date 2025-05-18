@@ -40,3 +40,4 @@ junit.xml
 .ipynb_checkpoints/
 Untitled*.ipynb
 config.yaml
+output
