@@ -14,9 +14,9 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	readonly base_url: URL = new URL("/v1-alpha.1/links", "https://api.song.link");
 	readonly api_key: string = "";
 
-	constructor (name: string, origins: URL[], destination: URL, base_url?: URL, api_key?: string)
+	constructor (name: string, origins: URL[], destinations: URL[], base_url?: URL, api_key?: string)
 	{
-		super(name, origins, [], destination)
+		super(name, origins, [], destinations)
 		if (api_key !== undefined) this.api_key = api_key
 		if (base_url !== undefined) this.base_url = new URL(base_url)
 	}
@@ -29,7 +29,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	 */
 	public override async convertLink (link: URL): Promise<URL>
 	{
-		if (this.isSupported(link))
+		if (this.isSourceSupported(link))
 		{
 			console.debug(`Converting link…\n\t${ link }`)
 

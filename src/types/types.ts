@@ -1,11 +1,11 @@
-import { Composer, Context } from "grammy"
+import { Composer, Context } from "x/grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export type LinkConfiguration = {
 	name: string
 	origins: string[]
 	origins_regex: string[],
-	destination: string,
+	destinations: string[],
 	enabled?: boolean,
 	settings?: SimpleLinkConverterSettings
 }
@@ -63,15 +63,18 @@ export interface LinkConverter
 	readonly type: ConversionTypes
 	readonly origins: URL[]
 	readonly originRegExps: RegExp[]
-	readonly destination: URL
+	readonly destinations: URL[]
+	readonly defaultDestination: URL
 	readonly expand: boolean
-	readonly preserveSearchParams: string[]
+	readonly preserveQueryParamKeys: string[]
 	enabled: boolean
 
 	disable (): void
 	enable (): void
-	isSupported (link: URL): boolean
-	parseLink (link: URL): Promise<URL>
+	isSourceSupported (link: URL): boolean
+	isDestinationSupported (link: URL): boolean
+	parseLink (link: URL, destination: URL): Promise<URL>
+	parseLinkDefault (link: URL): Promise<URL>
 }
 
 export interface BotActions

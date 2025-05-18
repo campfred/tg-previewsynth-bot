@@ -3,53 +3,70 @@ about:
   owner: 12345678
   # status_updates: # Optional
   #   chat: -12345678901234
-  #   # topic: 1234 # Optional within status_updates
+  #   # topic: 1234 # Optional
 links:
   # - name: Example
   #   origins:
   #     - https://contoso.com
-  #   destination: https://example.com
+  #   destinations:
+  #     - https://example.com # First is used as default
+  #     - https://example2.com # Proposed only through in-line queries
   #   enabled: false
   #   settings:
   #     expand: false
-  #     preserveSearchParams:
+  #     preserveQueryParamKeys:
   #       - id
   #       - flavour
   - name: FurAffinity
     origins:
       - https://furaffinity.net
-    destination: https://xfuraffinity.net
+    destinations:
+      - https://xfuraffinity.net
   - name: FurTrack
     origins:
       - https://furtrack.com/p/
     origins_regex:
-      - ^https:\/\/(www\.)?furtrack\.com\/(\w+\/)?(\w+[:/])?\w+(\(\w+\))?\/
-    destination: https://furtrack.owo.lgbt/p/
+      - ^https:\/\/www\.furtrack\.com\/\w+\/(\w+[:/])?\w+(\(\w+\))?\/
+    destinations:
+      - https://furtrack.owo.lgbt/p/
   - name: Reddit
     origins:
       - https://reddit.com
-    destination: https://vxreddit.com
+    destinations:
+      - https://vxreddit.com
+      - https://rxddit.com
   - name: Bluesky
     origins:
       - https://bsky.app
-    destination: https://fxbsky.app
+    destinations:
+      - https://fxbsky.app
   - name: Twitter
     origins:
       - https://twitter.com
       - https://x.com
-    destination: https://fxtwitter.com
+    destinations:
+      - https://fxtwitter.com
+      - https://vxtwitter.com
+      - https://fixupx.com
+      - https://girlcockx.com
+      - https://xcancel.com
   - name: Instagram
     origins:
       - https://instagram.com
-    destination: https://ddinstagram.com
+    destinations:
+      - https://ddinstagram.com
+      - https://instagramez.com
   - name: TikTok
     origins:
       - https://tiktok.com
-    destination: https://tfxktok.com
+    destinations:
+      - https://vxtiktok.com
+      - https://tfxktok.com
 apis:
   odesli:
     enabled: true
     # api_key: *** # Not using an API key grants you only 10 reqs. per minute
 features:
   link_recognition: true
+  inline_queries: true
   stats: true

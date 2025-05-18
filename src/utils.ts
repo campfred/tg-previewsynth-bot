@@ -1,4 +1,4 @@
-import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.32.0/context.ts"
+import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "x/grammy"
 import { CustomContext, LinkConverter } from "./types/types.ts"
 
 export function findMatchingConverter (url: URL, converters: LinkConverter[]): LinkConverter | undefined
@@ -6,7 +6,7 @@ export function findMatchingConverter (url: URL, converters: LinkConverter[]): L
 	console.debug(`Searching a matching converter…`)
 
 	for (const converter of converters)
-		if (converter.isSupported(url))
+		if (converter.isSourceSupported(url))
 		{
 			console.debug(`\t➥ Found ${ converter.name }!`)
 			return converter

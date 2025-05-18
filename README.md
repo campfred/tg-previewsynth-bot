@@ -1,5 +1,7 @@
 # Preview Synth Bot
 
+[![Dependabot Updates](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates) [![CodeQL](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql) [![Test conversion use-cases](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml) [![Build container image](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/campfred/tg-previewsynth-bot)
+
 Telegram bot to automatically convert links into embed-friendly ones for Telegram and other messaging platforms. ✨
 
 ## General use cases
@@ -15,15 +17,15 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
 - Reddit
-  > reddit.com ➡️ vxreddit.com
+  > reddit.com ➡️ vxreddit.com, rxddit.com
 - Bluesky
   > bsky.app ➡️ fxbsky.app
 - Twitter
-  > twitter.com, x.com ➡️ fxtwitter.com
+  > twitter.com, x.com ➡️ fxtwitter.com, vxtwitter.com, fixupx.com, girlcockx.com, xcancel.com
 - Instagram
-  > instagram.com ➡️ ddinstagram.com
+  > instagram.com ➡️ ddinstagram.com, instagramez.com
 - TikTok
-  > tiktok.com ➡️ tfxktok.com
+  > tiktok.com ➡️ vxtiktok, tfxktok.com
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
@@ -55,6 +57,46 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - `/reload`
   > Reloads configuration from disk.
 
+## Configuration
+
+The bot's behaviour is set via a configuration file in YAML format.
+
+> [!tip]
+> There is an example configuration file [in this respoitory](config.yaml.example) that you can fill in with your own details.
+> It also contains the conversion links I personnaly use on my own deployment.
+
+```yaml
+# config.yaml
+about:
+  code_repo: https://github.com/campfred/tg-previewsynth-bot # Your code repository's URL, used by the bot for directing users to issues and stuff.
+  owner: 12345678 # Your own Telegram user ID, used by the bot to recognize you for admin commands.
+  status_updates: # Optional
+    chat: -12345678901234 # Chat ID where you'd like to send bot status updates.
+    topic: 1234 # Optional, topic you'd like to use for those updates.
+links:
+  - name: Example # Display name of the website, ie.: FurAffinity
+    origins: # Base URLs that must be converted, can be a single one as long as it stays an array
+      - https://origin.com
+      - https://origin.app
+    destinations: # Base URL(s) to convert to, can be a single one as long as it stays an array
+      - https://example.com # First is used as default for /convert and conversational conversions
+      - https://example2.com # Proposed only through in-line queries
+    enabled: true # Optional, set to false to keep it disabled
+    settings: # Optional, allows configuring some quirks about that site's links
+      expand: true # Optional, set to false to disable expanding links
+      preserveQueryParamKeys: # Optional, set query parameter keys to keep during link cleanup
+        - id
+        - flavour
+apis:
+  odesli:
+    enabled: true # Enable Odesli API-based converter
+    # api_key: *** # Not using an API key grants you only 10 reqs. per minute
+features: # Disable behaviour features here
+  link_recognition: true # Optional, disabled by default
+  inline_queries: true # Optional, disabled by default
+  stats: true # Optional, disabled by default
+```
+
 ## Deployment
 
 ### Prerequisites
@@ -62,10 +104,11 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - An Internet connection
 - A Telegram Bot token (talk to [@BotFather](https://BotFather.t.me) to get one)
 - Deno@v2
+- [A configuration file]
 
 ### Steps
 
-1. Create [config.yaml](config.yaml) configuration file (use [config.yaml.example](config.yaml.example) as a complete example)
+1. Create [a configuration file](#configuration) (use [config.yaml.example](config.yaml.example) as a complete example)
 2. Set environment variables
    > `export PREVIEWSYNTH_TG_BOT_TOKEN={YOUR_BOT_TOKEN_FROM_@BOTFATHER}` or use `.env` file (use [.env.example](.env.example) as a complete example)
 3. Run application

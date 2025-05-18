@@ -1,9 +1,9 @@
 import { parse, stringify } from "@std/yaml"
+import { UserFromGetMe } from "x/grammy_types/manage"
 import { AboutConfiguration, APIConfiguration, APIsConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
 import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"
 import { OdesliOrigins } from "../types/odesli.ts"
-import { UserFromGetMe } from "https://deno.land/x/grammy_types@v3.16.0/manage.ts"
 
 const PATH_CONFIG_FILE: string = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
 
@@ -94,7 +94,7 @@ export class ConfigurationManager
 				link.name.trim(),
 				"origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : [],
 				"origins_regex" in link ? link.origins_regex.map((originRegExpString: string) => new RegExp(originRegExpString.trim(), "i")) : [],
-				new URL(link.destination.trim()),
+				"destinations" in link ? link.destinations.map((destination: string) => new URL(destination.trim())) : [],
 				link.settings,
 			)
 			converter.setEnabled(link.enabled || true)
@@ -124,7 +124,7 @@ export class ConfigurationManager
 			const converter = new OdesliMusicConverter(
 				"Music",
 				OdesliOrigins.map((origin): URL => new URL(origin.trim())),
-				new URL("https://song.link"),
+				[new URL("https://song.link")],
 			)
 			converter.setEnabled(odesliConfig.enabled || true)
 
@@ -179,7 +179,7 @@ export class ConfigurationManager
 				name: converter.name.trim(),
 				origins: converter.origins.map((origin: URL): string => origin.toString()),
 				origins_regex: converter.originRegExps.map((originRegExp: RegExp): string => originRegExp.source),
-				destination: converter.destination.toString().trim(),
+				destinations: converter.destinations.map((destination: URL): string => destination.toString()),
 				enabled: converter.enabled,
 			}
 			linkConfigs.push(config_link)
@@ -226,7 +226,7 @@ export class ConfigurationManager
 	printConvertersListInConsole (): void
 	{
 		console.debug("Links I recognize at the moment :")
-		for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }${ converter.enabled ? "" : " (disabled)" }`)
+		for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
 	}
 
 	/**
@@ -247,7 +247,7 @@ export class ConfigurationManager
 	getConvertersListForMessage (): string
 	{
 		let message: string = "\n<blockquote><b>🔗 Links I recognize at the moment</b>"
-		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destination.hostname }`
+		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }`
 		message += "</blockquote>"
 		return message
 	}
@@ -271,7 +271,7 @@ export class ConfigurationManager
 	 */
 	async loadConfig (): Promise<void>
 	{
-		console.debug(`Loading configuration from disk at ${ PATH_CONFIG_FILE }…`)
+		console.debug(`Loading configuration from file ${ PATH_CONFIG_FILE } on disk…`)
 		try
 		{
 			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE)) as Configuration
