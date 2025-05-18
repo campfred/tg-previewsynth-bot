@@ -5,7 +5,7 @@ export type LinkConfiguration = {
 	name: string
 	origins: string[]
 	origins_regex: string[],
-	destination: string,
+	destinations: string[],
 	enabled?: boolean,
 	settings?: SimpleLinkConverterSettings
 }
