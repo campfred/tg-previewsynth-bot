@@ -17,11 +17,23 @@ jobs:
               with:
                   deno-version: v2.x
 
-            - name: Install dependencies
-              run: deno task install
+            # - name: Install dependencies
+            #   run: deno task install
 
             - name: Cache dependencies
               run: deno task cache
 
-            - name: Compile
-              run: deno task compile
+            - name: Compile Windows x86_64
+              run: deno task compile-windows-x86_64
+
+            - name: Compile macOS x86_64
+              run: deno task compile-macos-x86_64
+
+            - name: Compile macOS aarch64
+              run: deno task compile-macos-aarch64
+
+            - name: Compile Linux x86_64
+              run: deno task compile-linux-x86_64
+
+            - name: Compile Linux aarch64
+              run: deno task compile-linux-aarch64
