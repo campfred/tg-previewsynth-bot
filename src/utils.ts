@@ -1,4 +1,4 @@
-import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "x/grammy_types/context"
+import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "x/grammy"
 import { CustomContext, LinkConverter } from "./types/types.ts"
 
 export function findMatchingConverter (url: URL, converters: LinkConverter[]): LinkConverter | undefined

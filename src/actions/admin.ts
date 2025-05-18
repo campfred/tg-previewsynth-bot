@@ -45,18 +45,19 @@ export class AdminActions implements BotActions
 			ctx.react("🤔")
 			for (const map of CONFIG.SimpleConverters)
 				for (const origin of map.origins)
-					if (
-						map.name.trim().toLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
-						origin.hostname.trim().toLocaleLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
-						map.destination.hostname.trim().toLocaleLowerCase() === ctx.match.trim().toLocaleLowerCase()
-					)
-					{
-						ctx.react("🫡")
-						map.enabled = state === undefined ? !map.enabled : state
-						// const inlineKeyboard: InlineKeyboard = new InlineKeyboard().text(map.enabled ? "Disable ❌" : "Enable ✅", `${map.enabled ? COMMANDS.MAP_DISABLE : COMMANDS.MAP_ENABLE} ${map.destination.hostname}`);
-						// ctx.reply(`${map.name} is now ${map.enabled ? "enabled! ✅" : "disabled! ❌"}`, { reply_parameters: { message_id: ctx.msgId }, reply_markup: inlineKeyboard });
-						ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
-					}
+					for (const destination of map.destinations)
+						if (
+							map.name.trim().toLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
+							origin.hostname.trim().toLocaleLowerCase() === ctx.match.trim().toLocaleLowerCase() ||
+							destination.hostname.trim().toLocaleLowerCase() === ctx.match.trim().toLocaleLowerCase()
+						)
+						{
+							ctx.react("🫡")
+							map.enabled = state === undefined ? !map.enabled : state
+							// const inlineKeyboard: InlineKeyboard = new InlineKeyboard().text(map.enabled ? "Disable ❌" : "Enable ✅", `${map.enabled ? COMMANDS.MAP_DISABLE : COMMANDS.MAP_ENABLE} ${map.destination.hostname}`);
+							// ctx.reply(`${map.name} is now ${map.enabled ? "enabled! ✅" : "disabled! ❌"}`, { reply_parameters: { message_id: ctx.msgId }, reply_markup: inlineKeyboard });
+							ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
+						}
 		}
 	}
 

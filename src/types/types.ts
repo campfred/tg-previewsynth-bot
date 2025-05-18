@@ -63,7 +63,7 @@ export interface LinkConverter
 	readonly type: ConversionTypes
 	readonly origins: URL[]
 	readonly originRegExps: RegExp[]
-	readonly destination: URL
+	readonly destinations: URL[]
 	readonly expand: boolean
 	readonly preserveSearchParams: string[]
 	enabled: boolean
@@ -71,7 +71,7 @@ export interface LinkConverter
 	disable (): void
 	enable (): void
 	isSupported (link: URL): boolean
-	parseLink (link: URL): Promise<URL>
+	parseLink (link: URL, destination: string): Promise<URL>
 }
 
 export interface BotActions
