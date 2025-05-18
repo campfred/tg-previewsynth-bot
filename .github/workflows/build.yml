@@ -63,7 +63,7 @@ jobs:
                   path: output/previewsynth-${{ matrix.os }}-${{ matrix.arch }}*
                   if-no-files-found: error
 
-    publish:
+    containerize:
         name: Build and publish container image
         # if: ${{ github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' }}
         runs-on: ubuntu-latest
