@@ -66,7 +66,7 @@ export interface LinkConverter
 	readonly destinations: URL[]
 	readonly defaultDestination: URL
 	readonly expand: boolean
-	readonly preserveSearchParams: string[]
+	readonly preserveQueryParamKeys: string[]
 	enabled: boolean
 
 	disable (): void

@@ -3,7 +3,7 @@ import { ConversionTypes, LinkConverter } from "../types/types.ts"
 
 const CACHE: CacheManager = CacheManager.Instance
 
-export type SimpleLinkConverterSettings = { expand?: boolean; preserveSearchParams?: string[] }
+export type SimpleLinkConverterSettings = { expand?: boolean; preserveQueryParamKeys?: string[] }
 
 export class SimpleLinkConverter implements LinkConverter
 {
@@ -14,7 +14,7 @@ export class SimpleLinkConverter implements LinkConverter
 	readonly destinations: URL[]
 	readonly defaultDestination: URL
 	readonly expand: boolean = true;
-	readonly preserveSearchParams: string[] = [];
+	readonly preserveQueryParamKeys: string[] = [];
 	enabled: boolean = true;
 
 	/**
@@ -35,8 +35,8 @@ export class SimpleLinkConverter implements LinkConverter
 		// console.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
 		this.expand = settings?.expand != undefined ? settings.expand : true
 		if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
-		if (settings?.preserveSearchParams) this.preserveSearchParams = settings?.preserveSearchParams
-		if (this.preserveSearchParams.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveSearchParams?.toString())
+		if (settings?.preserveQueryParamKeys) this.preserveQueryParamKeys = settings?.preserveQueryParamKeys
+		if (this.preserveQueryParamKeys.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveQueryParamKeys?.toString())
 	}
 
 	/**
@@ -181,7 +181,7 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		console.debug(`Cleaning link…\n\t${ link }`)
 		const newLink = new URL(link.origin + link.pathname)
-		for (const searchParam of this.preserveSearchParams)
+		for (const searchParam of this.preserveQueryParamKeys)
 		{
 			const value: string | null = link.searchParams.get(searchParam)
 			if (value != null) newLink.searchParams.append(searchParam, value)

@@ -66,7 +66,7 @@ Deno.test("YouTube-specific constraint", function (): void
 	assert(!Converter.isSourceSupported(Link))
 })
 
-const youtubeConversionSettings: SimpleLinkConverterSettings = { expand: false, preserveSearchParams: ["v", "t"] }
+const youtubeConversionSettings: SimpleLinkConverterSettings = { expand: false, preserveQueryParamKeys: ["v", "t"] }
 Deno.test("YouTube-specific test case", async function (): Promise<void>
 {
 	const Link: URL = new URL("https://www.youtube.com/watch?v=0yiwxIuXmdk&t=355s")
