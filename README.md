@@ -17,15 +17,15 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
 - Reddit
-  > reddit.com ➡️ vxreddit.com
+  > reddit.com ➡️ vxreddit.com, rxddit.com
 - Bluesky
   > bsky.app ➡️ fxbsky.app
 - Twitter
-  > twitter.com, x.com ➡️ fxtwitter.com
+  > twitter.com, x.com ➡️ fxtwitter.com, vxtwitter.com, fixupx.com, girlcockx.com, xcancel.com
 - Instagram
-  > instagram.com ➡️ ddinstagram.com
+  > instagram.com ➡️ ddinstagram.com, instagramez.com
 - TikTok
-  > tiktok.com ➡️ tfxktok.com
+  > tiktok.com ➡️ vxtiktok, tfxktok.com
 - Music (through [Odesli's API](https://odesli.co))
   > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link
 
