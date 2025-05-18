@@ -13,11 +13,12 @@
     "@std/dotenv": "jsr:@std/dotenv@0.225.4",
     "@std/log": "jsr:@std/log@^0.224.14",
     "@std/yaml": "jsr:@std/yaml@1.0.6",
-    "grammy": "https://deno.land/x/grammy@v1.36.1/mod.ts",
-    "grammy_types/manage": "https://deno.land/x/grammy_types@v1.36.1/manage.ts",
-    "grammy_types/message": "https://deno.land/x/grammy_types@v1.36.1/message.ts",
-    "grammy_types/context": "https://deno.land/x/grammy_types@v1.36.1/context.ts",
-    "grammy_types/inline": "https://deno.land/x/grammy_types@v1.36.1/inline.ts"
+    "x/sleep": "https://deno.land/x/sleep@v1.3.0/mod.ts",
+    "x/grammy": "https://deno.land/x/grammy@v1.36.1/mod.ts",
+    "x/grammy_types/manage": "https://deno.land/x/grammy_types@v3.20.0/manage.ts",
+    "x/grammy_types/message": "https://deno.land/x/grammy_types@v3.20.0/message.ts",
+    "x/grammy_types/context": "https://deno.land/x/grammy_types@v3.20.0/context.ts",
+    "x/grammy_types/inline": "https://deno.land/x/grammy_types@v3.20.0/inline.ts"
   },
   "unstable": [
     "temporal"

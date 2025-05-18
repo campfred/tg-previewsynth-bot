@@ -3,7 +3,7 @@ import { AboutConfiguration, APIConfiguration, APIsConfiguration, Configuration,
 import { SimpleLinkConverter } from "../converters/simple.ts"
 import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"
 import { OdesliOrigins } from "../types/odesli.ts"
-import { UserFromGetMe } from "grammy_types/manage"
+import { UserFromGetMe } from "x/grammy_types/manage"
 
 const PATH_CONFIG_FILE: string = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
 

@@ -1,4 +1,4 @@
-import { Bot, GrammyError, HttpError, NextFunction } from "grammy"
+import { Bot, GrammyError, HttpError, NextFunction } from "x/grammy"
 import { BotActions, CustomContext } from "../types/types.ts"
 import { ConfigurationManager } from "./config.ts"
 

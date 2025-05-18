@@ -1,4 +1,4 @@
-import { Composer, Context } from "grammy"
+import { Composer, Context } from "x/grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export type LinkConfiguration = {

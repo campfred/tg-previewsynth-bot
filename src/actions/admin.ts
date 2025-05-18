@@ -1,4 +1,4 @@
-import { CommandContext, Composer } from "grammy"
+import { CommandContext, Composer } from "x/grammy"
 import { CustomContext, BotActions } from "../types/types.ts"
 import { ConfigurationManager } from "../managers/config.ts"
 import { getExpeditorDebugString } from "../utils.ts"
