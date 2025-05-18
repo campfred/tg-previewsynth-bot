@@ -35,7 +35,7 @@ export class CacheManager
 	 * @param origin Origin URL
 	 * @returns Destination URL
 	 */
-	public get (origin: URL, destination: string): string | undefined
+	public get (origin: URL, destination: URL): string | undefined
 	{
 		const originString: string = origin.toString()
 
@@ -43,7 +43,7 @@ export class CacheManager
 		if (this._Cache.has(originString)) STATS.countCacheHit()
 		else STATS.countCacheMiss()
 
-		return this._Cache.get(originString)?.get(destination)
+		return this._Cache.get(originString)?.get(destination.toString())
 	}
 
 	/**

@@ -29,7 +29,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	 */
 	public override async convertLink (link: URL): Promise<URL>
 	{
-		if (this.isSupported(link))
+		if (this.isSourceSupported(link))
 		{
 			console.debug(`Converting link…\n\t${ link }`)
 

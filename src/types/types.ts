@@ -64,14 +64,17 @@ export interface LinkConverter
 	readonly origins: URL[]
 	readonly originRegExps: RegExp[]
 	readonly destinations: URL[]
+	readonly defaultDestination: URL
 	readonly expand: boolean
 	readonly preserveSearchParams: string[]
 	enabled: boolean
 
 	disable (): void
 	enable (): void
-	isSupported (link: URL): boolean
-	parseLink (link: URL, destination: string): Promise<URL>
+	isSourceSupported (link: URL): boolean
+	isDestinationSupported (link: URL): boolean
+	parseLink (link: URL, destination: URL): Promise<URL>
+	parseLinkDefault (link: URL): Promise<URL>
 }
 
 export interface BotActions

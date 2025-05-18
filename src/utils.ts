@@ -6,7 +6,7 @@ export function findMatchingConverter (url: URL, converters: LinkConverter[]): L
 	console.debug(`Searching a matching converter…`)
 
 	for (const converter of converters)
-		if (converter.isSupported(url))
+		if (converter.isSourceSupported(url))
 		{
 			console.debug(`\t➥ Found ${ converter.name }!`)
 			return converter

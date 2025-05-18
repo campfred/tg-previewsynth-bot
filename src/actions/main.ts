@@ -32,7 +32,7 @@ export const MainCommandsDetails: BotCommand[] = [
  * @param ctx Command or Hears context.
  * @returns Completion promise.
  */
-async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods, destination?: string): Promise<void>
+async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods): Promise<void>
 {
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private")
@@ -62,7 +62,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	{
 		await ctx.react("🤔")
 		console.debug(`${ converter?.name } will be used to convert requested link.`)
-		const linkConverted: URL = await converter.parseLink(new URL(ctx.match.toString()), destination ? destination : converter.destinations[0].hostname)
+		const linkConverted: URL = await converter.parseLinkDefault(new URL(ctx.match.toString()))
 		await ctx.react("👀")
 		await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
 		STATS.countConversion(converter, method)
@@ -228,20 +228,22 @@ export class MainActions implements BotActions
 				ctx.answerInlineQuery([])
 			}
 
+			// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Thinking… ⏳`).text("")])
 			const url: URL = new URL(ctx.match.toString())
-			const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
-			if (converter)
+			const Converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
+			if (Converter)
 			{
 				const queryResults: InlineQueryResultArticle[] = []
 
-				for (const destination of converter.destinations)
+				// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
+				for (const Destination of Converter.destinations)
 				{
-					const convertedLink: URL = await converter.parseLink(new URL(link), destination.hostname)
-					queryResults.push(InlineQueryResultBuilder.article(convertedLink.toString(), `Convert ${ converter.name } link with ${ convertedLink.hostname } 🔄️`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true } }))
+					const convertedLink: URL = await Converter.parseLink(new URL(link), Destination)
+					queryResults.push(InlineQueryResultBuilder.article(convertedLink.toString(), `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔄️`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true } }))
 					// queryResults.push(InlineQueryResultBuilder.article(convertedLink.toString(), `Convert ${ converter.name } link silently with ${ convertedLink.hostname } 🔄️🔕`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true }, disable_notification: true }))
 				}
 				await ctx.answerInlineQuery(queryResults)
-				STATS.countConversion(converter, ConversionMethods.INLINE)
+				STATS.countConversion(Converter, ConversionMethods.INLINE)
 			} else ctx.answerInlineQuery([])
 		})
 
