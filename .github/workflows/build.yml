@@ -31,8 +31,11 @@ jobs:
 
         strategy:
             matrix:
-                os: [windows, macos]
+                os: [windows, macos, linux]
                 arch: [x86_64, aarch64]
+                exclude:
+                    - os: windows
+                      arch: aarch64
 
         steps:
             - name: Checkout repository
