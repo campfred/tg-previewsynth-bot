@@ -7,7 +7,8 @@
     "cache": "deno cache --allow-import src/main.ts",
     "dev": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env --watch --inspect src/main.ts",
     "run": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
-    "start": "deno task run"
+    "start": "deno task run",
+    "compile": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output previewsynth src/main.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.13",
