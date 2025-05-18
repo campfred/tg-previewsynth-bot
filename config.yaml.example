@@ -3,19 +3,18 @@ about:
   owner: 12345678
   # status_updates: # Optional
   #   chat: -12345678901234
-  #   # topic: 1234 # Optional within status_updates
+  #   # topic: 1234 # Optional
 links:
   # - name: Example
   #   origins:
   #     - https://contoso.com
-  #   destination: https://example.com
   #   destinations:
   #     - https://example.com # First is used as default
   #     - https://example2.com # Proposed only through in-line queries
   #   enabled: false
   #   settings:
   #     expand: false
-  #     preserveSearchParams:
+  #     preserveQueryParamKeys:
   #       - id
   #       - flavour
   - name: FurAffinity
