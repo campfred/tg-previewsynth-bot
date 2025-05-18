@@ -1,12 +1,12 @@
 import { CommandContext, Composer, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "grammy"
+import { BotCommand } from "grammy_types/manage"
+import { InlineQueryResult, InlineQueryResultArticle } from "grammy_types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter } from "../types/types.ts"
-import { BotCommand } from "https://deno.land/x/grammy_types@v3.16.0/manage.ts"
 import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { AdminCommands } from "./admin.ts"
 import { BotManager } from "../managers/bot.ts"
-import { InlineQueryResult } from "https://deno.land/x/grammy_types@v3.16.0/inline.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const STATS: StatsManager = StatsManager.Instance
@@ -236,7 +236,8 @@ export class MainActions implements BotActions
 				// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
 				const convertedLink: URL = await converter.parseLink(new URL(link))
 				const convertedLinkText: string = convertedLink.toString()
-				const queryResult: InlineQueryResult = InlineQueryResultBuilder.article(converter.name, `Convert ${ converter.name } link 🔄️`).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
+				const queryResult: InlineQueryResultArticle = InlineQueryResultBuilder.article(convertedLinkText, `Convert ${ converter.name } link 🔄️`, { description: convertedLinkText }).text(convertedLinkText, { link_preview_options: { show_above_text: true } })
+				// const queryResultSilent: InlineQueryResultArticle = InlineQueryResultBuilder.article(convertedLinkText, `Convert ${ converter.name } link silently 🔄️🔕`, { description: convertedLinkText }).text(convertedLinkText, { link_preview_options: { show_above_text: true }, disable_notification: true })
 				await ctx.answerInlineQuery([queryResult])
 				STATS.countConversion(converter, ConversionMethods.INLINE)
 			} else ctx.answerInlineQuery([])

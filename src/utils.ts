@@ -1,4 +1,4 @@
-import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.32.0/context.ts"
+import { CallbackQueryContext, CommandContext, HearsContext, InlineQueryContext } from "grammy_types/context"
 import { CustomContext, LinkConverter } from "./types/types.ts"
 
 export function findMatchingConverter (url: URL, converters: LinkConverter[]): LinkConverter | undefined
