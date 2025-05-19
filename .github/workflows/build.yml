@@ -32,10 +32,10 @@ jobs:
         strategy:
             matrix:
                 os: [windows, macos, linux]
-                arch: [x86_64, aarch64]
+                arch: [amd64, arm64]
                 exclude:
                     - os: windows
-                      arch: aarch64
+                      arch: arm64
 
         steps:
             - name: Checkout repository
@@ -101,13 +101,13 @@ jobs:
             - name: Download linux/amd64 artifact
               uses: actions/download-artifact@v4
               with:
-                  name: PreviewSynthBot-linux-x86_64
+                  name: PreviewSynthBot-linux-amd64
                   path: output
 
             - name: Download linux/arm64 artifact
               uses: actions/download-artifact@v4
               with:
-                  name: PreviewSynthBot-linux-aarch64
+                  name: PreviewSynthBot-linux-arm64
                   path: output
 
             - name: Build and push Docker image
