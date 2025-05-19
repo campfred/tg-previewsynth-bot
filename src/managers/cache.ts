@@ -47,6 +47,22 @@ export class CacheManager
 	}
 
 	/**
+	 * Get all URL conversions from cache.
+	 * @param origin Origin URL
+	 * @returns Map of destination URLs
+	 */
+	public getAll (origin: URL): Map<string, string> | undefined
+	{
+		const originString: string = origin.toString()
+
+		console.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for ${ originString }.`)
+		if (this._Cache.has(originString)) STATS.countCacheHit()
+		else STATS.countCacheMiss()
+
+		return this._Cache.get(originString)
+	}
+
+	/**
 	 * Clear the cache.
 	 */
 	public clear (): void { this._Cache.clear(); STATS.resetCacheStats() }

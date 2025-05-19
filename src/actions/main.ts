@@ -228,20 +228,18 @@ export class MainActions implements BotActions
 				ctx.answerInlineQuery([])
 			}
 
-			// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Thinking… ⏳`).text("")])
 			const url: URL = new URL(ctx.match.toString())
 			const Converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 			if (Converter)
 			{
 				const queryResults: InlineQueryResultArticle[] = []
-
-				// ctx.answerInlineQuery([InlineQueryResultBuilder.article(BOT.Itself.botInfo.username, `Converting link… ⏳`).text("")])
-				for (const Destination of Converter.destinations)
+				const convertedLinks: URL[] = await Converter.parseLink(new URL(link))
+				for (const convertedLink of convertedLinks)
 				{
-					const convertedLink: URL = await Converter.parseLink(new URL(link), Destination)
-					queryResults.push(InlineQueryResultBuilder.article(convertedLink.toString(), `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔄️`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true } }))
-					// queryResults.push(InlineQueryResultBuilder.article(convertedLink.toString(), `Convert ${ converter.name } link silently with ${ convertedLink.hostname } 🔄️🔕`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true }, disable_notification: true }))
+					queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true } }))
+					// queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link silently with ${ convertedLink.hostname } 🔀🔕`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true }, disable_notification: true }))
 				}
+
 				await ctx.answerInlineQuery(queryResults)
 				STATS.countConversion(Converter, ConversionMethods.INLINE)
 			} else ctx.answerInlineQuery([])

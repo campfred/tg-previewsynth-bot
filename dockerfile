@@ -1,13 +1,12 @@
-FROM denoland/deno:alpine-2.3.3
+FROM debian:12.10-slim
+# Using Debian since the compiled binary uses the GNU dynamic linker
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
-USER deno
+# Use the mapped architecture to copy the correct binary
+COPY ["output/previewsynth-${TARGETOS}-${TARGETARCH}", "/app/previewsynth"]
+RUN chmod +x /app/previewsynth
 
-COPY ["deno.*", "./"]
-RUN deno task install
-
-COPY ["src", "./src"]
-RUN deno task cache
-
-CMD [ "task", "start"]
+ENTRYPOINT ["./previewsynth"]
