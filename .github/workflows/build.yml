@@ -7,15 +7,15 @@ permissions:
 
 on:
     push:
-        # branches:
-        #     - main
-        # tags:
-        #     - "*"
-        # paths:
-        #     - src/**
-        #     - "*.example"
-        #     - deno.*
-        #     - dockerfile
+        branches:
+            - main
+        tags:
+            - "*"
+        paths:
+            - src/**
+            - "*.example"
+            - deno.*
+            - dockerfile
 
 env:
     REGISTRY: ghcr.io
@@ -65,7 +65,7 @@ jobs:
 
     containerize:
         name: Build and publish container image
-        # if: ${{ github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' }}
+        if: ${{ github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' }}
         runs-on: ubuntu-latest
         needs: compile
 
