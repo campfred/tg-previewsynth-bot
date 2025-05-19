@@ -114,25 +114,57 @@ features: # Disable behaviour features here
 3. Run application
    1. Container
       1. Pull image
-         > `docker pull ghcr.io/campfred/tg-previewsynth-bot:main`
+
+         > ```shell
+         > docker pull ghcr.io/campfred/tg-previewsynth-bot:main
+         > ```
+
       2. Run image
-         > With env variable : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env PREVIEWSYNTH_TG_BOT_TOKEN=$PREVIEWSYNTH_TG_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main`
-         > With .env file : `docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env-file $PWD/.env ghcr.io/campfred/tg-previewsynth-bot:main`
+         > With env variable :
+         >
+         > ```shell
+         > docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env PREVIEWSYNTH_TG_BOT_TOKEN=$PREVIEWSYNTH_TG_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main
+         > ```
+         >
+         > With .env file :
+         >
+         > ```shell
+         > docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env-file $PWD/.env ghcr.io/campfred/tg-previewsynth-bot:main
+         > ```
+         >
          > > [!note]
          > > The suggested command mounts the configuration file as a read-only resource with option `--read-only`.
-         > > If you plan on using the `/save` command, you may want to leave that option (`--read-only`) out.
-   2. Local
-      1. Install dependancies
-         > `deno task install`
-      2. Run app
-         > `deno task start`
+         > > If you plan on using the `/save` command, you may want to leave the `--read-only` option out.
+   2. Binaries
+      1. Download [the latest binary executable release](https://github.com/campfred/tg-previewsynth-bot/releases/latest) corresponding to your platform
+      2. Run the binary executable release by double clicking or through CLI
+   3. Code base
+      1. Pull this repository and open a terminal in it
+      2. Move your configuration file at your position
+
+         > ```shell
+         > mv /path/config.yaml .
+         > ```
+
+      3. Install dependancies
+
+         > ```shell
+         > deno task cache
+         > ```
+
+      4. Run app
+
+         > ```shell
+         > deno task start
+         > ```
+
 4. Use it!
 
 ### Available environment variables
 
 | name                            | default         | description                                                   |
 | ------------------------------- | --------------- | ------------------------------------------------------------- |
-| `PREVIEWSYNTH_TG_BOT_TOKEN`     | `null`          | Telegram bot token from [@BotFather](https://BotFather.t.me). |
+| `PREVIEWSYNTH_TG_BOT_TOKEN`     | _(none)_        | Telegram bot token from [@BotFather](https://BotFather.t.me). |
 | `PREVIEWSYNTH_CONFIG_FILE_PATH` | `./config.yaml` | Path to the configuration file.                               |
 
 ## Upcoming improvements
@@ -143,5 +175,3 @@ features: # Disable behaviour features here
       - To expand the message with basic infos
   - Allow adding unsupported APIs to config
     > Probably through _config.yaml_.(apis.base_url+api_key+response_path)
-- Releases
-  - Add job to compile binary of the bot [with Deno compile](https://youtu.be/ZsDqTQs3_G0)
