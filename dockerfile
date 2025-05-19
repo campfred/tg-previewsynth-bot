@@ -1,12 +1,19 @@
 FROM debian:12.10-slim
-# Using Debian since the compiled binary uses the GNU dynamic linker (ld-linux-x86-64.so.2)
-ARG TARGETOS=linux
-ARG TARGETARCH=x86_64
-ARG EXECUTABLE_EXTENSION
+# Using Debian since the compiled binary uses the GNU dynamic linker
+
+ARG TARGETARCH
+
+# Map Docker's TARGETARCH to our binary naming scheme
+RUN case ${TARGETARCH} in \
+	"amd64") echo "x86_64" > /tmp/arch ;; \
+	"arm64") echo "aarch64" > /tmp/arch ;; \
+	*) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+	esac
 
 WORKDIR /app
 
-COPY ["output/previewsynth-${TARGETOS}-${TARGETARCH}${EXECUTABLE_EXTENSION}", "/app/previewsynth"]
+# Use the mapped architecture to copy the correct binary
+COPY ["output/previewsynth-linux-$(cat /tmp/arch)", "/app/previewsynth"]
 RUN chmod +x /app/previewsynth
 
 ENTRYPOINT ["./previewsynth"]
