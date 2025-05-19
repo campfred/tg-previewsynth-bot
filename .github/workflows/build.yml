@@ -1,4 +1,4 @@
-name: Build app
+name: Application build
 
 permissions:
     contents: read
