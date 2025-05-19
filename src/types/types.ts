@@ -73,8 +73,9 @@ export interface LinkConverter
 	enable (): void
 	isSourceSupported (link: URL): boolean
 	isDestinationSupported (link: URL): boolean
-	parseLink (link: URL, destination: URL): Promise<URL>
+	parseLink (link: URL): Promise<URL[]>
 	parseLinkDefault (link: URL): Promise<URL>
+	parseLinkViaDestination (link: URL, destination: URL): Promise<URL>
 }
 
 export interface BotActions

@@ -230,7 +230,41 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @returns Converted link.
 	 * @throws Error if the link is unsupported or conversion is not needed.
 	*/
-	public async parseLink (link: URL, destination: URL): Promise<URL>
+	public async parseLink (link: URL): Promise<URL[]>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
+
+		console.debug(`Parsing link ${ link }`)
+		if (this.isSourceSupported(link))
+		{
+			const originalLinkCleaned: URL = this.cleanLink(link)
+			const cachedLinksFromOriginal: Map<string, string> | undefined = CACHE.getAll(originalLinkCleaned)
+			if (cachedLinksFromOriginal && cachedLinksFromOriginal.size === this.destinations.length) return cachedLinksFromOriginal.values().toArray().map((link: string): URL => new URL(link))
+
+			const originalLinkExpanded: URL = this.cleanLink(await this.expandLink(originalLinkCleaned))
+			const cachedLinksFromExpanded: Map<string, string> | undefined = CACHE.getAll(originalLinkExpanded)
+			if (cachedLinksFromExpanded && cachedLinksFromExpanded.size === this.destinations.length) return cachedLinksFromExpanded.values().toArray().map((link: string): URL => new URL(link))
+
+			const convertedLinks: URL[] = []
+			for (const destination of this.destinations)
+			{
+				const convertedLink: URL = await this.convertLink(originalLinkExpanded, destination)
+				CACHE.add(originalLinkCleaned, convertedLink)
+				CACHE.add(originalLinkExpanded, convertedLink)
+				convertedLinks.push(convertedLink)
+			}
+			return convertedLinks
+		} else throw Error("Unsupported link")
+	}
+
+	/**
+	 * Parse a given link via a specific destination.
+	 * @param link Link to convert.
+	 * @param destination Destination URL to convert the link to.
+	 * @returns Converted link.
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	*/
+	public async parseLinkViaDestination (link: URL, destination: URL): Promise<URL>
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
 
@@ -260,23 +294,6 @@ export class SimpleLinkConverter implements LinkConverter
 	*/
 	public async parseLinkDefault (link: URL): Promise<URL>
 	{
-		if (!this.enabled) throw new Error("Converter is disabled.")
-
-		console.debug(`Parsing link ${ link }`)
-		if (this.isSourceSupported(link))
-		{
-			const originalLinkCleaned: URL = this.cleanLink(link)
-			const cachedLinkFromOriginal: string | undefined = CACHE.get(originalLinkCleaned, this.destinations[0])
-			if (cachedLinkFromOriginal) return new URL(cachedLinkFromOriginal)
-
-			const originalLinkExpanded: URL = this.cleanLink(await this.expandLink(originalLinkCleaned))
-			const cachedLinkFromExpanded: string | undefined = CACHE.get(originalLinkExpanded, this.destinations[0])
-			if (cachedLinkFromExpanded) return new URL(cachedLinkFromExpanded)
-
-			const convertedLink: URL = await this.convertLink(originalLinkExpanded, this.destinations[0])
-			CACHE.add(originalLinkCleaned, convertedLink)
-			CACHE.add(originalLinkExpanded, convertedLink)
-			return convertedLink
-		} else throw Error("Unsupported link")
+		return await this.parseLinkViaDestination(link, this.defaultDestination)
 	}
 }
