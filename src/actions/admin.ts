@@ -124,7 +124,7 @@ export class AdminActions implements BotActions
 				if (STATS.CacheHits > 0 || STATS.CacheMisses > 0) message += `\n${ Math.round(STATS.CacheHitRatio * 100) }% hit ratio`
 				message += "</blockquote>"
 
-				message += `\n\nBtw, I've been up for ${ STATS.UpTime.round({ largestUnit: "auto", smallestUnit: "seconds" }).toLocaleString("en") }! 🚀`
+				message += `\n\nBtw, I've been up for ${ STATS.UpTime.round({ largestUnit: "years", smallestUnit: "seconds" }).toLocaleString("en") }! 🚀`
 
 				ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 			}
