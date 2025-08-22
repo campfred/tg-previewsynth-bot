@@ -1,24 +1,24 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@std/assert@^1.0.13": "1.0.13",
-    "jsr:@std/dotenv@0.225.4": "0.225.4",
+    "jsr:@std/assert@^1.0.14": "1.0.14",
+    "jsr:@std/dotenv@0.225.5": "0.225.5",
     "jsr:@std/fmt@^1.0.5": "1.0.8",
-    "jsr:@std/fs@^1.0.11": "1.0.17",
-    "jsr:@std/internal@^1.0.6": "1.0.7",
+    "jsr:@std/fs@^1.0.11": "1.0.19",
+    "jsr:@std/internal@^1.0.10": "1.0.10",
     "jsr:@std/io@~0.225.2": "0.225.2",
     "jsr:@std/log@~0.224.14": "0.224.14",
-    "jsr:@std/yaml@1.0.6": "1.0.6"
+    "jsr:@std/yaml@1.0.9": "1.0.9"
   },
   "jsr": {
-    "@std/assert@1.0.13": {
-      "integrity": "ae0d31e41919b12c656c742b22522c32fb26ed0cba32975cb0de2a273cb68b29",
+    "@std/assert@1.0.14": {
+      "integrity": "68d0d4a43b365abc927f45a9b85c639ea18a9fab96ad92281e493e4ed84abaa4",
       "dependencies": [
         "jsr:@std/internal"
       ]
     },
-    "@std/dotenv@0.225.4": {
-      "integrity": "2a672c2b192abe535dcfea1ae89f219ee3979af6aad7d185cb19206ee9bc5caf"
+    "@std/dotenv@0.225.5": {
+      "integrity": "9ce6f9d0ec3311f74a32535aa1b8c62ed88b1ab91b7f0815797d77a6f60c922f"
     },
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
@@ -26,8 +26,11 @@
     "@std/fs@1.0.17": {
       "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b"
     },
-    "@std/internal@1.0.7": {
-      "integrity": "39eeb5265190a7bc5d5591c9ff019490bd1f2c3907c044a11b0d545796158a0f"
+    "@std/fs@1.0.19": {
+      "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06"
+    },
+    "@std/internal@1.0.10": {
+      "integrity": "e3be62ce42cab0e177c27698e5d9800122f67b766a0bea6ca4867886cbde8cf7"
     },
     "@std/io@0.225.2": {
       "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
@@ -40,8 +43,8 @@
         "jsr:@std/io"
       ]
     },
-    "@std/yaml@1.0.6": {
-      "integrity": "c9a5a914e1d51c46756cb10e356710035cfa905e713c90d3b711413fd3aead27"
+    "@std/yaml@1.0.9": {
+      "integrity": "6bad3dc766dd85b4b37eabcba81b6aa4eac7a392792ae29abcfb0f90602d55bb"
     }
   },
   "redirects": {
@@ -204,10 +207,10 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/assert@^1.0.13",
-      "jsr:@std/dotenv@0.225.4",
+      "jsr:@std/assert@^1.0.14",
+      "jsr:@std/dotenv@0.225.5",
       "jsr:@std/log@~0.224.14",
-      "jsr:@std/yaml@1.0.6"
+      "jsr:@std/yaml@1.0.9"
     ]
   }
 }
