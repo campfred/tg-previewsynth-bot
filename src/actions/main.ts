@@ -3,7 +3,7 @@ import { BotCommand } from "x/grammy_types/manage"
 import { InlineQueryResultArticle } from "x/grammy_types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter } from "../types/types.ts"
-import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString } from "../utils.ts"
+import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString, logErrorMessage } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { AdminCommands } from "./admin.ts"
 import { BotManager } from "../managers/bot.ts"
@@ -37,10 +37,28 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private")
 	{
-		await ctx.reply("Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>", {
-			parse_mode: "HTML",
-			reply_parameters: { message_id: ctx.msgId },
-		})
+		const response: string = "Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>"
+		try
+		{
+			await ctx.reply(response, {
+				parse_mode: "HTML",
+				reply_parameters: { message_id: ctx.msgId },
+			})
+		} catch (error)
+		{
+			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to reply to a message.`)
+			// console.error(error)
+			try
+			{
+				await ctx.reply(response, { parse_mode: "HTML" })
+			} catch (error)
+			{
+				logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
+				// console.error(`An error occurred when trying to reply to a message indirectly.`)
+				// console.error(error)
+			}
+		}
 		return
 	}
 
@@ -50,8 +68,9 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		new URL(ctx.match.toString())
 	} catch (error)
 	{
-		console.error(error)
-		console.error(`Received link is invalid (${ ctx.match }), silently aborting processing it.`)
+		logErrorMessage("receiving an invalid link", error, ctx, CONFIG, BOT)
+		// console.error(error)
+		// console.error(`Received link is invalid (${ ctx.match }), silently aborting processing it.`)
 		return
 	}
 
@@ -60,11 +79,48 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 	if (converter)
 	{
-		await ctx.react("🤔")
+		try
+		{
+			await ctx.react("🤔")
+		} catch (error)
+		{
+			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to react to a message.`)
+			// console.error(error)
+		}
 		console.debug(`${ converter?.name } will be used to convert requested link.`)
 		const linkConverted: URL = await converter.parseLinkDefault(new URL(ctx.match.toString()))
-		await ctx.react("👀")
-		await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
+		try
+		{
+			await ctx.react("👀")
+		} catch (error)
+		{
+			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to react to a message.`)
+			// console.error(error)
+		}
+		try
+		{
+			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
+		} catch (error)
+		{
+			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to reply to a message.`)
+			// console.error(error)
+			try
+			{
+				await ctx.reply("Oof… Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>", {
+					parse_mode: "HTML",
+					reply_parameters: { message_id: ctx.msgId },
+					link_preview_options: { is_disabled: true },
+				})
+			} catch (error)
+			{
+				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+				// console.error(`An error occurred when trying to react to a message.`)
+				// console.error(error)
+			}
+		}
 		STATS.countConversion(converter, method)
 		// else
 		// 	ctx.reply(
@@ -79,15 +135,31 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	} else if (ctx.chat.type === "private")
 	{
 		// Handle when link isn't known in map
-		await ctx.react("🗿")
-		await ctx.reply(
-			`Sorry, I don't have an equivalent for that website. 😥\n\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ ctx.config.codeRepoURL }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
-			{
-				parse_mode: "HTML",
-				reply_parameters: { message_id: ctx.msgId },
-				link_preview_options: { is_disabled: true },
-			},
-		)
+		try
+		{
+			await ctx.react("🗿")
+		} catch (error)
+		{
+			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to react to a message.`)
+			// console.error(error)
+		}
+		try
+		{
+			await ctx.reply(
+				`Sorry, I don't have an equivalent for that website. 😥\n\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ ctx.config.codeRepoURL }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
+				{
+					parse_mode: "HTML",
+					reply_parameters: { message_id: ctx.msgId },
+					link_preview_options: { is_disabled: true },
+				},
+			)
+		} catch (error)
+		{
+			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+			// console.error(`An error occurred when trying to reply to a message.`)
+			// console.error(error)
+		}
 	}
 }
 
@@ -125,7 +197,25 @@ export class MainActions implements BotActions
 			response += `\nUse the / ${ MainCommands.HELP } command!</blockquote>`
 			response += "\n"
 			response += `\nAnyway, I wish you a nice day! 🎶`
-			ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+			try
+			{
+				ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+			} catch (error)
+			{
+				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+				// console.error("An error occurred while trying to reply to a message.")
+				// console.error(error)
+				try
+				{
+					ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+				}
+				catch (error)
+				{
+					logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
+					// console.error("An error occurred while trying to reply to a message.")
+					// console.error(error)
+				}
+			}
 			STATS.countCommand(MainCommands.START)
 		})
 
@@ -173,7 +263,24 @@ export class MainActions implements BotActions
 			response += "\n"
 			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
 			response += `\nFeel free to suggest it as an issue <a href = "${ ctx.config.codeRepoURL }/issues/new">on GitHub</a>!</blockquote>`
-			await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+			try
+			{
+				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+			} catch (error)
+			{
+				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+				// console.error("An error occurred while trying to reply to a message.")
+				// console.error(error)
+				try
+				{
+					await ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+				} catch (error)
+				{
+					logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
+					// console.error("An error occurred while trying to reply to a message.")
+					// console.error(error)
+				}
+			}
 			STATS.countCommand(MainCommands.HELP)
 		})
 
