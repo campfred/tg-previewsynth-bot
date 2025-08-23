@@ -23,6 +23,11 @@ export function getExpeditorDebugString (ctx: CommandContext<CustomContext> | He
 	return `${ ctx.from?.first_name }${ ctx.config.isDeveloper ? " [Developer]" : "" } (@${ ctx.from?.username + " / " }${ ctx.from?.id })`
 }
 
+export function getChatDebugString (ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext> | CallbackQueryContext<CustomContext>): string
+{
+	return `${ ctx.chat?.title ? ctx.chat?.title : "private chat" }${ ctx.chat?.is_forum ? " [Forum]" : "" } (${ ctx.chat?.username ? `@${ ctx.chat?.username } / ` : "" }${ ctx.chat?.id })`
+}
+
 export function getQueryDebugString (ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext>): string | RegExpMatchArray
 {
 	return ctx.match.length < 1 ? "(nothing)" : ctx.match
@@ -30,10 +35,10 @@ export function getQueryDebugString (ctx: CommandContext<CustomContext> | HearsC
 
 export function logErrorMessage (eventDescription: string, error: unknown, ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext> | CallbackQueryContext<CustomContext>, botConfig: ConfigurationManager, BotManager: BotManager): void
 {
-	console.error(`An error occurred while ${ eventDescription } from ${ getExpeditorDebugString(ctx) }.`)
+	console.error(`An error occurred while ${ eventDescription } from ${ getExpeditorDebugString(ctx) } in ${ getChatDebugString(ctx) }.`)
 	console.error(error)
 	BotManager.Itself.api.sendMessage(
 		botConfig.StatusUpdatesChatID,
-		`An error occurred while ${ eventDescription } from ${ getExpeditorDebugString(ctx) }. 🫠\n\n<blockquote>\n${ String(error) }\n</blockquote>\n\nPlease check the logs for more details. 📜`,
+		`An error occurred while ${ eventDescription }. 🫠\n\n<blockquote>\n${ String(error) }\n</blockquote>\n\nPlease check the logs for more details. 📜`,
 		{ parse_mode: "HTML", ...botConfig.StatusUpdatesMessagesOptions })
 }
