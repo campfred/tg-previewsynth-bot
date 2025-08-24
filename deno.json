@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "install": "deno install --allow-import",
+    "install": "deno install --allow-import --allow-scripts",
     "update": "deno outdated --update --latest",
     "lint": "deno lint",
     "test": "deno test --allow-net --allow-import src/main_test.ts",
@@ -21,11 +21,11 @@
     "@std/log": "jsr:@std/log@^0.224.14",
     "@std/yaml": "jsr:@std/yaml@1.0.9",
     "x/sleep": "https://deno.land/x/sleep@v1.3.0/mod.ts",
-    "x/grammy": "https://deno.land/x/grammy@v1.36.1/mod.ts",
-    "x/grammy_types/manage": "https://deno.land/x/grammy_types@v3.20.0/manage.ts",
-    "x/grammy_types/message": "https://deno.land/x/grammy_types@v3.20.0/message.ts",
-    "x/grammy_types/context": "https://deno.land/x/grammy_types@v3.20.0/context.ts",
-    "x/grammy_types/inline": "https://deno.land/x/grammy_types@v3.20.0/inline.ts"
+    "x/grammy": "https://deno.land/x/grammy@v1.38.1/mod.ts",
+    "x/grammy_types/manage": "https://deno.land/x/grammy_types@v3.22.1/manage.ts",
+    "x/grammy_types/message": "https://deno.land/x/grammy_types@v3.22.1/message.ts",
+    "x/grammy_types/context": "https://deno.land/x/grammy_types@v3.22.1/context.ts",
+    "x/grammy_types/inline": "https://deno.land/x/grammy_types@v3.22.1/inline.ts"
   },
   "unstable": [
     "temporal"
