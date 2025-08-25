@@ -1,8 +1,12 @@
 import { Bot, GrammyError, HttpError, NextFunction } from "x/grammy"
-import { BotActions, CustomContext } from "../types/types.ts"
+import { BotActions, CustomContext, EnvironmentVariables } from "../types/types.ts"
 import { ConfigurationManager } from "./config.ts"
+import { getLogger, Logger } from "@logtape/logtape"
+import { LogCategories, setupLoggingWithTelegramMessages } from "./logging.ts"
+import { BusinessBotRights, ChatAdministratorRights } from "x/grammy_types/manage"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
+const LOGGER: Logger = getLogger(LogCategories.BOT)
 
 export class BotManager
 {
@@ -24,12 +28,15 @@ export class BotManager
 	 */
 	public async init (): Promise<void>
 	{
-		console.debug("Initializing bot…")
+		const logger: Logger = LOGGER.with({ action: "initializing" })
+
+		// console.debug("Initializing bot…")
+		logger.debug("Initializing bot… 🏁")
 		this._Bot = new Bot<CustomContext>( // https://grammy.dev/guide/context#transformative-context-flavors
-			Deno.env.get("PREVIEWSYNTH_TG_BOT_TOKEN")
-			|| Deno.env.get("previewsynth_tg_bot_token")
-			|| Deno.env.get("TG_PREVIEW_BOT_TOKEN")
-			|| Deno.env.get("tg_preview_bot_token")
+			Deno.env.get(EnvironmentVariables.BOT_TOKEN.toUpperCase())
+			|| Deno.env.get(EnvironmentVariables.BOT_TOKEN.toLowerCase())
+			|| Deno.env.get(EnvironmentVariables.BOT_TOKEN_OLD.toUpperCase())
+			|| Deno.env.get(EnvironmentVariables.BOT_TOKEN_OLD.toLowerCase())
 			|| ""
 		)
 
@@ -38,15 +45,17 @@ export class BotManager
 		this._Bot.catch((err): void =>
 		{
 			const ctx = err.ctx
-			let errorMessage: string = `Error while handling update ${ ctx.update.update_id } :\n`
+			const logger: Logger = LOGGER.with({ action: "handling an update" })
+			let errorMessage: string = `Error while {action} ${ ctx.update.update_id } :\n`
 			const error = err.error
 
 			if (error instanceof GrammyError) errorMessage += (`Grammy error in request : ${ error.description }`)
 			else if (error instanceof HttpError) errorMessage += (`Web error with Telegram's API : ${ error }`)
 			else errorMessage += (`Unknown error : ${ error }`)
 
-			console.error(errorMessage)
-			this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, errorMessage, CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
+			// console.error(errorMessage)
+			logger.error(errorMessage)
+			// this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, errorMessage, CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
 		})
 
 		this._Bot.use(function (ctx: CustomContext, next: NextFunction)
@@ -59,12 +68,25 @@ export class BotManager
 			next()
 		})
 
-		await this._Bot.api.sendMessage(
-			CONFIG.StatusUpdatesChatID,
-			`<b>Bot online! 🎉</b>\n${ CONFIG.getConvertersListForMessage() }\n${ CONFIG.getFeaturesListForMessage() }`,
-			{ parse_mode: "HTML", ...CONFIG.StatusUpdatesMessagesOptions }
-		)
-		console.info("Bot online!")
+		try
+		{
+			await this._Bot.api.sendMessage(
+				CONFIG.StatusUpdatesChatID,
+				`<b>Bot online! 🎉</b>\n${ CONFIG.getConvertersListForMessage() }\n${ CONFIG.getFeaturesListForMessage() }`,
+				{ parse_mode: "HTML", ...CONFIG.StatusUpdatesMessagesOptions }
+			)
+		} catch (error)
+		{
+			logger.error(String(error))
+			logger.error("Error while sending status update message. Make sure you added me there and that I am allowed to send messaged there. 🫠")
+			this._Bot.stop()
+			Deno.exit(1)
+		}
+		// console.info("Bot online!")
+		logger.info("Bot online! 👀")
+		await setupLoggingWithTelegramMessages(this, CONFIG)
+
+		// this._Bot.api.setMyDefaultAdministratorRights({ rights: { can_post_messages: true }, for_channels: true })
 	}
 
 	/**
@@ -73,8 +95,10 @@ export class BotManager
 	 */
 	loadActionsComposer (actionsComposer: BotActions): void
 	{
+		const logger: Logger = LOGGER.with({ action: "loading composer", name: actionsComposer.Name })
 		this._Bot.use(actionsComposer.Composer)
-		console.debug(`Loaded composer ${ actionsComposer.Name }!`)
+		// console.debug(`Loaded composer ${ actionsComposer.Name }!`)
+		logger.debug(`Loaded composer {name}! ✅`)
 	}
 
 	/**
@@ -82,8 +106,11 @@ export class BotManager
 	 */
 	notifyShutdownThenStop (reason: string): void
 	{
-		console.info(`Bot shutting down! (${ reason })`)
-		if (this._Bot.isInited()) this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, "Bot shutting down! 💤", CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
+		const logger = LOGGER.with({ action: "shutting down" })
+
+		// console.info(`Bot shutting down! (${ reason })`)
+		logger.info(`Bot shutting down! (${ reason })`)
+		if (this._Bot.isInited()) this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, "Bot shutting down!\nGood night! 💤", CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
 		if (this._Bot.isRunning()) this._Bot.stop()
 	}
 

@@ -1,6 +1,25 @@
 import { Composer, Context } from "x/grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
+export enum EnvironmentVariables
+{
+	NODE_ENV = "NODE_ENV",
+	BOT_TOKEN = "PREVIEWSYNTH_TG_BOT_TOKEN",
+	BOT_TOKEN_OLD = "TG_PREVIEW_BOT_TOKEN",
+	BOT_CONFIG_PATH = "PREVIEWSYNTH_CONFIG_FILE_PATH",
+	BOT_LOG_LEVEL = "PREVIEWSYNTH_LOG_LEVEL"
+}
+
+export enum LogLevels
+{
+	TRACE = "trace",
+	DEBUG = "debug",
+	INFO = "info",
+	WARNING = "warning",
+	ERROR = "error",
+	FATAL = "fatal"
+}
+
 export type LinkConfiguration = {
 	name: string
 	origins: string[]

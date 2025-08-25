@@ -1,6 +1,7 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@logtape/logtape@^1.1.0-dev.333+b25e634b": "1.1.0-dev.333+b25e634b",
     "jsr:@std/assert@^1.0.14": "1.0.14",
     "jsr:@std/dotenv@0.225.5": "0.225.5",
     "jsr:@std/fmt@^1.0.5": "1.0.8",
@@ -8,9 +9,13 @@
     "jsr:@std/internal@^1.0.10": "1.0.10",
     "jsr:@std/io@~0.225.2": "0.225.2",
     "jsr:@std/log@~0.224.14": "0.224.14",
+    "jsr:@std/path@1.0.9": "1.0.9",
     "jsr:@std/yaml@1.0.9": "1.0.9"
   },
   "jsr": {
+    "@logtape/logtape@1.1.0-dev.333+b25e634b": {
+      "integrity": "482814e7de5a3470cd614182681bc3e64435b56f424de34badee259503a40273"
+    },
     "@std/assert@1.0.14": {
       "integrity": "68d0d4a43b365abc927f45a9b85c639ea18a9fab96ad92281e493e4ed84abaa4",
       "dependencies": [
@@ -42,6 +47,9 @@
         "jsr:@std/fs",
         "jsr:@std/io"
       ]
+    },
+    "@std/path@1.0.9": {
+      "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
     },
     "@std/yaml@1.0.9": {
       "integrity": "6bad3dc766dd85b4b37eabcba81b6aa4eac7a392792ae29abcfb0f90602d55bb"
@@ -240,6 +248,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@logtape/logtape@^1.1.0-dev.333+b25e634b",
       "jsr:@std/assert@^1.0.14",
       "jsr:@std/dotenv@0.225.5",
       "jsr:@std/log@~0.224.14",

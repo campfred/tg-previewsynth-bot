@@ -1,11 +1,14 @@
 import "@std/dotenv/load"
 import { sleep } from "x/sleep"
+import { getLogger, Logger } from "@logtape/logtape"
 // import { AdminActions } from "./actions/admin.ts"
 import { ConfigurationManager } from "./managers/config.ts"
 // import { MAIN_COMMANDS_LIST, MainActions } from "./actions/main.ts"
 import { BotManager } from "./managers/bot.ts"
 import { AdminActions } from "./actions/admin.ts"
 import { MainActions, MainCommandsDetails } from "./actions/main.ts"
+import { EnvironmentVariables } from "./types/types.ts"
+import { LogCategories, setupLogging } from "./managers/logging.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const BOT: BotManager = BotManager.Instance
@@ -19,27 +22,29 @@ if (Deno.build.os != "windows")
 }
 
 
-// try
-// {
-// 	await CONFIG.loadConfig()
-// } catch (error)
-// {
-// 	console.error("Can't load configuration.", error)
-// 	Deno.exitCode = 1
-// 	Deno.exit()
-// }
+// Initialize bot configuration
+await setupLogging()
 await CONFIG.loadConfig()
+const LOGGER: Logger = getLogger(LogCategories.BOT)
 
-const waitTime: number = 3
-console.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
-for (let seconds = 1; seconds <= waitTime; seconds++)
+// Delay bot start when in development mode to prevent session conflicts
+if (Deno.env.get(EnvironmentVariables.NODE_ENV) === "development")
 {
-	console.debug(`${ seconds }…`)
-	await sleep(1)
+	const waitTime: number = 3
+	// console.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
+	LOGGER.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
+	for (let seconds = waitTime; seconds > 0; seconds--)
+	{
+		// console.debug(`${ seconds }…`)
+		LOGGER.debug(`${ seconds }…`)
+		await sleep(1)
+	}
 }
+
 await BOT.init()
 BOT.loadActionsComposer(new AdminActions())
 BOT.loadActionsComposer(new MainActions())
 BOT.Itself.api.setMyCommands(MainCommandsDetails)
 BOT.Itself.start()
-console.info("Bot started! Have fun! 🚀")
+// console.info("Bot started! Have fun! 🚀")
+LOGGER.info("Bot started! Have fun! 🚀")
