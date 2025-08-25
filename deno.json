@@ -3,7 +3,7 @@
     "install": "deno install --allow-import --allow-scripts",
     "update": "deno outdated --update --latest",
     "lint": "deno lint",
-    "test": "deno test --allow-net --allow-import src/main_test.ts",
+    "test": "deno test --allow-net --allow-env --allow-import src/main_test.ts",
     "cache": "deno cache --allow-import src/main.ts",
     "dev": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env --watch --inspect src/main.ts",
     "run": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
