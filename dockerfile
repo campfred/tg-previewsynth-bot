@@ -9,4 +9,6 @@ WORKDIR /app
 COPY ["output/previewsynth-${TARGETOS}-${TARGETARCH}", "/app/previewsynth"]
 RUN chmod +x /app/previewsynth
 
+ENV NODE_ENV=production
+
 ENTRYPOINT ["./previewsynth"]

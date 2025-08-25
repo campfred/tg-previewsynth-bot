@@ -1,16 +1,19 @@
-import { CommandContext, Composer, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "x/grammy"
+import { CommandContext, Composer, GrammyError, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "x/grammy"
 import { BotCommand } from "x/grammy_types/manage"
 import { InlineQueryResultArticle } from "x/grammy_types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
-import { BotActions, ConversionMethods, CustomContext, LinkConverter } from "../types/types.ts"
-import { findMatchingConverter, getExpeditorDebugString, getQueryDebugString, logErrorMessage } from "../utils.ts"
+import { BotActions, ConversionMethods, CustomContext, LinkConverter, LogLevels } from "../types/types.ts"
+import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { AdminCommands } from "./admin.ts"
 import { BotManager } from "../managers/bot.ts"
+import { getLogger, Logger } from "@logtape/logtape"
+import { COMMAND_LOG_STRING, LogCategories } from "../managers/logging.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const STATS: StatsManager = StatsManager.Instance
 const BOT: BotManager = BotManager.Instance
+const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.MAIN])
 
 export enum MainCommands
 {
@@ -34,6 +37,8 @@ export const MainCommandsDetails: BotCommand[] = [
  */
 async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods): Promise<void>
 {
+	const logger: Logger = getLogger([LogCategories.BOT, LogCategories.LINKS]).with({ action: "processing a conversion request via " + method, user: getExpeditorDebugString(ctx), chat: getChatDebugString(ctx), arg: ctx.match })
+
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private")
 	{
@@ -46,17 +51,12 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			})
 		} catch (error)
 		{
-			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
-			// console.error(`An error occurred when trying to reply to a message.`)
-			// console.error(error)
 			try
 			{
 				await ctx.reply(response, { parse_mode: "HTML" })
 			} catch (error)
 			{
-				logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
-				// console.error(`An error occurred when trying to reply to a message indirectly.`)
-				// console.error(error)
+				logReplyError(error, ctx)
 			}
 		}
 		return
@@ -68,7 +68,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		new URL(ctx.match.toString())
 	} catch (error)
 	{
-		logErrorMessage("receiving an invalid link", error, ctx, CONFIG, BOT)
+		logAction(LogLevels.ERROR, "receiving an invalid link", String(error), ctx)
 		// console.error(error)
 		// console.error(`Received link is invalid (${ ctx.match }), silently aborting processing it.`)
 		return
@@ -84,54 +84,36 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			await ctx.react("🤔")
 		} catch (error)
 		{
-			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
-			// console.error(`An error occurred when trying to react to a message.`)
-			// console.error(error)
+			logReactionError(error, ctx)
 		}
-		console.debug(`${ converter?.name } will be used to convert requested link.`)
+		// console.debug(`${ converter?.name } will be used to convert requested link.`)
+		logger.debug(`${ converter?.name } will be used to convert requested link.`)
 		const linkConverted: URL = await converter.parseLinkDefault(new URL(ctx.match.toString()))
 		try
 		{
 			await ctx.react("👀")
 		} catch (error)
 		{
-			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
-			// console.error(`An error occurred when trying to react to a message.`)
-			// console.error(error)
+			logReactionError(error, ctx)
 		}
 		try
 		{
 			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
 		} catch (error)
 		{
-			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
-			// console.error(`An error occurred when trying to reply to a message.`)
-			// console.error(error)
 			try
 			{
-				await ctx.reply("Oof… Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>", {
+				await ctx.reply("Oof… Looks like I'm having difficulty converting that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>", {
 					parse_mode: "HTML",
 					reply_parameters: { message_id: ctx.msgId },
 					link_preview_options: { is_disabled: true },
 				})
 			} catch (error)
 			{
-				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
-				// console.error(`An error occurred when trying to react to a message.`)
-				// console.error(error)
+				logReplyError(error, ctx)
 			}
 		}
 		STATS.countConversion(converter, method)
-		// else
-		// 	ctx.reply(
-		// 		`Oof… 'Looks like I can't convert that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href="${ ctx.config.codeRepoURL }/issues">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`,
-		// 		{
-		// 			parse_mode: "HTML",
-		// 			reply_parameters: { message_id: ctx.msgId },
-		// 			link_preview_options: { is_disabled: true },
-		// 		},
-		// 	)
-		// return
 	} else if (ctx.chat.type === "private")
 	{
 		// Handle when link isn't known in map
@@ -140,9 +122,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			await ctx.react("🗿")
 		} catch (error)
 		{
-			logErrorMessage("trying to react to a message", error, ctx, CONFIG, BOT)
-			// console.error(`An error occurred when trying to react to a message.`)
-			// console.error(error)
+			logReactionError(error, ctx)
 		}
 		try
 		{
@@ -156,7 +136,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			)
 		} catch (error)
 		{
-			logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+			logReplyError(error, ctx)
 			// console.error(`An error occurred when trying to reply to a message.`)
 			// console.error(error)
 		}
@@ -182,7 +162,10 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.START, function (ctx)
 		{
-			console.debug(`Incoming /${ MainCommands.START } by ${ getExpeditorDebugString(ctx) }`)
+			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
+			// console.debug(`Incoming /${ MainCommands.START } by ${ getExpeditorDebugString(ctx) }`)
+			loggerCommand.debug(COMMAND_LOG_STRING)
+
 			ctx.react("👀")
 			let response: string = `Hi! I'm <b>${ BOT.Itself.botInfo.first_name }</b>! 👋`
 			response += "\nA simple bot that serves the purpose of automatically embedding links!"
@@ -202,7 +185,7 @@ export class MainActions implements BotActions
 				ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			} catch (error)
 			{
-				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+				// logReplyError(error, ctx)
 				// console.error("An error occurred while trying to reply to a message.")
 				// console.error(error)
 				try
@@ -211,11 +194,12 @@ export class MainActions implements BotActions
 				}
 				catch (error)
 				{
-					logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
+					logReplyError(error, ctx)
 					// console.error("An error occurred while trying to reply to a message.")
 					// console.error(error)
 				}
 			}
+
 			STATS.countCommand(MainCommands.START)
 		})
 
@@ -224,9 +208,32 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, function (ctx)
 		{
-			console.debug(`Incoming /${ MainCommands.PING } by ${ getExpeditorDebugString(ctx) }`)
-			ctx.react("⚡")
-			ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
+			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
+			// console.debug(`Incoming /${ MainCommands.PING } by ${ getExpeditorDebugString(ctx) }`)
+			loggerCommand.debug(COMMAND_LOG_STRING)
+
+			try
+			{
+				ctx.react("⚡")
+			} catch (error)
+			{
+				logReactionError(error, ctx)
+			}
+
+			try
+			{
+				ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
+			} catch (error)
+			{
+				try
+				{
+					ctx.reply("Pong! 🏓")
+				} catch (error)
+				{
+					logReplyError(error, ctx)
+				}
+			}
+
 			STATS.countCommand(MainCommands.PING)
 		})
 
@@ -235,7 +242,10 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.HELP, async function (ctx)
 		{
-			console.debug(`Incoming /${ MainCommands.HELP } by ${ getExpeditorDebugString(ctx) }`)
+			const loggerCommand: Logger = getLoggerForCommand(MainCommands.HELP, ctx)
+			// console.debug(`Incoming /${ MainCommands.HELP } by ${ getExpeditorDebugString(ctx) }`)
+			loggerCommand.debug(COMMAND_LOG_STRING)
+
 			let response: string = "Oh! You see, I'm a simple Synth!"
 			if (CONFIG.Features.link_recognition)
 			{
@@ -268,7 +278,7 @@ export class MainActions implements BotActions
 				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			} catch (error)
 			{
-				logErrorMessage("trying to reply to a message", error, ctx, CONFIG, BOT)
+				// logReplyError(error, ctx)
 				// console.error("An error occurred while trying to reply to a message.")
 				// console.error(error)
 				try
@@ -276,7 +286,7 @@ export class MainActions implements BotActions
 					await ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 				} catch (error)
 				{
-					logErrorMessage("trying to reply to a message indirectly", error, ctx, CONFIG, BOT)
+					logReplyError(error, ctx)
 					// console.error("An error occurred while trying to reply to a message.")
 					// console.error(error)
 				}
@@ -289,7 +299,10 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.command([MainCommands.LINK_CONVERT, MainCommands.LINK_EMBED], async function (ctx)
 		{
-			console.debug(`Incoming /${ MainCommands.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			const loggerCommand: Logger = getLoggerForCommand(MainCommands.LINK_EMBED, ctx)
+			// console.debug(`Incoming /${ MainCommands.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			loggerCommand.debug(COMMAND_LOG_STRING)
+
 			await processConversionRequest(ctx, ConversionMethods.COMMAND)
 		})
 	}
@@ -299,29 +312,36 @@ export class MainActions implements BotActions
 	 */
 	private addProactiveFeatures (): void
 	{
-		if (!BOT.Itself.botInfo.can_join_groups) console.warn("Bot cannot join groups! Bot will be available only in private chats until allowed.")
-		else if (!BOT.Itself.botInfo.can_read_all_group_messages) console.warn("Bot cannot read group messages! Bot will not be able to convert links in groups until allowed.")
+		// if (!BOT.Itself.botInfo.can_join_groups) console.warn("Bot cannot join groups! Bot will be available only in private chats until allowed.")
+		// else if (!BOT.Itself.botInfo.can_read_all_group_messages) console.warn("Bot cannot read group messages! Bot will not be able to convert links in groups until allowed.")
+		if (!BOT.Itself.botInfo.can_join_groups) LOGGER.warn("Joining groups is disabled Telegram-side! I will be available only in private chats until allowed.")
+		else if (!BOT.Itself.botInfo.can_read_all_group_messages) LOGGER.warn("Reading group messages is disallowed Telegram-side! I will not be able to convert links in groups until allowed.")
 
 		/**
 		 * Detects and sends link replacements
 		 */
 		this.Composer.hears([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: HearsContext<CustomContext>): Promise<void>
 		{
-			console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			// console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			getLoggerForCommand("supported link", ctx).debug(COMMAND_LOG_STRING)
 			await processConversionRequest(ctx, ConversionMethods.CONVO)
 		})
 	}
 
 	private addInlineFeatures (): void
 	{
-		if (!BOT.Itself.botInfo.supports_inline_queries) console.warn("Bot does not support inline queries! Inline features will not be available until enabled.")
+		// if (!BOT.Itself.botInfo.supports_inline_queries) console.warn("Bot does not support inline queries! Inline features will not be available until enabled.")
+		if (!BOT.Itself.botInfo.supports_inline_queries) LOGGER.warn("Inline quieries are disabled Telegram-side! I will not be able to support inline queries until enabled.")
 
 		/**
 		 * Detects and suggests link replacements
 		 */
 		this.Composer.inlineQuery([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: InlineQueryContext<CustomContext>): Promise<void>
 		{
-			console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			const logger: Logger = getLoggerForCommand("inline query", ctx)
+			// console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			logger.debug(COMMAND_LOG_STRING)
+
 			const link: string = ctx.match.toString()
 
 			try
@@ -330,8 +350,10 @@ export class MainActions implements BotActions
 				new URL(ctx.match.toString())
 			} catch (error)
 			{
-				console.error(error)
-				console.error(`Received link is invalid (${ ctx.match }), silently aborting processing it.`)
+				// console.error(error)
+				// console.error(`Received link is invalid (${ ctx.match }), silently aborting processing it.`)
+				logger.error(String(error))
+				logger.error(`Received link { arg } is invalid, silently aborting processing it.`)
 				ctx.answerInlineQuery([])
 			}
 

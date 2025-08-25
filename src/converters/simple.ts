@@ -1,7 +1,10 @@
+import { getLogger, Logger } from "@logtape/logtape"
 import { CacheManager } from "../managers/cache.ts"
 import { ConversionTypes, LinkConverter } from "../types/types.ts"
+import { LogCategories } from "../managers/logging.ts"
 
 const CACHE: CacheManager = CacheManager.Instance
+const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.LINKS])
 
 export type SimpleLinkConverterSettings = { expand?: boolean; preserveQueryParamKeys?: string[] }
 
@@ -31,12 +34,16 @@ export class SimpleLinkConverter implements LinkConverter
 		this.originRegExps = originsRegExp
 		this.destinations = destinations
 		this.defaultDestination = destinations[0]
-		console.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
+		// console.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
+		LOGGER.debug(`\t➥ Created ${ this.name } ${ this.constructor.name }!`)
 		// console.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
+		// LOGGER.debug(`\t\t➥ ${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
 		this.expand = settings?.expand != undefined ? settings.expand : true
-		if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
+		// if (!this.expand) console.debug("\t➥ Link expansion is disabled.")
+		if (!this.expand) LOGGER.debug("\t➥ Link expansion is disabled.")
 		if (settings?.preserveQueryParamKeys) this.preserveQueryParamKeys = settings?.preserveQueryParamKeys
-		if (this.preserveQueryParamKeys.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveQueryParamKeys?.toString())
+		// if (this.preserveQueryParamKeys.length > 0) console.debug("\t➥ Preserving search parameters :", this.preserveQueryParamKeys?.toString())
+		if (this.preserveQueryParamKeys.length > 0) LOGGER.debug("\t➥ Preserving search parameters : " + this.preserveQueryParamKeys?.toString())
 	}
 
 	/**
@@ -91,19 +98,23 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		if (!this.enabled) return false // Gate in case it's disabled
 
-		console.debug(`Checking if link is supported by converter for ${ this.name }…`)
+		// console.debug(`Checking if link is supported by converter for ${ this.name }…`)
+		LOGGER.debug(`Checking if link is supported by converter for ${ this.name }…`)
 
 		const isAlreadyConverted: boolean = link.hostname === this.destinations[0].hostname
-		console.debug("\t➥ Link is already converted :", isAlreadyConverted)
+		// console.debug("\t➥ Link is already converted :", isAlreadyConverted)
+		LOGGER.debug("\t➥ Link is already converted : " + isAlreadyConverted)
 		if (isAlreadyConverted) { return true }
 
 
 		const hasMatchingOrigin: boolean = this.findMatchingOrigin(link) != undefined
-		console.debug("\t➥ Link matches one of the supported origin URLs :", hasMatchingOrigin)
+		// console.debug("\t➥ Link matches one of the supported origin URLs :", hasMatchingOrigin)
+		LOGGER.debug("\t➥ Link matches one of the supported origin URLs : " + hasMatchingOrigin)
 		if (hasMatchingOrigin) return true
 
 		const hasMatchingOriginRegExp: boolean = this.findMatchingOriginRegExp(link) != undefined
-		console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
+		// console.debug("\t➥ Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
+		LOGGER.debug("\t➥ Link matches one of the supported origin patterns : " + hasMatchingOriginRegExp)
 		if (hasMatchingOriginRegExp) return true
 
 		return false
@@ -118,10 +129,12 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		if (!this.enabled) return false // Gate in case it's disabled
 
-		console.debug(`Checking if destination is supported by converter for ${ this.name }…`)
+		// console.debug(`Checking if destination is supported by converter for ${ this.name }…`)
+		LOGGER.debug(`Checking if destination is supported by converter for ${ this.name }…`)
 
 		const hasMatchingDestination: boolean = this.destinations.some((destination: URL): boolean => destination.hostname.endsWith(link.hostname))
-		console.debug("\t➥ Link matches one of the supported destination URLs :", hasMatchingDestination)
+		// console.debug("\t➥ Link matches one of the supported destination URLs :", hasMatchingDestination)
+		LOGGER.debug("\t➥ Link matches one of the supported destination URLs : " + hasMatchingDestination)
 		return hasMatchingDestination
 	}
 
@@ -133,11 +146,13 @@ export class SimpleLinkConverter implements LinkConverter
 	public static filterOutSubdomains (link: URL): URL
 	{
 		// if (!this.enabled) throw new Error("Converter is disabled.");
-		console.debug(`Filtering out subdomains of link…\n\t${ link }`)
+		// console.debug(`Filtering out subdomains of link…\n\t${ link }`)
+		LOGGER.debug(`Filtering out subdomains of link…\n\t${ link }`)
 		const filteredUrl: URL = new URL(link)
 		const hostnameParts: string[] = filteredUrl.hostname.split(".")
 		filteredUrl.hostname = hostnameParts[hostnameParts.length - 2] + "." + hostnameParts[hostnameParts.length - 1]
-		console.debug(`\t➥ ${ filteredUrl }`)
+		// console.debug(`\t➥ ${ filteredUrl }`)
+		LOGGER.debug(`\t➥ ${ filteredUrl }`)
 		return filteredUrl
 	}
 
@@ -149,7 +164,8 @@ export class SimpleLinkConverter implements LinkConverter
 	public async expandLink (link: URL): Promise<URL>
 	{
 		if (!this.expand) return link
-		console.debug(`Expanding link …\n\t${ link }`)
+		// console.debug(`Expanding link …\n\t${ link }`)
+		LOGGER.debug(`Expanding link …\n\t${ link }`)
 		try
 		{
 			let response: Response = await fetch(link)
@@ -157,17 +173,22 @@ export class SimpleLinkConverter implements LinkConverter
 			response.body?.cancel()
 			while (response.redirected)
 			{
-				console.debug(`\t➥ ${ response.url }`)
+				// console.debug(`\t➥ ${ response.url }`)
+				LOGGER.debug(`\t➥ ${ response.url }`)
 				response = await fetch(newLink)
 				newLink = new URL(response.url)
 				response.body?.cancel()
 			}
-			console.debug(`\t➥ ${ newLink }`)
+			// console.debug(`\t➥ ${ newLink }`)
+			LOGGER.debug(`\t➥ ${ newLink }`)
 			return newLink
 		} catch (error)
 		{
-			console.error(error)
-			console.error("Error while expanding URL.")
+			LOGGER.error("Error while expanding URL.")
+			// console.error(error)
+			LOGGER.error(String(error))
+			// console.error("Error while expanding URL.")
+			LOGGER.error("Error while expanding URL.")
 			throw error
 		}
 	}
@@ -179,14 +200,16 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	public cleanLink (link: URL): URL
 	{
-		console.debug(`Cleaning link…\n\t${ link }`)
+		// console.debug(`Cleaning link…\n\t${ link }`)
+		LOGGER.debug(`Cleaning link…\n\t${ link }`)
 		const newLink = new URL(link.origin + link.pathname)
 		for (const searchParam of this.preserveQueryParamKeys)
 		{
 			const value: string | null = link.searchParams.get(searchParam)
 			if (value != null) newLink.searchParams.append(searchParam, value)
 		}
-		console.debug(`\t➥ ${ newLink }`)
+		// console.debug(`\t➥ ${ newLink }`)
+		LOGGER.debug(`\t➥ ${ newLink }`)
 		return newLink
 	}
 
@@ -197,7 +220,8 @@ export class SimpleLinkConverter implements LinkConverter
 	*/
 	public convertLink (link: URL, destination: URL): URL | Promise<URL>
 	{
-		console.debug(`Converting link…\n\t${ link }`)
+		// console.debug(`Converting link…\n\t${ link }`)
+		LOGGER.debug(`Converting link…\n\t${ link }`)
 
 		const matchingOrigin: URL | undefined = this.findMatchingOrigin(link)
 		if (matchingOrigin)
@@ -206,7 +230,8 @@ export class SimpleLinkConverter implements LinkConverter
 			newLink.protocol = destination.protocol
 			newLink.hostname = destination.hostname
 			newLink.port = destination.port
-			console.debug(`\t➥ ${ newLink }`)
+			// console.debug(`\t➥ ${ newLink }`)
+			LOGGER.debug(`\t➥ ${ newLink }`)
 
 			return newLink
 		}
@@ -215,7 +240,8 @@ export class SimpleLinkConverter implements LinkConverter
 		if (matchesOriginRegExp)
 		{
 			const newLink = new URL(link.toString().replace(matchesOriginRegExp, destination.toString())) // This is not working at the moment.
-			console.debug(`\t➥ ${ newLink }`)
+			// console.debug(`\t➥ ${ newLink }`)
+			LOGGER.debug(`\t➥ ${ newLink }`)
 
 			return newLink
 		}
@@ -234,7 +260,8 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
 
-		console.debug(`Parsing link ${ link }`)
+		// console.debug(`Parsing link ${ link }`)
+		LOGGER.debug(`Parsing link ${ link }`)
 		if (this.isSourceSupported(link))
 		{
 			const originalLinkCleaned: URL = this.cleanLink(link)
@@ -268,7 +295,8 @@ export class SimpleLinkConverter implements LinkConverter
 	{
 		if (!this.enabled) throw new Error("Converter is disabled.")
 
-		console.debug(`Parsing link ${ link }`)
+		// console.debug(`Parsing link ${ link }`)
+		LOGGER.debug(`Parsing link ${ link }`)
 		if (this.isSourceSupported(link))
 		{
 			const originalLinkCleaned: URL = this.cleanLink(link)

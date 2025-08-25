@@ -4,8 +4,11 @@ import { AboutConfiguration, APIConfiguration, APIsConfiguration, Configuration,
 import { SimpleLinkConverter } from "../converters/simple.ts"
 import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"
 import { OdesliOrigins } from "../types/odesli.ts"
+import { getLogger, Logger } from "@logtape/logtape"
+import { LogCategories } from "./logging.ts"
 
 const PATH_CONFIG_FILE: string = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
+const LOGGER: Logger = getLogger(LogCategories.BOT)
 
 /**
  * Manager that handles everything related to the configuration including loading and saving it.
@@ -81,7 +84,10 @@ export class ConfigurationManager
 	 */
 	private parseSimpleConvertersInConfig (links: LinkConfiguration[]): SimpleLinkConverter[]
 	{
-		console.debug("Loading links configuration…")
+		const logger: Logger = LOGGER.with({ action: "loading links configuration" })
+
+		// console.debug("Loading links configuration…")
+		logger.debug("Loading links configuration…")
 
 		const converters: SimpleLinkConverter[] = links.map(function (link: LinkConfiguration): SimpleLinkConverter
 		{
@@ -89,6 +95,7 @@ export class ConfigurationManager
 			if (!("origins" in link) && !("origins_regex" in link)) throw new Error("No origin set in link config")
 
 			// console.debug(`Creating ${ SimpleLinkConverter.name } config for ${ link.name } …`)
+			// LOGGER.debug(`Creating { SimpleLinkConverter.name } config for {name} …`)
 
 			const converter = new SimpleLinkConverter(
 				link.name.trim(),
@@ -102,7 +109,8 @@ export class ConfigurationManager
 			return converter
 		})
 
-		console.info(`\t➥ ${ converters.length } link converters`)
+		// console.info(`\t➥ ${ converters.length } link converters`)
+		logger.info(`\t➥ ${ converters.length } link converters`)
 		return converters
 	}
 
@@ -113,12 +121,16 @@ export class ConfigurationManager
 	 */
 	private parseAPIConvertersInConfig (apiConfigs: APIsConfiguration): APILinkConverter[]
 	{
+		const logger: Logger = LOGGER.with({ action: "loading apis configuration" })
+
 		const converters: APILinkConverter[] = []
-		console.debug("Loading APIs configuration…")
+		// console.debug("Loading APIs configuration…")
+		logger.debug("Loading APIs configuration…")
 
 		if ("odesli" in apiConfigs)
 		{
-			console.debug("\t➥ Odesli")
+			// console.debug("\t➥ Odesli")
+			logger.debug("\t➥ Odesli")
 			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
 
 			const converter = new OdesliMusicConverter(
@@ -132,7 +144,8 @@ export class ConfigurationManager
 		}
 
 
-		console.info(`\t➥ ${ converters.length } api converters`)
+		// console.info(`\t➥ ${ converters.length } api converters`)
+		logger.info(`\t➥ ${ converters.length } api converters`)
 		return converters
 	}
 
@@ -142,7 +155,8 @@ export class ConfigurationManager
 	 */
 	getAllLinksOriginsAsRegExps (): RegExp[]
 	{
-		console.debug("Generating regular expressions for supported origins…")
+		// console.debug("Generating regular expressions for supported origins…")
+		LOGGER.debug("Generating regular expressions for supported origins…")
 		// return config_manager.Simple_Converters.filter((map: SimpleLinkConverter): boolean => map.enabled) // Filter out maps that are not enabled
 		// const originsAsRegExps: RegExp[] = this.AllConverters.filter((converter: LinkConverter): boolean => converter.enabled) // Filter out maps that are disabled
 		const originsAsRegExps: RegExp[] = this.AllConverters.flatMap(
@@ -159,7 +173,8 @@ export class ConfigurationManager
 	 */
 	getAllLinksOriginRegExps (): RegExp[]
 	{
-		console.debug("Gathering all supported origin regular expressions…")
+		// console.debug("Gathering all supported origin regular expressions…")
+		LOGGER.debug("Gathering all supported origin regular expressions…")
 		const originRegExps: RegExp[] = this.AllConverters.flatMap((converter: LinkConverter): RegExp[] => converter.originRegExps)
 		return originRegExps
 	}
@@ -171,6 +186,7 @@ export class ConfigurationManager
 	private saveSimpleConvertersInConfig (): LinkConfiguration[]
 	{
 		// console.debug("Parsing simple link converters into configuration…")
+		// LOGGER.debug("Parsing simple link converters into configuration…")
 
 		const linkConfigs: LinkConfiguration[] = []
 		for (const converter of this._SimpleConverters)
@@ -185,7 +201,8 @@ export class ConfigurationManager
 			linkConfigs.push(config_link)
 		}
 
-		console.debug("Loaded links configuration!")
+		// console.debug("Loaded links configuration!")
+		LOGGER.debug("Loaded links configuration!")
 		return linkConfigs
 	}
 
@@ -195,7 +212,8 @@ export class ConfigurationManager
 	 */
 	private saveAPIConvertersInConfig (): APIsConfiguration
 	{
-		console.debug("Parsing api-based link converters into configuration…")
+		// console.debug("Parsing api-based link converters into configuration…")
+		LOGGER.debug("Parsing api-based link converters into configuration…")
 		const apiConfigs: APIsConfiguration = {}
 
 		for (const api of this._APIConverters)
@@ -207,7 +225,8 @@ export class ConfigurationManager
 			apiConfigs[api.name.toLowerCase()] = config
 		}
 
-		console.debug("Loaded APIs configuration!")
+		// console.debug("Loaded APIs configuration!")
+		LOGGER.debug("Loaded APIs configuration!")
 		return apiConfigs
 	}
 
@@ -225,8 +244,10 @@ export class ConfigurationManager
 	 */
 	printConvertersListInConsole (): void
 	{
-		console.debug("Links I recognize at the moment :")
-		for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
+		// console.debug("Links I recognize at the moment :")
+		LOGGER.debug("Links I recognize at the moment :")
+		// for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
+		for (const converter of this.AllConverters) LOGGER.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
 	}
 
 	/**
@@ -234,10 +255,11 @@ export class ConfigurationManager
 	 */
 	printFeaturesListInConsole (): void
 	{
-		console.debug("Features I enabled at the moment :")
-		console.debug(` -  Link recognition: ${ this.Features.link_recognition }`)
-		console.debug(` -  Inline queries: ${ this.Features.inline_queries }`)
-		console.debug(` -  Stats: ${ this.Features.stats }`)
+		// console.debug("Features I enabled at the moment :")
+		// console.debug(` -  Link recognition: ${ this.Features.link_recognition }`)
+		// console.debug(` -  Inline queries: ${ this.Features.inline_queries }`)
+		// console.debug(` -  Stats: ${ this.Features.stats }`)
+		LOGGER.debug(`Features I enabled at the moment :\n -  Link recognition: ${ this.Features.link_recognition }\n -  Inline queries: ${ this.Features.inline_queries }\n -  Stats: ${ this.Features.stats }`)
 	}
 
 	/**
@@ -271,30 +293,39 @@ export class ConfigurationManager
 	 */
 	async loadConfig (): Promise<void>
 	{
-		console.debug(`Loading configuration from file ${ PATH_CONFIG_FILE } on disk…`)
+		const logger: Logger = LOGGER.with({ action: "loading configuration", file: PATH_CONFIG_FILE })
+
+		// console.debug(`Loading configuration from file ${ PATH_CONFIG_FILE } on disk…`)
+		logger.debug(`Loading configuration from file { file } on disk…`)
 		try
 		{
 			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE)) as Configuration
 
 			this._SimpleConverters = this.parseSimpleConvertersInConfig(config.links)
-			console.info("Loaded simple link convertions configuration!")
+			// console.info("Loaded simple link convertions configuration!")
+			logger.info("Loaded simple link convertions configuration!")
 
 			this._APIConverters = this.parseAPIConvertersInConfig(config.apis)
-			console.info("Loaded api-based link convertions configuration!")
+			// console.info("Loaded api-based link convertions configuration!")
+			logger.info("Loaded api-based link convertions configuration!")
 
 			this._Features = config.features
-			console.info("Loaded features configuration!")
+			// console.info("Loaded features configuration!")
+			logger.info("Loaded features configuration!")
 
 			this._About = config.about
-			console.info("Loaded about configuration!")
+			// console.info("Loaded about configuration!")
+			logger.info("Loaded about configuration!")
 
 			this.printConvertersListInConsole()
 		} catch (error)
 		{
-			console.error(error)
-			console.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue? Maybe it wasn't mounted properly?")
+			logger.error("Error while {action}")
+			// console.error(error)
+			logger.error(String(error))
+			// console.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue? Maybe it wasn't mounted properly?")
+			logger.error("Could not load configuration file.\nDoes it exist? Maybe a permissions issue? Maybe it wasn't mounted properly?")
 			throw new Error("Can't read config")
-
 		}
 	}
 
@@ -303,21 +334,29 @@ export class ConfigurationManager
 	 */
 	async saveConfig (): Promise<void>
 	{
-		const config: Configuration = { links: this.saveSimpleConvertersInConfig(), apis: this.saveAPIConvertersInConfig(), features: this.Features, about: this.About }
-		console.debug("Generated configuration!")
-		console.debug(config)
+		const logger: Logger = LOGGER.with({ action: "saving configuration" })
 
-		console.debug("Writing configuration to disk…")
+		const config: Configuration = { links: this.saveSimpleConvertersInConfig(), apis: this.saveAPIConvertersInConfig(), features: this.Features, about: this.About }
+		// console.debug("Generated configuration!")
+		logger.debug("Generated configuration!")
+		// console.debug(config)
+		logger.debug(config)
+
+		// console.debug("Writing configuration to disk…")
+		logger.debug("Writing configuration to disk…")
 		try
 		{
 			await Deno.writeTextFile(PATH_CONFIG_FILE, this.getConfigurationJson())
-			console.info("Configuration saved!")
+			// console.info("Configuration saved!")
+			logger.info("Configuration saved!")
 		} catch (error)
 		{
-			console.error(error)
-			console.error("Could not save configuration data.\nCould there be a permissions issue?")
+			logger.error("Error while {action}")
+			// console.error(error)
+			logger.error(String(error))
+			// console.error("Could not save configuration data.\nCould there be a permissions issue?")
+			logger.error("Could not save configuration data.\nCould there be a permissions issue?")
 			throw new Error("Can't write config")
-
 		}
 	}
 }

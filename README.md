@@ -166,6 +166,7 @@ features: # Disable behaviour features here
 | ------------------------------- | --------------- | ------------------------------------------------------------- |
 | `PREVIEWSYNTH_TG_BOT_TOKEN`     | _(none)_        | Telegram bot token from [@BotFather](https://BotFather.t.me). |
 | `PREVIEWSYNTH_CONFIG_FILE_PATH` | `./config.yaml` | Path to the configuration file.                               |
+| `PREVIEWSYNTH_LOG_LEVEL`        | _(none)_        | Logging level to use for software logging.                    |
 
 ## Upcoming improvements
 
