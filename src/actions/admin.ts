@@ -41,6 +41,8 @@ export class AdminActions implements BotActions
 	 */
 	private toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
 	{
+		let reactionsAllowed: boolean = true
+		
 		if (ctx.config.isDeveloper)
 		{
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
@@ -55,6 +57,7 @@ export class AdminActions implements BotActions
 				// console.error("An error occurred while trying to react to a message.")
 				// console.error(error)
 				logReactionError(error, ctx)
+				reactionsAllowed = false
 			}
 			for (const map of CONFIG.SimpleConverters)
 				for (const origin of map.origins)
@@ -65,14 +68,17 @@ export class AdminActions implements BotActions
 							destination.hostname.trim().toLocaleLowerCase() === ctx.match.trim().toLocaleLowerCase()
 						)
 						{
-							try
+							if (reactionsAllowed)
 							{
-								ctx.react("🫡")
-							} catch (error)
-							{
-								// console.error("An error occurred while trying to react to a message.")
-								// console.error(error)
-								logReactionError(error, ctx)
+								try
+								{
+									ctx.react("🫡")
+								} catch (error)
+								{
+									// console.error("An error occurred while trying to react to a message.")
+									// console.error(error)
+									logReactionError(error, ctx)
+								}
 							}
 							map.enabled = state === undefined ? !map.enabled : state
 							// const inlineKeyboard: InlineKeyboard = new InlineKeyboard().text(map.enabled ? "Disable ❌" : "Enable ✅", `${map.enabled ? COMMANDS.MAP_DISABLE : COMMANDS.MAP_ENABLE} ${map.destination.hostname}`);
@@ -108,6 +114,8 @@ export class AdminActions implements BotActions
 
 		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, (ctx) =>
 		{
+			let reactionsAllowed: boolean = true
+			
 			if (ctx.config.isDeveloper)
 			{
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CACHE_CLEAR, ctx)
@@ -122,6 +130,7 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
+					reactionsAllowed = false
 				}
 				const cacheSize: number = CACHE.size
 				CACHE.clear()
@@ -139,6 +148,7 @@ export class AdminActions implements BotActions
 
 		this.Composer.command(AdminCommands.STATS, (ctx) =>
 		{
+			let reactionsAllowed: boolean = true
 
 			if (ctx.config.isDeveloper)
 			{
@@ -154,6 +164,7 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
+					reactionsAllowed = false
 				}
 
 				let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }`
@@ -207,6 +218,8 @@ export class AdminActions implements BotActions
 	{
 		this.Composer.chatType("private").command(AdminCommands.CONFIG_SAVE, async function (ctx)
 		{
+			let reactionsAllowed: boolean = true
+			
 			if (ctx.config.isDeveloper)
 			{
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_SAVE, ctx)
@@ -221,18 +234,22 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
+					reactionsAllowed = false
 				}
 				try
 				{
 					await CONFIG.saveConfig()
-					try
+					if (reactionsAllowed)
 					{
-						ctx.react("🎉")
-					} catch (error)
-					{
-						// console.error("An error occurred while trying to react to a message.")
-						// console.error(error)
-						logReactionError(error, ctx)
+						try
+						{
+							ctx.react("🎉")
+						} catch (error)
+						{
+							// console.error("An error occurred while trying to react to a message.")
+							// console.error(error)
+							logReactionError(error, ctx)
+						}
 					}
 					try
 					{
@@ -248,14 +265,18 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to save the configuration.")
 					// console.error(error)
 					logAction(LogLevels.ERROR, "trying to save the configuration", String(error), ctx)
-					try
+					if (reactionsAllowed)
 					{
-						ctx.react("💔")
-					} catch (error)
-					{
-						// console.error("An error occurred while trying to react to a message.")
-						// console.error(error)
-						logReactionError(error, ctx)
+						try
+						{
+							ctx.react("💔")
+						} catch (error)
+						{
+							// console.error("An error occurred while trying to react to a message.")
+							// console.error(error)
+							logReactionError(error, ctx)
+							reactionsAllowed = false
+						}
 					}
 					try
 					{
@@ -272,6 +293,8 @@ export class AdminActions implements BotActions
 
 		this.Composer.chatType("private").command(AdminCommands.CONFIG_RELOAD, async function (ctx)
 		{
+			let reactionsAllowed: boolean = true
+			
 			if (ctx.config.isDeveloper)
 			{
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_RELOAD, ctx)
@@ -286,18 +309,23 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
+					reactionsAllowed = false
 				}
 				try
 				{
 					await CONFIG.loadConfig()
-					try
+					if (reactionsAllowed)
 					{
-						ctx.react("🎉")
-					} catch (error)
-					{
-						// console.error("An error occurred while trying to react to a message.")
-						// console.error(error)
-						logReactionError(error, ctx)
+						try
+						{
+							ctx.react("🎉")
+						} catch (error)
+						{
+							// console.error("An error occurred while trying to react to a message.")
+							// console.error(error)
+							logReactionError(error, ctx)
+							reactionsAllowed = false
+						}
 					}
 					try
 					{
@@ -313,14 +341,18 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to load the configuration.")
 					// console.error(error)
 					logAction(LogLevels.ERROR, "trying to load the configuration", String(error), ctx)
-					try
+					if (reactionsAllowed)
 					{
-						ctx.react("💔")
-					} catch (error)
-					{
-						// console.error("An error occurred while trying to react to a message.")
-						// console.error(error)
-						logReactionError(error, ctx)
+						try
+						{
+							ctx.react("💔")
+						} catch (error)
+						{
+							// console.error("An error occurred while trying to react to a message.")
+							// console.error(error)
+							logReactionError(error, ctx)
+							reactionsAllowed = false
+						}
 					}
 					try
 					{

@@ -103,7 +103,7 @@ export function getLoggerForCommand (command: string, ctx: CommandContext<Custom
  */
 export function logReactionError (error: unknown, ctx: CommandContext<CustomContext> | HearsContext<CustomContext> | InlineQueryContext<CustomContext> | CallbackQueryContext<CustomContext>): void
 {
-	logAction(LogLevels.ERROR, "trying to react to a message", String(error), ctx)
+	logAction(LogLevels.WARNING, "trying to react to a message", String(error), ctx)
 	LOGGER.debug("Silently abandonning reacting but continuing processing…")
 	// console.error("An error occurred while trying to react to a message.")
 	// console.error(error)
