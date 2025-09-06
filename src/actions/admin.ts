@@ -39,7 +39,7 @@ export class AdminActions implements BotActions
 	 * @param ctx Context of the action
 	 * @param state Desired state of the web link map
 	 */
-	private toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
+	private async toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
 	{
 		if (ctx.config.isDeveloper)
 		{
@@ -50,7 +50,7 @@ export class AdminActions implements BotActions
 
 			try
 			{
-				ctx.react("🤔")
+				await ctx.react("🤔")
 			} catch (error)
 			{
 				// console.error("An error occurred while trying to react to a message.")
@@ -71,7 +71,7 @@ export class AdminActions implements BotActions
 							{
 								try
 								{
-									ctx.react("🫡")
+									await ctx.react("🫡")
 								} catch (error)
 								{
 									// console.error("An error occurred while trying to react to a message.")
@@ -112,7 +112,7 @@ export class AdminActions implements BotActions
 	private addDataCommands (): void
 	{
 
-		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, (ctx) =>
+		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, async function (ctx)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -123,7 +123,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("🔥")
+					await ctx.react("🔥")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -145,7 +145,7 @@ export class AdminActions implements BotActions
 			}
 		})
 
-		this.Composer.command(AdminCommands.STATS, (ctx) =>
+		this.Composer.command(AdminCommands.STATS, async function (ctx)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -156,7 +156,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("🤓")
+					await ctx.react("🤓")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -225,7 +225,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("⚡")
+					await ctx.react("⚡")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -240,7 +240,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("🎉")
+							await ctx.react("🎉")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -267,7 +267,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("💔")
+							await ctx.react("💔")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -300,7 +300,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("⚡")
+					await ctx.react("⚡")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -315,7 +315,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("🎉")
+							await ctx.react("🎉")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -342,7 +342,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("💔")
+							await ctx.react("💔")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")

@@ -83,7 +83,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("🤔")
+				await ctx.react("🤔")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -97,7 +97,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -129,7 +129,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("🗿")
+				await ctx.react("🗿")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -172,7 +172,7 @@ export class MainActions implements BotActions
 		/**
 		 * Start command
 		 */
-		this.Composer.chatType("private").command(MainCommands.START, function (ctx)
+		this.Composer.chatType("private").command(MainCommands.START, async function (ctx)
 		{
 			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
@@ -181,7 +181,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -226,7 +226,7 @@ export class MainActions implements BotActions
 		/**
 		 * Healthcheck ping command
 		 */
-		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, async function (ctx)
 		{
 			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
@@ -235,7 +235,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("⚡")
+				await ctx.react("⚡")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -271,7 +271,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
