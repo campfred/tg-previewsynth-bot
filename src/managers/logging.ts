@@ -70,10 +70,10 @@ export async function setupLoggingWithTelegramMessages (bot: BotManager, config:
 		loggers: [
 			...InitialConfig.loggers,
 			{ category: [LogCategories.BOT, LogCategories.CACHE], lowestLevel: LogLevels.DEBUG, sinks: ["console"], filters: ["minimumLevel"] },
-			{ category: [LogCategories.BOT, LogCategories.ADMIN], lowestLevel: LogLevels.WARNING, sinks: ["telegram"] },
-			{ category: [LogCategories.BOT, LogCategories.LINKS], lowestLevel: LogLevels.WARNING, sinks: ["telegram"] },
-			{ category: [LogCategories.BOT, LogCategories.APIS], lowestLevel: LogLevels.WARNING, sinks: ["telegram"] },
-			{ category: [LogCategories.BOT, LogCategories.ACTIONS], lowestLevel: LogLevels.ERROR, sinks: ["telegram"] },
+			{ category: [LogCategories.BOT, LogCategories.ADMIN], lowestLevel: LogLevels.WARNING, sinks: ["telegram"], filters: ["minimumLevel"] },
+			{ category: [LogCategories.BOT, LogCategories.LINKS], lowestLevel: LogLevels.WARNING, sinks: ["telegram"], filters: ["minimumLevel"] },
+			{ category: [LogCategories.BOT, LogCategories.APIS], lowestLevel: LogLevels.WARNING, sinks: ["telegram"], filters: ["minimumLevel"] },
+			{ category: [LogCategories.BOT, LogCategories.ACTIONS], lowestLevel: LogLevels.ERROR, sinks: ["telegram"], filters: ["minimumLevel"] },
 		]
 	})
 }

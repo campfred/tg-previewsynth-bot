@@ -56,12 +56,12 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 			{
 				// console.debug(`Sending request to API…`)
 				LOGGER.debug(`Sending request to API…`)
-				// console.debug(`\t➥ GET ${ requestURL }`)
-				LOGGER.debug(`\t➥ GET ${ requestURL }`)
+				// console.debug(`GET ${ requestURL }`)
+				LOGGER.debug(`GET ${ requestURL }`)
 				const response: OdesliResponse = await (await fetch(requestURL.toString())).json()
 				const newLink: URL = new URL(response.pageUrl)
-				// console.debug(`\t\t➥ ${ newLink }`)
-				LOGGER.debug(`\t\t➥ ${ newLink }`)
+				// console.debug(`\t${ newLink }`)
+				LOGGER.debug(`\t${ newLink }`)
 				CACHE.add(originalLinkCleaned, newLink)
 				return newLink
 			} catch (error)

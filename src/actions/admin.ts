@@ -41,10 +41,9 @@ export class AdminActions implements BotActions
 	 */
 	private toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
 	{
-		let reactionsAllowed: boolean = true
-		
 		if (ctx.config.isDeveloper)
 		{
+			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
 			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -78,6 +77,7 @@ export class AdminActions implements BotActions
 									// console.error("An error occurred while trying to react to a message.")
 									// console.error(error)
 									logReactionError(error, ctx)
+									reactionsAllowed = false
 								}
 							}
 							map.enabled = state === undefined ? !map.enabled : state
@@ -114,10 +114,9 @@ export class AdminActions implements BotActions
 
 		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, (ctx) =>
 		{
-			let reactionsAllowed: boolean = true
-			
 			if (ctx.config.isDeveloper)
 			{
+				// let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CACHE_CLEAR, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -130,7 +129,7 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
-					reactionsAllowed = false
+					// reactionsAllowed = false
 				}
 				const cacheSize: number = CACHE.size
 				CACHE.clear()
@@ -148,10 +147,9 @@ export class AdminActions implements BotActions
 
 		this.Composer.command(AdminCommands.STATS, (ctx) =>
 		{
-			let reactionsAllowed: boolean = true
-
 			if (ctx.config.isDeveloper)
 			{
+				// let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.STATS, ctx)
 				// console.debug(`Incoming /${ AdminCommands.STATS } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -164,7 +162,7 @@ export class AdminActions implements BotActions
 					// console.error("An error occurred while trying to react to a message.")
 					// console.error(error)
 					logReactionError(error, ctx)
-					reactionsAllowed = false
+					// reactionsAllowed = false
 				}
 
 				let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }`
@@ -218,10 +216,9 @@ export class AdminActions implements BotActions
 	{
 		this.Composer.chatType("private").command(AdminCommands.CONFIG_SAVE, async function (ctx)
 		{
-			let reactionsAllowed: boolean = true
-			
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_SAVE, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CONFIG_SAVE } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -249,6 +246,7 @@ export class AdminActions implements BotActions
 							// console.error("An error occurred while trying to react to a message.")
 							// console.error(error)
 							logReactionError(error, ctx)
+							reactionsAllowed = false
 						}
 					}
 					try
@@ -293,10 +291,9 @@ export class AdminActions implements BotActions
 
 		this.Composer.chatType("private").command(AdminCommands.CONFIG_RELOAD, async function (ctx)
 		{
-			let reactionsAllowed: boolean = true
-			
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_RELOAD, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)

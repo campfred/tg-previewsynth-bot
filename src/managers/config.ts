@@ -109,8 +109,8 @@ export class ConfigurationManager
 			return converter
 		})
 
-		// console.info(`\t➥ ${ converters.length } link converters`)
-		logger.info(`\t➥ ${ converters.length } link converters`)
+		// console.info(`${ converters.length } link converters`)
+		logger.info(`${ converters.length } link converters`)
 		return converters
 	}
 
@@ -129,8 +129,8 @@ export class ConfigurationManager
 
 		if ("odesli" in apiConfigs)
 		{
-			// console.debug("\t➥ Odesli")
-			logger.debug("\t➥ Odesli")
+			// console.debug("Odesli")
+			logger.debug("Odesli")
 			const odesliConfig: APIConfiguration = apiConfigs["odesli"]
 
 			const converter = new OdesliMusicConverter(
@@ -144,8 +144,8 @@ export class ConfigurationManager
 		}
 
 
-		// console.info(`\t➥ ${ converters.length } api converters`)
-		logger.info(`\t➥ ${ converters.length } api converters`)
+		// console.info(`${ converters.length } api converters`)
+		logger.info(`${ converters.length } api converters`)
 		return converters
 	}
 
