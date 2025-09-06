@@ -12,10 +12,10 @@ export function findMatchingConverter (url: URL, converters: LinkConverter[]): L
 	for (const converter of converters)
 		if (converter.isSourceSupported(url))
 		{
-			LOGGER.debug(`\t➥ Found ${ converter.name }!`)
+			LOGGER.debug(`Found ${ converter.name }!`)
 			return converter
 		}
-	LOGGER.debug(`\t➥ Didn't find a matching link converter. :(`)
+	LOGGER.debug(`Didn't find a matching link converter. :(`)
 
 	return undefined
 }
