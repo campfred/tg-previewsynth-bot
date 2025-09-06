@@ -12,3 +12,7 @@ RUN chmod +x /app/previewsynth
 ENV NODE_ENV=production
 
 ENTRYPOINT ["./previewsynth"]
+
+LABEL org.opencontainers.image.source="https://github.com/campfred/tg-previewsynth-bot"
+LABEL org.opencontainers.image.description="Telegram bot to automatically convert links into embed-friendly ones for Telegram. ✨"
+LABEL org.opencontainers.image.license="GPL-3.0"
