@@ -3,7 +3,6 @@ import { BotActions, CustomContext, EnvironmentVariables } from "../types/types.
 import { ConfigurationManager } from "./config.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 import { LogCategories, setupLoggingWithTelegramMessages } from "./logging.ts"
-import { BusinessBotRights, ChatAdministratorRights } from "x/grammy_types/manage"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const LOGGER: Logger = getLogger(LogCategories.BOT)

@@ -1,4 +1,4 @@
-import { CommandContext, Composer, GrammyError, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "x/grammy"
+import { CommandContext, Composer, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "x/grammy"
 import { BotCommand } from "x/grammy_types/manage"
 import { InlineQueryResultArticle } from "x/grammy_types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
@@ -38,8 +38,7 @@ export const MainCommandsDetails: BotCommand[] = [
 async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods, reactionsAllowed: boolean): Promise<void>
 {
 	const logger: Logger = getLogger([LogCategories.BOT, LogCategories.LINKS]).with({ action: "processing a conversion request via " + method, user: getExpeditorDebugString(ctx), chat: getChatDebugString(ctx), arg: ctx.match })
-	let reactingWorks: boolean = true
-	
+
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private")
 	{
@@ -80,7 +79,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 	if (converter)
 	{
-		if (reactingWorks)
+		if (reactionsAllowed)
 		{
 			try
 			{
@@ -88,13 +87,13 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactingWorks = false
+				reactionsAllowed = false
 			}
 		}
 		// console.debug(`${ converter?.name } will be used to convert requested link.`)
 		logger.debug(`${ converter?.name } will be used to convert requested link.`)
 		const linkConverted: URL = await converter.parseLinkDefault(new URL(ctx.match.toString()))
-		if (reactingWorks)
+		if (reactionsAllowed)
 		{
 			try
 			{
@@ -102,7 +101,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactingWorks = false
+				reactionsAllowed = false
 			}
 		}
 		try
@@ -126,7 +125,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	} else if (ctx.chat.type === "private")
 	{
 		// Handle when link isn't known in map
-		if (reactingWorks)
+		if (reactionsAllowed)
 		{
 			try
 			{
@@ -134,7 +133,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactingWorks = false
+				reactionsAllowed = false
 			}
 		}
 		try
@@ -175,7 +174,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.START, function (ctx)
 		{
-			let reactionsAllowed: boolean = true
+			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
 			// console.debug(`Incoming /${ MainCommands.START } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -186,7 +185,7 @@ export class MainActions implements BotActions
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactionsAllowed = false
+				// reactionsAllowed = false
 			}
 			let response: string = `Hi! I'm <b>${ BOT.Itself.botInfo.first_name }</b>! 👋`
 			response += "\nA simple bot that serves the purpose of automatically embedding links!"
@@ -229,7 +228,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, function (ctx)
 		{
-			let reactionsAllowed: boolean = true
+			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
 			// console.debug(`Incoming /${ MainCommands.PING } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -240,7 +239,7 @@ export class MainActions implements BotActions
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactionsAllowed = false
+				// reactionsAllowed = false
 			}
 
 			try
@@ -265,7 +264,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.HELP, async function (ctx)
 		{
-			let reactionsAllowed: boolean = false
+			// let reactionsAllowed: boolean = false
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.HELP, ctx)
 			// console.debug(`Incoming /${ MainCommands.HELP } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -276,6 +275,7 @@ export class MainActions implements BotActions
 			} catch (error)
 			{
 				logReactionError(error, ctx)
+				// reactionsAllowed = false
 			}
 			let response: string = "Oh! You see, I'm a simple Synth!"
 			if (CONFIG.Features.link_recognition)
