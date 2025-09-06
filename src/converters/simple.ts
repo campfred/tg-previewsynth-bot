@@ -36,14 +36,14 @@ export class SimpleLinkConverter implements LinkConverter
 		this.defaultDestination = destinations[0]
 		// console.debug(`${ this.name } ${ this.constructor.name } created!`)
 		LOGGER.debug(`${ this.name } ${ this.constructor.name } created!`)
-		// console.debug(`\t${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
-		// LOGGER.debug(`\t${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
+		// console.debug(`\t${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
+		// LOGGER.debug(`\t${ this.origins.map((origin: URL): string => origin.hostname) } → ${ this.destinations[0].hostname }`)
 		this.expand = settings?.expand != undefined ? settings.expand : true
 		// if (!this.expand) console.debug("Link expansion is disabled.")
 		if (!this.expand) LOGGER.debug("Link expansion is disabled.")
 		if (settings?.preserveQueryParamKeys) this.preserveQueryParamKeys = settings?.preserveQueryParamKeys
-		// if (this.preserveQueryParamKeys.length > 0) console.debug("Preserving search parameters :", this.preserveQueryParamKeys?.toString())
-		if (this.preserveQueryParamKeys.length > 0) LOGGER.debug("Preserving search parameters : " + this.preserveQueryParamKeys?.toString())
+		// if (this.preserveQueryParamKeys.length > 0) console.debug("Preserving search parameters :", this.preserveQueryParamKeys?.toString())
+		if (this.preserveQueryParamKeys.length > 0) LOGGER.debug("Preserving search parameters : " + this.preserveQueryParamKeys?.toString())
 	}
 
 	/**
@@ -102,19 +102,19 @@ export class SimpleLinkConverter implements LinkConverter
 		LOGGER.debug(`Checking if link is supported by converter for ${ this.name }…`)
 
 		const isAlreadyConverted: boolean = link.hostname === this.destinations[0].hostname
-		// console.debug("Link is already converted :", isAlreadyConverted)
-		LOGGER.debug("Link is already converted : " + isAlreadyConverted)
+		// console.debug("Link is already converted :", isAlreadyConverted)
+		LOGGER.debug("Link is already converted : " + isAlreadyConverted)
 		if (isAlreadyConverted) { return true }
 
 
 		const hasMatchingOrigin: boolean = this.findMatchingOrigin(link) != undefined
-		// console.debug("Link matches one of the supported origin URLs :", hasMatchingOrigin)
-		LOGGER.debug("Link matches one of the supported origin URLs : " + hasMatchingOrigin)
+		// console.debug("Link matches one of the supported origin URLs :", hasMatchingOrigin)
+		LOGGER.debug("Link matches one of the supported origin URLs : " + hasMatchingOrigin)
 		if (hasMatchingOrigin) return true
 
 		const hasMatchingOriginRegExp: boolean = this.findMatchingOriginRegExp(link) != undefined
-		// console.debug("Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
-		LOGGER.debug("Link matches one of the supported origin patterns : " + hasMatchingOriginRegExp)
+		// console.debug("Link matches one of the supported origin patterns :", hasMatchingOriginRegExp)
+		LOGGER.debug("Link matches one of the supported origin patterns : " + hasMatchingOriginRegExp)
 		if (hasMatchingOriginRegExp) return true
 
 		return false
@@ -133,8 +133,8 @@ export class SimpleLinkConverter implements LinkConverter
 		LOGGER.debug(`Checking if destination is supported by converter for ${ this.name }…`)
 
 		const hasMatchingDestination: boolean = this.destinations.some((destination: URL): boolean => destination.hostname.endsWith(link.hostname))
-		// console.debug("Link matches one of the supported destination URLs :", hasMatchingDestination)
-		LOGGER.debug("Link matches one of the supported destination URLs : " + hasMatchingDestination)
+		// console.debug("Link matches one of the supported destination URLs :", hasMatchingDestination)
+		LOGGER.debug("Link matches one of the supported destination URLs : " + hasMatchingDestination)
 		return hasMatchingDestination
 	}
 
@@ -164,8 +164,8 @@ export class SimpleLinkConverter implements LinkConverter
 	public async expandLink (link: URL): Promise<URL>
 	{
 		if (!this.expand) return link
-		// console.debug(`Expanding link …\n\t${ link }`)
-		LOGGER.debug(`Expanding link …\n\t${ link }`)
+		// console.debug(`Expanding link …\n\t${ link }`)
+		LOGGER.debug(`Expanding link …\n\t${ link }`)
 		try
 		{
 			let response: Response = await fetch(link)

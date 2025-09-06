@@ -39,13 +39,13 @@ export class AdminActions implements BotActions
 	 * @param ctx Context of the action
 	 * @param state Desired state of the web link map
 	 */
-	private async toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
+	private async toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): Promise<void>
 	{
 		if (ctx.config.isDeveloper)
 		{
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
-			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
+			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for "${ ctx.match }"`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
 			try
@@ -167,27 +167,27 @@ export class AdminActions implements BotActions
 
 				let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }`
 
-				message += "\n\n<blockquote><b>⌨️ Command usage</b>"
+				message += "\n\n<blockquote><b>⌨️ Command usage</b>"
 				if (STATS.CommandsUsage.size === 0) message += "\nNo commands used yet."
-				else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
+				else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
 				message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>💬 Conversion methods</b>"
+				message += "\n\n<blockquote><b>💬 Conversion methods</b>"
 				if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion methods used yet."
-				else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
+				else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
 				message += "</blockquote>"
 
-				// message += "\n\n<blockquote><b>🛠️ Conversion types</b>"
+				// message += "\n\n<blockquote><b>🛠️ Conversion types</b>"
 				// if (STATS.ConversionTypeUsage.size === 0) message += "\nNo conversion types used yet."
-				// else for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
+				// else for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
 				// message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>🔗 Links</b>"
+				message += "\n\n<blockquote><b>🔗 Links</b>"
 				if (STATS.LinkConversionUsage.size === 0) message += "\nNo links converted yet."
-				else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
+				else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
 				message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>🗃️ Cache</b>"
+				message += "\n\n<blockquote><b>🗃️ Cache</b>"
 				message += `\n${ CACHE.size } links cached`
 				message += `\n${ STATS.CacheHits } hits`
 				message += `\n${ STATS.CacheMisses } misses`

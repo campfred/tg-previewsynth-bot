@@ -1,6 +1,6 @@
 # Preview Synth Bot
 
-[![Dependabot Updates](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates) [![CodeQL](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql) [![Test conversion use-cases](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml) [![Application build](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml) [![GitHub Release](https://img.shields.io/github/v/release/campfred/tg-previewsynth-bot?display_name=tag&label=Latest%20release%20tag)](https://github.com/campfred/tg-previewsynth-bot/releases/latest) 
+[![Dependabot Updates](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/dependabot/dependabot-updates) [![CodeQL](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/github-code-scanning/codeql) [![Test conversion use-cases](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/test.yml) [![Application build](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml/badge.svg)](https://github.com/campfred/tg-previewsynth-bot/actions/workflows/build.yml) [![GitHub Release](https://img.shields.io/github/v/release/campfred/tg-previewsynth-bot?display_name=tag&label=Latest%20release%20tag)](https://github.com/campfred/tg-previewsynth-bot/releases/latest)
 
 Telegram bot to automatically convert links into embed-friendly ones for Telegram and other messaging platforms. ✨
 
@@ -120,13 +120,13 @@ features: # Disable behaviour features here
          > ```
 
       2. Run image
-         > With env variable :
+         > With env variable :
          >
          > ```shell
          > docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env PREVIEWSYNTH_TG_BOT_TOKEN=$PREVIEWSYNTH_TG_BOT_TOKEN ghcr.io/campfred/tg-previewsynth-bot:main
          > ```
          >
-         > With .env file :
+         > With .env file :
          >
          > ```shell
          > docker run --detach --read-only --volume $PWD/config.yaml:/app/config.yaml --env-file $PWD/.env ghcr.io/campfred/tg-previewsynth-bot:main

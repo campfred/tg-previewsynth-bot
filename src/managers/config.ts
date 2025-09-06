@@ -244,10 +244,10 @@ export class ConfigurationManager
 	 */
 	printConvertersListInConsole (): void
 	{
-		// console.debug("Links I recognize at the moment :")
-		LOGGER.debug("Links I recognize at the moment :")
-		// for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
-		for (const converter of this.AllConverters) LOGGER.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
+		// console.debug("Links I recognize at the moment :")
+		LOGGER.debug("Links I recognize at the moment :")
+		// for (const converter of this.AllConverters) console.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
+		for (const converter of this.AllConverters) LOGGER.debug(` -  ${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }${ converter.enabled ? "" : " (disabled)" }`)
 	}
 
 	/**
@@ -255,11 +255,11 @@ export class ConfigurationManager
 	 */
 	printFeaturesListInConsole (): void
 	{
-		// console.debug("Features I enabled at the moment :")
-		// console.debug(` -  Link recognition: ${ this.Features.link_recognition }`)
-		// console.debug(` -  Inline queries: ${ this.Features.inline_queries }`)
-		// console.debug(` -  Stats: ${ this.Features.stats }`)
-		LOGGER.debug(`Features I enabled at the moment :\n -  Link recognition: ${ this.Features.link_recognition }\n -  Inline queries: ${ this.Features.inline_queries }\n -  Stats: ${ this.Features.stats }`)
+		// console.debug("Features I enabled at the moment :")
+		// console.debug(` -  Link recognition: ${ this.Features.link_recognition }`)
+		// console.debug(` -  Inline queries: ${ this.Features.inline_queries }`)
+		// console.debug(` -  Stats: ${ this.Features.stats }`)
+		LOGGER.debug(`Features I enabled at the moment :\n -  Link recognition: ${ this.Features.link_recognition }\n -  Inline queries: ${ this.Features.inline_queries }\n -  Stats: ${ this.Features.stats }`)
 	}
 
 	/**
@@ -268,8 +268,8 @@ export class ConfigurationManager
 	 */
 	getConvertersListForMessage (): string
 	{
-		let message: string = "\n<blockquote><b>🔗 Links I recognize at the moment</b>"
-		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }`
+		let message: string = "\n<blockquote><b>🔗 Links I recognize at the moment</b>"
+		for (const converter of this.AllConverters) if (converter.enabled) message += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }`
 		message += "</blockquote>"
 		return message
 	}
@@ -280,7 +280,7 @@ export class ConfigurationManager
 	 */
 	getFeaturesListForMessage (): string
 	{
-		let message: string = "\n<blockquote><b>🛠️ Features I enabled at the moment</b>"
+		let message: string = "\n<blockquote><b>🛠️ Features I enabled at the moment</b>"
 		message += `\nLink recognition: ${ this.Features.link_recognition }`
 		message += `\nInline queries: ${ this.Features.inline_queries }`
 		message += `\nStats: ${ this.Features.stats }`
