@@ -45,12 +45,12 @@ export class BotManager
 		{
 			const ctx = err.ctx
 			const logger: Logger = LOGGER.with({ action: "handling an update" })
-			let errorMessage: string = `Error while {action} ${ ctx.update.update_id } :\n`
+			let errorMessage: string = `Error while {action} ${ ctx.update.update_id } :\n`
 			const error = err.error
 
-			if (error instanceof GrammyError) errorMessage += (`Grammy error in request : ${ error.description }`)
-			else if (error instanceof HttpError) errorMessage += (`Web error with Telegram's API : ${ error }`)
-			else errorMessage += (`Unknown error : ${ error }`)
+			if (error instanceof GrammyError) errorMessage += (`Grammy error in request : ${ error.description }`)
+			else if (error instanceof HttpError) errorMessage += (`Web error with Telegram's API : ${ error }`)
+			else errorMessage += (`Unknown error : ${ error }`)
 
 			// console.error(errorMessage)
 			logger.error(errorMessage)

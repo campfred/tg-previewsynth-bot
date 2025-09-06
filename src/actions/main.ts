@@ -42,14 +42,14 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	// Handle mistakes where no link is given
 	if (ctx.match.length < 1 && ctx.chat.type === "private")
 	{
-		const response: string = "Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check « /help ».</blockquote>"
+		const response: string = "Oop! No link was given with the command. 😅\nMaybe try again with a link following the command next time?\n<blockquote>Need help to use the command? Check /help.</blockquote>"
 		try
 		{
 			await ctx.reply(response, {
 				parse_mode: "HTML",
 				reply_parameters: { message_id: ctx.msgId },
 			})
-		} catch (error)
+		} catch (_error)
 		{
 			try
 			{
@@ -83,7 +83,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("🤔")
+				await ctx.react("🤔")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -97,7 +97,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -107,7 +107,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		try
 		{
 			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
-		} catch (error)
+		} catch (_error)
 		{
 			try
 			{
@@ -129,7 +129,7 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 		{
 			try
 			{
-				ctx.react("🗿")
+				await ctx.react("🗿")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -172,7 +172,7 @@ export class MainActions implements BotActions
 		/**
 		 * Start command
 		 */
-		this.Composer.chatType("private").command(MainCommands.START, function (ctx)
+		this.Composer.chatType("private").command(MainCommands.START, async function (ctx)
 		{
 			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
@@ -181,7 +181,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -196,21 +196,21 @@ export class MainActions implements BotActions
 				if (BOT.Itself.botInfo.can_join_groups && BOT.Itself.botInfo.can_read_all_group_messages) response += "\nI'll also do the same in groups and channels you add me in."
 			}
 			response += "\n"
-			response += `\n<blockquote><b>💡 Wanna know which links I'll recognize?</b>`
+			response += `\n<blockquote><b>💡 Wanna know which links I'll recognize?</b>`
 			response += `\nUse the / ${ MainCommands.HELP } command!</blockquote>`
 			response += "\n"
 			response += `\nAnyway, I wish you a nice day! 🎶`
 			try
 			{
-				ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-			} catch (error)
+				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+			} catch (_error)
 			{
 				// logReplyError(error, ctx)
 				// console.error("An error occurred while trying to reply to a message.")
 				// console.error(error)
 				try
 				{
-					ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+					await ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 				}
 				catch (error)
 				{
@@ -226,7 +226,7 @@ export class MainActions implements BotActions
 		/**
 		 * Healthcheck ping command
 		 */
-		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, async function (ctx)
 		{
 			// let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
@@ -235,7 +235,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("⚡")
+				await ctx.react("⚡")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -244,12 +244,12 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
-			} catch (error)
+				await ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
+			} catch (_error)
 			{
 				try
 				{
-					ctx.reply("Pong! 🏓")
+					await ctx.reply("Pong! 🏓")
 				} catch (error)
 				{
 					logReplyError(error, ctx)
@@ -271,7 +271,7 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.react("👀")
+				await ctx.react("👀")
 			} catch (error)
 			{
 				logReactionError(error, ctx)
@@ -286,28 +286,28 @@ export class MainActions implements BotActions
 			}
 			if (CONFIG.Features.inline_queries) response += `\nIf you're in another chat where I am not present, begin your message with my username (@${ BOT.Itself.botInfo.username }) followed by a space and I'll be available in-line style! 😉`
 			response += "\n"
-			response += "\n<blockquote><b>💡 If a preview doesn't generate after a few seconds</b>"
+			response += "\n<blockquote><b>💡 If a preview doesn't generate after a few seconds</b>"
 			response += "\nIt is possible that @WebpageBot takes a long time to generate the web preview of a link you just sent."
 			response += "\nForward your converted link to it so that it can try again.</blockquote>"
 			response += "\n"
-			response += "\n<blockquote><b>ℹ️ Links I recognize at the moment</b>"
-			for (const converter of CONFIG.AllConverters) if (converter.enabled) response += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }`
+			response += "\n<blockquote><b>ℹ️ Links I recognize at the moment</b>"
+			for (const converter of CONFIG.AllConverters) if (converter.enabled) response += `\n${ converter.name } : ${ converter.origins.map((origin: URL): string => origin.hostname) } → ${ converter.destinations.map((destination: URL): string => destination.hostname) }`
 			response += "</blockquote>"
 			if (ctx.config.isDeveloper)
 			{
 				response += "\n"
 				response += "\nAlso, since you are an admin, you have extra commands you can use. 🔥"
-				response += "\n<blockquote><b>🛠️ Admin commands</b>"
+				response += "\n<blockquote><b>🛠️ Admin commands</b>"
 				for (const [, text] of Object.entries(AdminCommands)) response += `\n/${ text }`
 				response += "</blockquote>"
 			}
 			response += "\n"
-			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
+			response += "\n<blockquote><b>❓ Missing a translation you'd like me to learn?</b>"
 			response += `\nFeel free to suggest it as an issue <a href = "${ ctx.config.codeRepoURL }/issues/new">on GitHub</a>!</blockquote>`
 			try
 			{
 				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-			} catch (error)
+			} catch (_error)
 			{
 				// logReplyError(error, ctx)
 				// console.error("An error occurred while trying to reply to a message.")
@@ -330,9 +330,10 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.command([MainCommands.LINK_CONVERT, MainCommands.LINK_EMBED], async function (ctx)
 		{
+			// deno-lint-ignore prefer-const
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.LINK_EMBED, ctx)
-			// console.debug(`Incoming /${ MainCommands.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			// console.debug(`Incoming /${ MainCommands.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
 			await processConversionRequest(ctx, ConversionMethods.COMMAND, reactionsAllowed)
@@ -354,8 +355,9 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.hears([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: HearsContext<CustomContext>): Promise<void>
 		{
+			// deno-lint-ignore prefer-const
 			let reactionsAllowed: boolean = true
-			// console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			// console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			getLoggerForCommand("supported link", ctx).debug(COMMAND_LOG_STRING)
 			await processConversionRequest(ctx, ConversionMethods.CONVO, reactionsAllowed)
 		})
@@ -372,7 +374,7 @@ export class MainActions implements BotActions
 		this.Composer.inlineQuery([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: InlineQueryContext<CustomContext>): Promise<void>
 		{
 			const logger: Logger = getLoggerForCommand("inline query", ctx)
-			// console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
+			// console.debug(`Incoming inline conversion query by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			logger.debug(COMMAND_LOG_STRING)
 
 			const link: string = ctx.match.toString()

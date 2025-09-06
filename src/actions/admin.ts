@@ -39,18 +39,18 @@ export class AdminActions implements BotActions
 	 * @param ctx Context of the action
 	 * @param state Desired state of the web link map
 	 */
-	private toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): void
+	private async toggleConverterAvailability (ctx: CommandContext<CustomContext>, state?: boolean): Promise<void>
 	{
 		if (ctx.config.isDeveloper)
 		{
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
-			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
+			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for "${ ctx.match }"`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
 			try
 			{
-				ctx.react("🤔")
+				await ctx.react("🤔")
 			} catch (error)
 			{
 				// console.error("An error occurred while trying to react to a message.")
@@ -71,7 +71,7 @@ export class AdminActions implements BotActions
 							{
 								try
 								{
-									ctx.react("🫡")
+									await ctx.react("🫡")
 								} catch (error)
 								{
 									// console.error("An error occurred while trying to react to a message.")
@@ -85,7 +85,7 @@ export class AdminActions implements BotActions
 							// ctx.reply(`${map.name} is now ${map.enabled ? "enabled! ✅" : "disabled! ❌"}`, { reply_parameters: { message_id: ctx.msgId }, reply_markup: inlineKeyboard });
 							try
 							{
-								ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
+								await ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
 							} catch (error)
 							{
 								// console.error("An error occurred while trying to reply to a message.")
@@ -112,7 +112,7 @@ export class AdminActions implements BotActions
 	private addDataCommands (): void
 	{
 
-		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, (ctx) =>
+		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, async function (ctx)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -123,7 +123,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("🔥")
+					await ctx.react("🔥")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -135,7 +135,7 @@ export class AdminActions implements BotActions
 				CACHE.clear()
 				try
 				{
-					ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+					await ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to reply to a message.")
@@ -145,7 +145,7 @@ export class AdminActions implements BotActions
 			}
 		})
 
-		this.Composer.command(AdminCommands.STATS, (ctx) =>
+		this.Composer.command(AdminCommands.STATS, async function (ctx)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -156,7 +156,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("🤓")
+					await ctx.react("🤓")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -167,27 +167,27 @@ export class AdminActions implements BotActions
 
 				let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }`
 
-				message += "\n\n<blockquote><b>⌨️ Command usage</b>"
+				message += "\n\n<blockquote><b>⌨️ Command usage</b>"
 				if (STATS.CommandsUsage.size === 0) message += "\nNo commands used yet."
-				else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
+				else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
 				message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>💬 Conversion methods</b>"
+				message += "\n\n<blockquote><b>💬 Conversion methods</b>"
 				if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion methods used yet."
-				else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
+				else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
 				message += "</blockquote>"
 
-				// message += "\n\n<blockquote><b>🛠️ Conversion types</b>"
+				// message += "\n\n<blockquote><b>🛠️ Conversion types</b>"
 				// if (STATS.ConversionTypeUsage.size === 0) message += "\nNo conversion types used yet."
-				// else for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
+				// else for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
 				// message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>🔗 Links</b>"
+				message += "\n\n<blockquote><b>🔗 Links</b>"
 				if (STATS.LinkConversionUsage.size === 0) message += "\nNo links converted yet."
-				else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
+				else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
 				message += "</blockquote>"
 
-				message += "\n\n<blockquote><b>🗃️ Cache</b>"
+				message += "\n\n<blockquote><b>🗃️ Cache</b>"
 				message += `\n${ CACHE.size } links cached`
 				message += `\n${ STATS.CacheHits } hits`
 				message += `\n${ STATS.CacheMisses } misses`
@@ -198,7 +198,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+					await ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to reply to a message.")
@@ -225,7 +225,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("⚡")
+					await ctx.react("⚡")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -240,7 +240,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("🎉")
+							await ctx.react("🎉")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -251,7 +251,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
+						await ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -267,7 +267,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("💔")
+							await ctx.react("💔")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -278,7 +278,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ CONFIG.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+						await ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ CONFIG.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -300,7 +300,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.react("⚡")
+					await ctx.react("⚡")
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to react to a message.")
@@ -315,7 +315,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("🎉")
+							await ctx.react("🎉")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -326,7 +326,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
+						await ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -342,7 +342,7 @@ export class AdminActions implements BotActions
 					{
 						try
 						{
-							ctx.react("💔")
+							await ctx.react("💔")
 						} catch (error)
 						{
 							// console.error("An error occurred while trying to react to a message.")
@@ -353,7 +353,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+						await ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
