@@ -202,15 +202,15 @@ export class MainActions implements BotActions
 			response += `\nAnyway, I wish you a nice day! 🎶`
 			try
 			{
-				ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			} catch (error)
+				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 			{
 				// logReplyError(error, ctx)
 				// console.error("An error occurred while trying to reply to a message.")
 				// console.error(error)
 				try
 				{
-					ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
+					await ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 				}
 				catch (error)
 				{
@@ -244,12 +244,12 @@ export class MainActions implements BotActions
 
 			try
 			{
-				ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
 			} catch (error)
+				await ctx.reply("Pong! 🏓", { reply_parameters: { message_id: ctx.msgId } })
 			{
 				try
 				{
-					ctx.reply("Pong! 🏓")
+					await ctx.reply("Pong! 🏓")
 				} catch (error)
 				{
 					logReplyError(error, ctx)

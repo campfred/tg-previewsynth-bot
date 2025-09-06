@@ -85,7 +85,7 @@ export class AdminActions implements BotActions
 							// ctx.reply(`${map.name} is now ${map.enabled ? "enabled! ✅" : "disabled! ❌"}`, { reply_parameters: { message_id: ctx.msgId }, reply_markup: inlineKeyboard });
 							try
 							{
-								ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
+								await ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
 							} catch (error)
 							{
 								// console.error("An error occurred while trying to reply to a message.")
@@ -135,7 +135,7 @@ export class AdminActions implements BotActions
 				CACHE.clear()
 				try
 				{
-					ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+					await ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to reply to a message.")
@@ -198,7 +198,7 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+					await ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
 					// console.error("An error occurred while trying to reply to a message.")
@@ -251,7 +251,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
+						await ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -278,7 +278,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ CONFIG.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+						await ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ CONFIG.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -326,7 +326,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
+						await ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
@@ -353,7 +353,7 @@ export class AdminActions implements BotActions
 					}
 					try
 					{
-						ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
+						await ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
 						// console.error("An error occurred while trying to reply to a message.")
