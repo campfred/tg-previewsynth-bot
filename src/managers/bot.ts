@@ -31,7 +31,7 @@ export class BotManager
 		const logger: Logger = LOGGER.with({ action: "initializing" })
 
 		// console.debug("Initializing bot…")
-		logger.debug("Initializing bot… 🏁")
+		logger.debug("Initializing bot… 🏃")
 		this._Bot = new Bot<CustomContext>( // https://grammy.dev/guide/context#transformative-context-flavors
 			Deno.env.get(EnvironmentVariables.BOT_TOKEN.toUpperCase())
 			|| Deno.env.get(EnvironmentVariables.BOT_TOKEN.toLowerCase())

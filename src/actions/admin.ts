@@ -45,6 +45,7 @@ export class AdminActions implements BotActions
 		
 		if (ctx.config.isDeveloper)
 		{
+			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
 			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for « ${ ctx.match } »`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -78,6 +79,7 @@ export class AdminActions implements BotActions
 									// console.error("An error occurred while trying to react to a message.")
 									// console.error(error)
 									logReactionError(error, ctx)
+									reactionsAllowed = false
 								}
 							}
 							map.enabled = state === undefined ? !map.enabled : state
@@ -118,6 +120,7 @@ export class AdminActions implements BotActions
 			
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CACHE_CLEAR, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -148,10 +151,9 @@ export class AdminActions implements BotActions
 
 		this.Composer.command(AdminCommands.STATS, (ctx) =>
 		{
-			let reactionsAllowed: boolean = true
-
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.STATS, ctx)
 				// console.debug(`Incoming /${ AdminCommands.STATS } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -222,6 +224,7 @@ export class AdminActions implements BotActions
 			
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_SAVE, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CONFIG_SAVE } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
@@ -249,6 +252,7 @@ export class AdminActions implements BotActions
 							// console.error("An error occurred while trying to react to a message.")
 							// console.error(error)
 							logReactionError(error, ctx)
+							reactionsAllowed = false
 						}
 					}
 					try
@@ -297,6 +301,7 @@ export class AdminActions implements BotActions
 			
 			if (ctx.config.isDeveloper)
 			{
+				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_RELOAD, ctx)
 				// console.debug(`Incoming /${ AdminCommands.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)

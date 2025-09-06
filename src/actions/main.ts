@@ -35,7 +35,7 @@ export const MainCommandsDetails: BotCommand[] = [
  * @param ctx Command or Hears context.
  * @returns Completion promise.
  */
-async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods): Promise<void>
+async function processConversionRequest (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>, method: ConversionMethods, reactionsAllowed: boolean): Promise<void>
 {
 	const logger: Logger = getLogger([LogCategories.BOT, LogCategories.LINKS]).with({ action: "processing a conversion request via " + method, user: getExpeditorDebugString(ctx), chat: getChatDebugString(ctx), arg: ctx.match })
 	let reactingWorks: boolean = true
@@ -175,7 +175,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.START, function (ctx)
 		{
-			let reactingWorks: boolean = true
+			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
 			// console.debug(`Incoming /${ MainCommands.START } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -186,7 +186,7 @@ export class MainActions implements BotActions
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactingWorks = false
+				reactionsAllowed = false
 			}
 			let response: string = `Hi! I'm <b>${ BOT.Itself.botInfo.first_name }</b>! 👋`
 			response += "\nA simple bot that serves the purpose of automatically embedding links!"
@@ -229,7 +229,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, function (ctx)
 		{
-			let reactingWorks: boolean = true
+			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
 			// console.debug(`Incoming /${ MainCommands.PING } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
@@ -240,7 +240,7 @@ export class MainActions implements BotActions
 			} catch (error)
 			{
 				logReactionError(error, ctx)
-				reactingWorks = false
+				reactionsAllowed = false
 			}
 
 			try
@@ -265,11 +265,18 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType("private").command(MainCommands.HELP, async function (ctx)
 		{
-			let reactingWorks: boolean = true
+			let reactionsAllowed: boolean = false
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.HELP, ctx)
 			// console.debug(`Incoming /${ MainCommands.HELP } by ${ getExpeditorDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
+			try
+			{
+				ctx.react("👀")
+			} catch (error)
+			{
+				logReactionError(error, ctx)
+			}
 			let response: string = "Oh! You see, I'm a simple Synth!"
 			if (CONFIG.Features.link_recognition)
 			{
@@ -323,11 +330,12 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.command([MainCommands.LINK_CONVERT, MainCommands.LINK_EMBED], async function (ctx)
 		{
+			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.LINK_EMBED, ctx)
 			// console.debug(`Incoming /${ MainCommands.LINK_CONVERT } by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
-			await processConversionRequest(ctx, ConversionMethods.COMMAND)
+			await processConversionRequest(ctx, ConversionMethods.COMMAND, reactionsAllowed)
 		})
 	}
 
@@ -346,9 +354,10 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.hears([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: HearsContext<CustomContext>): Promise<void>
 		{
+			let reactionsAllowed: boolean = true
 			// console.debug(`Recognized link by ${ getExpeditorDebugString(ctx) } : ${ getQueryDebugString(ctx) }`)
 			getLoggerForCommand("supported link", ctx).debug(COMMAND_LOG_STRING)
-			await processConversionRequest(ctx, ConversionMethods.CONVO)
+			await processConversionRequest(ctx, ConversionMethods.CONVO, reactionsAllowed)
 		})
 	}
 
