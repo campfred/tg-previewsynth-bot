@@ -54,8 +54,9 @@ links:
     origins:
       - https://instagram.com
     destinations:
+      - https://eeinstagram.com
+      - https://kkinstagram.com
       - https://ddinstagram.com
-      - https://instagramez.com
   - name: TikTok
     origins:
       - https://tiktok.com
