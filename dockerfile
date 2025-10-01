@@ -1,4 +1,4 @@
-FROM debian:13.0-slim
+FROM debian:13.1-slim
 # Using Debian since the compiled binary uses the GNU dynamic linker
 ARG TARGETOS
 ARG TARGETARCH
