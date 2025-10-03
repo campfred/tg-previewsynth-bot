@@ -35,6 +35,7 @@ links:
     destinations:
       - https://vxreddit.com
       - https://rxddit.com
+      - https://redditez.com
   - name: Bluesky
     origins:
       - https://bsky.app
@@ -49,19 +50,37 @@ links:
       - https://vxtwitter.com
       - https://fixupx.com
       - https://girlcockx.com
+			- https://xeezz.com
       - https://xcancel.com
   - name: Instagram
     origins:
       - https://instagram.com
     destinations:
+      - https://eeinstagram.com
+      - https://kkinstagram.com
       - https://ddinstagram.com
-      - https://instagramez.com
   - name: TikTok
     origins:
       - https://tiktok.com
     destinations:
       - https://vxtiktok.com
       - https://tfxktok.com
+      - https://tiktokez.com
+  - name: Snapchat
+    origins:
+       - https://snapchat.com
+     destinations:
+       - https://snapchatez.com
+   - name: Imgur
+     origins:
+       - https://imgur.com
+     destinations:
+       - https://imgurez.com
+   - name: IFunny
+     origins:
+       - https://ifunny.com
+     destinations:
+       - https://ifunnyez.co.com
 apis:
   odesli:
     enabled: true
