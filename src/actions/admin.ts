@@ -1,4 +1,4 @@
-import { CommandContext, Composer } from "x/grammy"
+import { CommandContext, Composer } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
 import { CustomContext, BotActions, LogLevels } from "../types/types.ts"
 import { ConfigurationManager } from "../managers/config.ts"
 import { getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"

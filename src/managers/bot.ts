@@ -1,4 +1,4 @@
-import { Bot, GrammyError, HttpError, NextFunction } from "x/grammy"
+import { Bot, GrammyError, HttpError, NextFunction } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
 import { BotActions, CustomContext, EnvironmentVariables } from "../types/types.ts"
 import { ConfigurationManager } from "./config.ts"
 import { getLogger, Logger } from "@logtape/logtape"

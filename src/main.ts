@@ -1,5 +1,5 @@
 import "@std/dotenv/load"
-import { sleep } from "x/sleep"
+import { sleep } from "https://deno.land/x/sleep@v1.3.0/mod.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 // import { AdminActions } from "./actions/admin.ts"
 import { ConfigurationManager } from "./managers/config.ts"

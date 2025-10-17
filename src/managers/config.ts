@@ -1,5 +1,5 @@
 import { parse, stringify } from "@std/yaml"
-import { UserFromGetMe } from "x/grammy_types/manage"
+import { UserFromGetMe } from "https://deno.land/x/grammy_types@v3.22.1/manage.ts"
 import { AboutConfiguration, APIConfiguration, APIsConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
 import { APILinkConverter, OdesliMusicConverter } from "../converters/music.ts"

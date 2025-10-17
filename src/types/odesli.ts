@@ -12,7 +12,7 @@ export const OdesliOrigins: string[] = [
 	"https://deezer.com",
 	"https://soundcloud.com",
 	"https://music.amazon.com",
-];
+]
 
 // Define the Platform type as a union of string literals
 export type OdesliPlatform =
@@ -35,59 +35,60 @@ export type OdesliPlatform =
 	| "audius"
 	| "audiomack"
 	| "anghami"
-	| "boomplay";
+	| "boomplay"
 
 // Define the APIProvider type as a union of string literals
-export type OdesliAPIProvider = "spotify" | "itunes" | "youtube" | "google" | "pandora" | "deezer" | "tidal" | "amazon" | "soundcloud" | "napster" | "yandex" | "spinrilla" | "audius" | "audiomack" | "anghami" | "boomplay";
+export type OdesliAPIProvider = "spotify" | "itunes" | "youtube" | "google" | "pandora" | "deezer" | "tidal" | "amazon" | "soundcloud" | "napster" | "yandex" | "spinrilla" | "audius" | "audiomack" | "anghami" | "boomplay"
 
 // Define the Response type
-export interface OdesliResponse {
+export interface OdesliResponse
+{
 	// The unique ID for the input entity that was supplied in the request.
-	entityUniqueId: string;
+	entityUniqueId: string
 
 	// The userCountry query param that was supplied in the request.
-	userCountry: string;
+	userCountry: string
 
 	// A URL that will render the Songlink page for this entity
-	pageUrl: string;
+	pageUrl: string
 
 	// A collection of objects. Each key is a platform, and each value is an object that contains data for linking to the match
 	linksByPlatform: {
 		[key in OdesliPlatform]?: {
 			// The unique ID for this entity.
-			entityUniqueId: string;
+			entityUniqueId: string
 
 			// The URL for this match
-			url: string;
+			url: string
 
 			// The native app URI that can be used on mobile devices
-			nativeAppUriMobile?: string;
+			nativeAppUriMobile?: string
 
 			// The native app URI that can be used on desktop devices
-			nativeAppUriDesktop?: string;
-		};
-	};
+			nativeAppUriDesktop?: string
+		}
+	}
 
 	// A collection of objects. Each key is a unique identifier for a streaming entity
 	entitiesByUniqueId: {
 		[entityUniqueId: string]: {
 			// This is the unique identifier on the streaming platform/API provider
-			id: string;
+			id: string
 
 			// The type of the entity
-			type: "song" | "album";
+			type: "song" | "album"
 
-			title?: string;
-			artistName?: string;
-			thumbnailUrl?: string;
-			thumbnailWidth?: number;
-			thumbnailHeight?: number;
+			title?: string
+			artistName?: string
+			thumbnailUrl?: string
+			thumbnailWidth?: number
+			thumbnailHeight?: number
 
 			// The API provider that powered this match
-			apiProvider: OdesliAPIProvider;
+			apiProvider: OdesliAPIProvider
 
 			// An array of platforms that are "powered" by this entity
-			platforms: OdesliPlatform[];
-		};
-	};
+			platforms: OdesliPlatform[]
+		}
+	}
 }
