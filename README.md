@@ -27,7 +27,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - TikTok
   > tiktok.com ➡️ vxtiktok, tfxktok.com
 - Music (through [Odesli's API](https://odesli.co))
-  > open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link / album.link
+  > spotify.link, spotify.app.link, open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link / album.link
 
 ## Supported commands
 

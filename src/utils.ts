@@ -1,4 +1,4 @@
-import { CallbackQueryContext, CommandContext, GrammyError, HearsContext, InlineQueryContext } from "x/grammy"
+import { CallbackQueryContext, CommandContext, GrammyError, HearsContext, InlineQueryContext } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
 import { CustomContext, LinkConverter, LogLevels } from "./types/types.ts"
 import { getLogger, Logger, LogLevel } from "@logtape/logtape"
 import { LogCategories } from "./managers/logging.ts"

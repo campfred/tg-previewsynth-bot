@@ -1,4 +1,4 @@
-import { Composer, Context } from "x/grammy"
+import { Composer, Context } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export enum EnvironmentVariables

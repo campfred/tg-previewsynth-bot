@@ -7,6 +7,7 @@
     "cache": "deno cache --allow-import src/main.ts",
     "dev": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env --watch --inspect src/main.ts",
     "run": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
+    "debug": "deno run --inspect-wait --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
     "start": "deno task run",
     "compile": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output previewsynth src/main.ts",
     "compile-windows-amd64": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output output/previewsynth-windows-amd64 --target x86_64-pc-windows-msvc src/main.ts",
@@ -16,17 +17,11 @@
     "compile-linux-arm64": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output output/previewsynth-linux-arm64 --target aarch64-unknown-linux-gnu src/main.ts"
   },
   "imports": {
-    "@logtape/logtape": "jsr:@logtape/logtape@^1.1.0-dev.333+b25e634b",
-    "@std/assert": "jsr:@std/assert@^1.0.14",
+    "@logtape/logtape": "jsr:@logtape/logtape@^1.2.0-dev.347+0deb84f4",
+    "@std/assert": "jsr:@std/assert@^1.0.15",
     "@std/dotenv": "jsr:@std/dotenv@0.225.5",
     "@std/log": "jsr:@std/log@^0.224.14",
-    "@std/yaml": "jsr:@std/yaml@1.0.9",
-    "x/sleep": "https://deno.land/x/sleep@v1.3.0/mod.ts",
-    "x/grammy": "https://deno.land/x/grammy@v1.38.1/mod.ts",
-    "x/grammy_types/manage": "https://deno.land/x/grammy_types@v3.22.1/manage.ts",
-    "x/grammy_types/message": "https://deno.land/x/grammy_types@v3.22.1/message.ts",
-    "x/grammy_types/context": "https://deno.land/x/grammy_types@v3.22.1/context.ts",
-    "x/grammy_types/inline": "https://deno.land/x/grammy_types@v3.22.1/inline.ts"
+    "@std/yaml": "jsr:@std/yaml@1.0.10"
   },
   "unstable": [
     "temporal"
