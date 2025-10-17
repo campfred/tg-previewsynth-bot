@@ -7,6 +7,7 @@
     "cache": "deno cache --allow-import src/main.ts",
     "dev": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env --watch --inspect src/main.ts",
     "run": "deno run --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
+    "debug": "deno run --inspect-wait --allow-import --allow-net --allow-read --allow-write --allow-env src/main.ts",
     "start": "deno task run",
     "compile": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output previewsynth src/main.ts",
     "compile-windows-amd64": "deno compile --allow-import --allow-net --allow-read --allow-write --allow-env --output output/previewsynth-windows-amd64 --target x86_64-pc-windows-msvc src/main.ts",
