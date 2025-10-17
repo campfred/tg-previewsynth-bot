@@ -123,7 +123,7 @@ Deno.test("Music-specific test case", async (): Promise<void> =>
 
 Deno.test("New Spotify share link test case", async (): Promise<void> =>
 {
-	const Converter: OdesliMusicConverter = new OdesliMusicConverter("Odesli", [new URL("https://spotify.link")], [new URL("https://song.link")])
+	const Converter: OdesliMusicConverter = new OdesliMusicConverter("Odesli", [new URL("https://spotify.link"), new URL("https://spotify.app.link")], [new URL("https://song.link")])
 	const SpotifyShareLink = new URL("https://spotify.link/tNTU1GlxwXb")
 	const OdesliConvertedLink = new URL("https://song.link/s/544TSCvEmOhC0favdRlHuQ")
 	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)

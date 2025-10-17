@@ -4,6 +4,7 @@
 // Provides a list of supported domains
 export const OdesliOrigins: string[] = [
 	"https://spotify.link",
+	"https://spotify.app.link",
 	"https://open.spotify.com",
 	"https://music.apple.com",
 	"https://music.youtube.com",
