@@ -400,8 +400,8 @@ export class MainActions implements BotActions
 				const convertedLinks: URL[] = await Converter.parseLink(new URL(link))
 				for (const convertedLink of convertedLinks)
 				{
-					queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true } }))
-					// queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link silently with ${ convertedLink.hostname } 🔀🔕`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true }, disable_notification: true }))
+					queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
+					// queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link silently with ${ convertedLink.hostname } 🔀🔕`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true }, disable_notification: true }))
 				}
 
 				await ctx.answerInlineQuery(queryResults)
