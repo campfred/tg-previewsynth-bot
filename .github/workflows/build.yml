@@ -57,7 +57,7 @@ jobs:
                   deno task compile-${{ matrix.os }}-${{ matrix.arch }}
 
             - name: Upload artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: PreviewSynthBot-${{ matrix.os }}-${{ matrix.arch }}
                   path: output/previewsynth-${{ matrix.os }}-${{ matrix.arch }}*
