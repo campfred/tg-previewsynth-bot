@@ -59,6 +59,8 @@ links:
       - https://eeinstagram.com
       - https://kkinstagram.com
       - https://ddinstagram.com
+		settings:
+			expand: false
   - name: TikTok
     origins:
       - https://tiktok.com
