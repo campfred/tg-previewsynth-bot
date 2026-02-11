@@ -99,13 +99,13 @@ jobs:
                   images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
             - name: Download linux/amd64 artifact
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: PreviewSynthBot-linux-amd64
                   path: output
 
             - name: Download linux/arm64 artifact
-              uses: actions/download-artifact@v6
+              uses: actions/download-artifact@v7
               with:
                   name: PreviewSynthBot-linux-arm64
                   path: output
