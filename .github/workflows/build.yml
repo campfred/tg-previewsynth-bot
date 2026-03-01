@@ -122,7 +122,7 @@ jobs:
                   outputs: type=image,name=target,annotation-index.org.opencontainers.image.source=https://github.com/campfred/tg-previewsynth-bot,annotation-index.org.opencontainers.image.description=Telegram bot to automatically convert links into embed-friendly ones for Telegram. ✨,annotation-index.org.opencontainers.image.license=GPL-3.0
 
             - name: Generate artifact attestation
-              uses: actions/attest-build-provenance@v3
+              uses: actions/attest-build-provenance@v4
               with:
                   subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
                   subject-digest: ${{ steps.push.outputs.digest }}
