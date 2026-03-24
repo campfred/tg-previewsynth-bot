@@ -1,6 +1,6 @@
 import { getLogger, Logger } from "@logtape/logtape"
 import { CacheManager } from "../managers/cache.ts"
-import { ConversionTypes, LinkConverter, OdesliConfiguration } from "../types/types.ts"
+import { ConversionTypes, LinkConverter, OdesliConfiguration, OdesliCountryCode } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
 import { LogCategories } from "../managers/logging.ts"
 import Odesli from "odesli.js"
@@ -12,13 +12,16 @@ const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.APIS]).with({
 export class OdesliMusicConverter extends SimpleLinkConverter implements LinkConverter
 {
 	override readonly type: ConversionTypes = ConversionTypes.API;
-	readonly odesli: Odesli = null as unknown as Odesli
-	readonly country: Odesli.CountryCode
+	readonly odesli: Odesli
+	readonly country: OdesliCountryCode
 
 	constructor (config?: OdesliConfiguration)
 	{
 		super("Odesli", OdesliOriginsURLs, [], OdesliDestinationsURLs)
-		this.country = config?.country || Odesli.getCountryOptions()[0].code
+		const defaultCountry: OdesliCountryCode = Odesli.getCountryOptions()[0].code
+		this.country = config?.country && Odesli.getCountryOptions().some(opt => opt.code === config.country)
+			? config.country as OdesliCountryCode
+			: defaultCountry
 		LOGGER.debug(`Using country ${ this.country } for Odesli API requests.`)
 		this.odesli = new Odesli({
 			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }) // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
@@ -50,7 +53,16 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 			{
 				LOGGER.debug(`Sending request to API…`)
 				const song = await this.odesli.fetch(link.toString(), { country: this.country })
-				const newLink: URL = new URL(song.pageUrl)
+
+				const parsedSong = Array.isArray(song) ? song[0] : song
+				const pageUrl = parsedSong && typeof parsedSong === "object" && "pageUrl" in parsedSong
+					? (parsedSong as { pageUrl: string }).pageUrl
+					: undefined
+
+				if (!pageUrl)
+					throw new Error("Odesli API response does not contain a pageUrl")
+
+				const newLink: URL = new URL(pageUrl)
 				LOGGER.debug(`\t${ newLink }`)
 				CACHE.add(originalLinkCleaned, newLink)
 				return newLink

@@ -1,5 +1,6 @@
 import { Composer, Context } from "@grammy/grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
+import Odesli from "odesli.js"
 
 export enum EnvironmentVariables
 {
@@ -34,9 +35,10 @@ export type APIConfiguration = {
 	// response_path: string
 	enabled?: boolean
 }
+export type OdesliCountryCode = (ReturnType<(typeof Odesli)["getCountryOptions"]>[number])["code"]
 export type OdesliConfiguration = {
 	enabled: boolean
-	country?: string
+	country?: OdesliCountryCode
 }
 // export type APIsConfiguration = { [api: string]: APIConfiguration }
 export type FeaturesConfiguration = { link_recognition: boolean, inline_queries: boolean, stats: boolean }
