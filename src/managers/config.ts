@@ -121,10 +121,7 @@ export class ConfigurationManager
 	 */
 	private parseOdesliConverterInConfig (odesliConfig: OdesliConfiguration): OdesliMusicConverter
 	{
-		const converter = new OdesliMusicConverter({
-			...odesliConfig,
-			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }) // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
-		})
+		const converter = new OdesliMusicConverter(odesliConfig)
 		converter.setEnabled(odesliConfig.enabled || true)
 
 		return converter

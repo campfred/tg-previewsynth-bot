@@ -13,13 +13,16 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 {
 	override readonly type: ConversionTypes = ConversionTypes.API;
 	readonly odesli: Odesli = null as unknown as Odesli
-	readonly country: string
+	readonly country: Odesli.CountryCode
 
 	constructor (config?: OdesliConfiguration)
 	{
 		super("Odesli", OdesliOriginsURLs, [], OdesliDestinationsURLs)
 		this.country = config?.country || Odesli.getCountryOptions()[0].code
-		this.odesli = new Odesli(config)
+		LOGGER.debug(`Using country ${ this.country } for Odesli API requests.`)
+		this.odesli = new Odesli({
+			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }) // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
+		})
 	}
 
 	public getSupportedLinks (): URL[]
@@ -46,7 +49,7 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 			try
 			{
 				LOGGER.debug(`Sending request to API…`)
-				const song = await this.odesli.fetch(link.toString())
+				const song = await this.odesli.fetch(link.toString(), { country: this.country })
 				const newLink: URL = new URL(song.pageUrl)
 				LOGGER.debug(`\t${ newLink }`)
 				CACHE.add(originalLinkCleaned, newLink)

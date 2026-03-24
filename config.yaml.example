@@ -5,7 +5,7 @@ about:
   #   chat: -12345678901234
   #   # topic: 1234 # Optional
   # status_message: | # Optional
-  #   Spotify and YouTube Music are not being nice to multiple aggregation services including Odesli! 🫠 <i>(the one I'm using for converting music links!)</i>
+  #   Spotify and YouTube Music are not being nice to multiple aggregation services, including Odesli! 🫠 <i>(the one I'm using for converting music links!)</i>
   #   I'll still try to convert those links and might fail. So, hang tight while they fix their oopsie! 🤞
 links:
   # - name: Example

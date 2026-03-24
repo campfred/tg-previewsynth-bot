@@ -34,7 +34,8 @@ export type APIConfiguration = {
 	// response_path: string
 	enabled?: boolean
 }
-export type OdesliConfiguration = APIConfiguration & {
+export type OdesliConfiguration = {
+	enabled: boolean
 	country?: string
 }
 // export type APIsConfiguration = { [api: string]: APIConfiguration }
