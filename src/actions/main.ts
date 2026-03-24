@@ -291,7 +291,7 @@ export class MainActions implements BotActions
 				response += "\nSend a link I recognize here and I'll respond with an embed-friendly one. ✨"
 				if (BOT.Itself.botInfo.can_join_groups) response += "\nI'll also do the same thing in groups and channels you add me in."
 			}
-			if (CONFIG.Features.inline_queries) response += `\nIf you're in another chat where I am not present, begin your message with my username (@${ BOT.Itself.botInfo.username }) followed by a space and I'll be available in-line style! 😉`
+			if (CONFIG.Features.inline_queries) response += `\nIf you're in another chat where I am not present, begin your message with my username (@${ BOT.Itself.botInfo.username }) followed by a space and I'll be available in-line style! 😎`
 			response += "\n"
 			response += "\n<blockquote><b>💡 If a preview doesn't generate after a few seconds</b>"
 			response += "\nIt is possible that @WebpageBot takes a long time to generate the web preview of a link you just sent."
@@ -304,7 +304,7 @@ export class MainActions implements BotActions
 			{
 				response += "\n"
 				response += "\nAlso, since you are an admin, you have extra commands you can use. 🔥"
-				response += "\n<blockquote><b>🛠️ Admin commands</b>"
+				response += "\n\n<blockquote><b>🛠️ Admin commands</b>"
 				for (const [, text] of Object.entries(AdminCommands)) response += `\n/${ text }`
 				response += "</blockquote>"
 			}

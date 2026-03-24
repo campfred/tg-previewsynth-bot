@@ -30,24 +30,24 @@ export function generateStatsMessageContents (): string
 {
 	let message: string = ""
 	message += "\n\n<blockquote><b>⌨️ Command usage</b>"
-	if (STATS.CommandsUsage.size === 0) message += "\nNo commands used yet."
+	if (STATS.CommandsUsage.size === 0) message += "\nNo command used yet."
 	else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
 	message += "</blockquote>"
 
 	message += "\n\n<blockquote><b>💬 Conversion methods</b>"
-	if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion methods used yet."
+	if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion method used yet."
 	else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
 	message += "</blockquote>"
 
 	message += "\n\n<blockquote><b>🔗 Links</b>"
-	if (STATS.LinkConversionUsage.size === 0) message += "\nNo links converted yet."
+	if (STATS.LinkConversionUsage.size === 0) message += "\nNo link converted yet."
 	else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
 	message += "</blockquote>"
 
 	message += "\n\n<blockquote><b>🗃️ Cache</b>"
-	message += `\n${ CACHE.size } links cached`
-	message += `\n${ STATS.CacheHits } hits`
-	message += `\n${ STATS.CacheMisses } misses`
+	message += `\n${ CACHE.size } link${ CACHE.size !== 1 ? "s" : "" } cached`
+	message += `\n${ STATS.CacheHits } hit${ STATS.CacheHits !== 1 ? "s" : "" }`
+	message += `\n${ STATS.CacheMisses } miss${ STATS.CacheMisses !== 1 ? "es" : "" }`
 	if (STATS.CacheHits > 0 || STATS.CacheMisses > 0) message += `\n${ Math.round(STATS.CacheHitRatio * 100) }% hit ratio`
 	message += "</blockquote>"
 
@@ -126,9 +126,9 @@ export class AdminActions implements BotActions
 	 */
 	private addFeatureCommands (): void
 	{
-		this.Composer.chatType("private").command(AdminCommands.MAP_ENABLE, (ctx) => this.toggleConverterAvailability(ctx, true))
-		this.Composer.chatType("private").command(AdminCommands.MAP_DISABLE, (ctx) => this.toggleConverterAvailability(ctx, false))
-		this.Composer.chatType("private").command(AdminCommands.MAP_TOGGLE, (ctx) => this.toggleConverterAvailability(ctx))
+		this.Composer.chatType("private").command(AdminCommands.MAP_ENABLE, (ctx: CommandContext<CustomContext>) => this.toggleConverterAvailability(ctx, true))
+		this.Composer.chatType("private").command(AdminCommands.MAP_DISABLE, (ctx: CommandContext<CustomContext>) => this.toggleConverterAvailability(ctx, false))
+		this.Composer.chatType("private").command(AdminCommands.MAP_TOGGLE, (ctx: CommandContext<CustomContext>) => this.toggleConverterAvailability(ctx))
 	}
 
 	/**
@@ -137,7 +137,7 @@ export class AdminActions implements BotActions
 	private addDataCommands (): void
 	{
 
-		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, async function (ctx)
+		this.Composer.chatType("private").command(AdminCommands.CACHE_CLEAR, async function (ctx: CommandContext<CustomContext>)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -163,7 +163,7 @@ export class AdminActions implements BotActions
 			}
 		})
 
-		this.Composer.command(AdminCommands.STATS, async function (ctx)
+		this.Composer.command(AdminCommands.STATS, async function (ctx: CommandContext<CustomContext>)
 		{
 			if (ctx.config.isDeveloper)
 			{
