@@ -198,7 +198,7 @@ export class AdminActions implements BotActions
 	 */
 	private addConfigCommands (): void
 	{
-		this.Composer.chatType("private").command(AdminCommands.CONFIG_SAVE, async function (ctx)
+		this.Composer.chatType("private").command(AdminCommands.CONFIG_SAVE, async function (ctx: CommandContext<CustomContext>)
 		{
 			if (ctx.config.isDeveloper)
 			{
@@ -260,7 +260,7 @@ export class AdminActions implements BotActions
 			}
 		})
 
-		this.Composer.chatType("private").command(AdminCommands.CONFIG_RELOAD, async function (ctx)
+		this.Composer.chatType("private").command(AdminCommands.CONFIG_RELOAD, async function (ctx: CommandContext<CustomContext>)
 		{
 			if (ctx.config.isDeveloper)
 			{
