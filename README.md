@@ -73,6 +73,7 @@ about:
   status_updates: # Optional
     chat: -12345678901234 # Chat ID where you'd like to send bot status updates.
     topic: 1234 # Optional, topic you'd like to use for those updates.
+  status_message: Spotify and YouTube Music are not being nice to multiple aggregation services including Odesli! 😤 (the one I'm using for converting music links!)\nI'll still try to convert those links and might fail. Hang tight while they fix their oopsie! 💛
 links:
   - name: Example # Display name of the website, ie.: FurAffinity
     origins: # Base URLs that must be converted, can be a single one as long as it stays an array
@@ -90,7 +91,7 @@ links:
 apis:
   odesli:
     enabled: true # Enable Odesli API-based converter
-    # api_key: *** # Not using an API key grants you only 10 reqs. per minute
+    # country: CA # https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
 features: # Disable behaviour features here
   link_recognition: true # Optional, disabled by default
   inline_queries: true # Optional, disabled by default
@@ -175,4 +176,4 @@ features: # Disable behaviour features here
     - Optional _Special function_ button
       - To expand the message with basic infos
   - Allow adding unsupported APIs to config
-    > Probably through _config.yaml_.(apis.base_url+api_key+response_path)
+    > Probably through _config.yaml_.(apis.base_url+response_path)

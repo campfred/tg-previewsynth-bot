@@ -4,6 +4,9 @@ about:
   # status_updates: # Optional
   #   chat: -12345678901234
   #   # topic: 1234 # Optional
+  # status_message: | # Optional
+  #   Spotify and YouTube Music are not being nice to multiple aggregation services, including Odesli! 🫠 <i>(the one I'm using for converting music links!)</i>
+  #   I'll still try to convert those links and might fail. So, hang tight while they fix their oopsie! 🤞
 links:
   # - name: Example
   #   origins:
@@ -50,7 +53,8 @@ links:
       - https://vxtwitter.com
       - https://fixupx.com
       - https://girlcockx.com
-			- https://xeezz.com
+      - https://stupidpenisx.com
+      - https://xeezz.com
       - https://xcancel.com
   - name: Instagram
     origins:
@@ -58,34 +62,33 @@ links:
     destinations:
       - https://eeinstagram.com
       - https://kkinstagram.com
-      - https://ddinstagram.com
-		settings:
-			expand: false
+    settings:
+      expand: false
   - name: TikTok
     origins:
       - https://tiktok.com
     destinations:
       - https://tfxktok.com
+      - https://vxtiktok.com
       - https://tiktokez.com
   - name: Snapchat
     origins:
-       - https://snapchat.com
-     destinations:
-       - https://snapchatez.com
-   - name: Imgur
-     origins:
-       - https://imgur.com
-     destinations:
-       - https://imgurez.com
-   - name: IFunny
-     origins:
-       - https://ifunny.com
-     destinations:
-       - https://ifunnyez.co.com
-apis:
-  odesli:
-    enabled: true
-    # api_key: *** # Not using an API key grants you only 10 reqs. per minute
+      - https://snapchat.com
+    destinations:
+      - https://snapchatez.com
+  - name: Imgur
+    origins:
+      - https://imgur.com
+    destinations:
+      - https://imgurez.com
+  - name: IFunny
+    origins:
+      - https://ifunny.com
+    destinations:
+      - https://ifunnyez.co.com
+odesli:
+  enabled: true
+  country: CA # Optional, see https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
 features:
   link_recognition: true
   inline_queries: true

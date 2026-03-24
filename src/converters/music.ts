@@ -1,30 +1,36 @@
 import { getLogger, Logger } from "@logtape/logtape"
 import { CacheManager } from "../managers/cache.ts"
-import { OdesliResponse } from "../types/odesli.ts"
-import { ConversionTypes, LinkConverter } from "../types/types.ts"
+import { ConversionTypes, LinkConverter, OdesliConfiguration, OdesliCountryCode } from "../types/types.ts"
 import { SimpleLinkConverter } from "./simple.ts"
 import { LogCategories } from "../managers/logging.ts"
+import Odesli from "odesli.js"
+import { OdesliDestinationsURLs, OdesliOriginsURLs } from "../types/odesli.ts"
 
 const CACHE: CacheManager = CacheManager.Instance
 const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.APIS]).with({ api: "Odesli" })
 
-export interface APILinkConverter extends LinkConverter
-{
-	readonly base_url: URL
-	readonly api_key: string
-}
-
-export class OdesliMusicConverter extends SimpleLinkConverter implements APILinkConverter
+export class OdesliMusicConverter extends SimpleLinkConverter implements LinkConverter
 {
 	override readonly type: ConversionTypes = ConversionTypes.API;
-	readonly base_url: URL = new URL("/v1-alpha.1/links", "https://api.song.link");
-	readonly api_key: string = "";
+	readonly odesli: Odesli
+	readonly country: OdesliCountryCode
 
-	constructor (name: string, origins: URL[], destinations: URL[], base_url?: URL, api_key?: string)
+	constructor (config?: OdesliConfiguration)
 	{
-		super(name, origins, [], destinations)
-		if (api_key !== undefined) this.api_key = api_key
-		if (base_url !== undefined) this.base_url = new URL(base_url)
+		super("Odesli", OdesliOriginsURLs, [], OdesliDestinationsURLs)
+		const defaultCountry: OdesliCountryCode = Odesli.getCountryOptions()[0].code
+		this.country = config?.country && Odesli.getCountryOptions().some(opt => opt.code === config.country)
+			? config.country as OdesliCountryCode
+			: defaultCountry
+		LOGGER.debug(`Using country ${ this.country } for Odesli API requests.`)
+		this.odesli = new Odesli({
+			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }) // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
+		})
+	}
+
+	public getSupportedLinks (): URL[]
+	{
+		return this.origins
 	}
 
 	/**
@@ -37,39 +43,33 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements APILink
 	{
 		if (this.isSourceSupported(link))
 		{
-			// console.debug(`Converting link…\n\t${ link }`)
 			LOGGER.debug(`Converting link…\n\t${ link }`)
 			const originalLinkCleaned: URL = this.cleanLink(link)
-			// const cachedLinksFromOriginal: Map<string, string> | undefined = CACHE.getAll(link)
 			const cachedLinksFromOriginal: Map<string, string> | undefined = CACHE.getAll(originalLinkCleaned)
 			if (cachedLinksFromOriginal?.has(this.defaultDestination.hostname))
-			{
-				const cachedLink = cachedLinksFromOriginal.get(this.defaultDestination.hostname)
-				if (cachedLink) return new URL(cachedLink)
-			}
-
-			const requestURL: URL = new URL(this.base_url)
-			requestURL.searchParams.append("songIfSingle", "true")
-			requestURL.searchParams.append("url", encodeURI(this.cleanLink(link).toString()))
+				return new URL(cachedLinksFromOriginal.get(this.defaultDestination.hostname)!)
 
 			try
 			{
-				// console.debug(`Sending request to API…`)
 				LOGGER.debug(`Sending request to API…`)
-				// console.debug(`GET ${ requestURL }`)
-				LOGGER.debug(`GET ${ requestURL }`)
-				const response: OdesliResponse = await (await fetch(requestURL.toString())).json()
-				const newLink: URL = new URL(response.pageUrl)
-				// console.debug(`\t${ newLink }`)
+				const song = await this.odesli.fetch(link.toString(), { country: this.country })
+
+				const parsedSong = Array.isArray(song) ? song[0] : song
+				const pageUrl = parsedSong && typeof parsedSong === "object" && "pageUrl" in parsedSong
+					? (parsedSong as { pageUrl: string }).pageUrl
+					: undefined
+
+				if (!pageUrl)
+					throw new Error("Odesli API response does not contain a pageUrl")
+
+				const newLink: URL = new URL(pageUrl)
 				LOGGER.debug(`\t${ newLink }`)
 				CACHE.add(originalLinkCleaned, newLink)
 				return newLink
 			} catch (error)
 			{
-				// console.error(error)
 				LOGGER.error(String(error))
-				// console.error(`Error with ${ this.name } API, maybe the link doesn't belong to a known song.`)
-				LOGGER.error(`Error with API { api }, maybe the link doesn't belong to a known song.`)
+				LOGGER.error(`Error with API ${ this.name }, maybe the service is having issues.`)
 				throw new Error("API error")
 			}
 		} else throw new Error("Unhandled link")

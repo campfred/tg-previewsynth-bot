@@ -115,7 +115,7 @@ Deno.test("FurTrack user photography page translation", async function (): Promi
 
 Deno.test("Music-specific test case", async (): Promise<void> =>
 {
-	const Converter: OdesliMusicConverter = new OdesliMusicConverter("Odesli", [new URL("https://open.spotify.com")], [new URL("https://song.link")])
+	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
 	const SpotifyShareLink = new URL("https://open.spotify.com/intl-fr/track/4zbInBD4rY7tYPJ16LVxdh?si=3ca28df1bfa044db")
 	const OdesliConvertedLink = new URL("https://song.link/s/4zbInBD4rY7tYPJ16LVxdh")
 	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)
@@ -123,7 +123,7 @@ Deno.test("Music-specific test case", async (): Promise<void> =>
 
 Deno.test("New Spotify share link test case", async (): Promise<void> =>
 {
-	const Converter: OdesliMusicConverter = new OdesliMusicConverter("Odesli", [new URL("https://spotify.link"), new URL("https://spotify.app.link")], [new URL("https://song.link")])
+	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
 	const SpotifyShareLink = new URL("https://spotify.link/tNTU1GlxwXb")
 	const OdesliConvertedLink = new URL("https://song.link/s/544TSCvEmOhC0favdRlHuQ")
 	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)

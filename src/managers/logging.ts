@@ -62,7 +62,7 @@ export async function setupLoggingWithTelegramMessages (bot: BotManager, config:
 			{
 				if (bot.Itself.isInited()) bot.Itself.api.sendMessage(
 					config.StatusUpdatesChatID,
-					`Oh no! Something happened! 🫠\n\n<blockquote>\n${ record.message }\n</blockquote>\n\nPlease check the logs for more details. 📜`,
+					`Oh no! Something happened! 🫠\n\n<blockquote>${ record.message }</blockquote>\n\nPlease check the logs for more details. 📜`,
 					{ parse_mode: "HTML", ...config.StatusUpdatesMessagesOptions }
 				)
 			}

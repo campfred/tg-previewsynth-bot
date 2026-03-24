@@ -31,8 +31,7 @@ export class CacheManager
 		const destinations: Map<string, string> = this._Cache.get(originString) || new Map<string, string>()
 		destinations.set(new URL(destinationString).hostname, destinationString)
 		this._Cache.set(originString, destinations)
-		// console.debug(`Added ${ originString } to cache as ${ destinationString }`)
-		logger.debug("Added { origin } to cache as { destination }")
+		logger.debug(`Added ${ origin } to cache as ${ destination }`)
 	}
 
 	/**
@@ -45,8 +44,7 @@ export class CacheManager
 		const originString: string = origin.toString()
 		const logger: Logger = LOGGER.with({ origin: originString })
 
-		// console.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for ${ originString }.`)
-		logger.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for { origin }.`)
+		logger.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for ${ origin }`)
 		if (this._Cache.has(originString)) STATS.countCacheHit()
 		else STATS.countCacheMiss()
 
@@ -63,8 +61,7 @@ export class CacheManager
 		const originString: string = origin.toString()
 		const logger: Logger = LOGGER.with({ origin: originString })
 
-		// console.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for ${ originString }.`)
-		logger.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for { origin }.`)
+		logger.debug(`Cache ${ this._Cache.has(originString) ? "hit" : "miss" } for ${ origin }`)
 		if (this._Cache.has(originString)) STATS.countCacheHit()
 		else STATS.countCacheMiss()
 

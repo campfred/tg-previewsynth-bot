@@ -1,8 +1,9 @@
-import { Bot, GrammyError, HttpError, NextFunction } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
+import { Bot, GrammyError, HttpError, NextFunction } from "@grammy/grammy"
 import { BotActions, CustomContext, EnvironmentVariables } from "../types/types.ts"
 import { ConfigurationManager } from "./config.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 import { LogCategories, setupLoggingWithTelegramMessages } from "./logging.ts"
+import { generateStatsMessageContents } from "../actions/admin.ts"
 
 const CONFIG: ConfigurationManager = ConfigurationManager.Instance
 const LOGGER: Logger = getLogger(LogCategories.BOT)
@@ -29,7 +30,6 @@ export class BotManager
 	{
 		const logger: Logger = LOGGER.with({ action: "initializing" })
 
-		// console.debug("Initializing bot…")
 		logger.debug("Initializing bot… 🏃")
 		this._Bot = new Bot<CustomContext>( // https://grammy.dev/guide/context#transformative-context-flavors
 			Deno.env.get(EnvironmentVariables.BOT_TOKEN.toUpperCase())
@@ -52,9 +52,7 @@ export class BotManager
 			else if (error instanceof HttpError) errorMessage += (`Web error with Telegram's API : ${ error }`)
 			else errorMessage += (`Unknown error : ${ error }`)
 
-			// console.error(errorMessage)
 			logger.error(errorMessage)
-			// this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, errorMessage, CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
 		})
 
 		this._Bot.use(function (ctx: CustomContext, next: NextFunction)
@@ -62,7 +60,8 @@ export class BotManager
 			ctx.config = {
 				botDeveloper: CONFIG.About.owner,
 				isDeveloper: ctx.from?.id === CONFIG.About.owner,
-				codeRepoURL: new URL(CONFIG.About.code_repo)
+				codeRepoURL: new URL(CONFIG.About.code_repo),
+				statusMessage: CONFIG.About.status_message || null
 			}
 			next()
 		})
@@ -71,7 +70,7 @@ export class BotManager
 		{
 			await this._Bot.api.sendMessage(
 				CONFIG.StatusUpdatesChatID,
-				`<b>Bot online! 🎉</b>\n${ CONFIG.getConvertersListForMessage() }\n${ CONFIG.getFeaturesListForMessage() }`,
+				`<b>Bot online! 🎉</b>\n${ CONFIG.getConvertersListForMessage() }\n${ CONFIG.getFeaturesListForMessage() }${ CONFIG.About.status_message ? `\n\n<blockquote><b>ℹ️ Status message</b>\n${ CONFIG.About.status_message }</blockquote>` : "" }`,
 				{ parse_mode: "HTML", ...CONFIG.StatusUpdatesMessagesOptions }
 			)
 		} catch (error)
@@ -81,11 +80,8 @@ export class BotManager
 			this._Bot.stop()
 			Deno.exit(1)
 		}
-		// console.info("Bot online!")
 		logger.info("Bot online! 👀")
 		await setupLoggingWithTelegramMessages(this, CONFIG)
-
-		// this._Bot.api.setMyDefaultAdministratorRights({ rights: { can_post_messages: true }, for_channels: true })
 	}
 
 	/**
@@ -96,7 +92,6 @@ export class BotManager
 	{
 		const logger: Logger = LOGGER.with({ action: "loading composer", name: actionsComposer.Name })
 		this._Bot.use(actionsComposer.Composer)
-		// console.debug(`Loaded composer ${ actionsComposer.Name }!`)
 		logger.debug(`Loaded composer {name}! ✅`)
 	}
 
@@ -107,9 +102,12 @@ export class BotManager
 	{
 		const logger = LOGGER.with({ action: "shutting down" })
 
-		// console.info(`Bot shutting down! (${ reason })`)
 		logger.info(`Bot shutting down! (${ reason })`)
-		if (this._Bot.isInited()) this._Bot.api.sendMessage(CONFIG.StatusUpdatesChatID, "Bot shutting down!\nGood night! 💤", CONFIG.About.status_updates?.topic ? { message_thread_id: CONFIG.About.status_updates.topic } : {})
+		if (this._Bot.isInited()) this._Bot.api.sendMessage(
+			CONFIG.StatusUpdatesChatID,
+			"<b>Bot shutting down! Good night! 💤</b>" + generateStatsMessageContents(),
+			{ parse_mode: "HTML", ...CONFIG.StatusUpdatesMessagesOptions }
+		)
 		if (this._Bot.isRunning()) this._Bot.stop()
 	}
 
