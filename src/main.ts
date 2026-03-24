@@ -1,9 +1,7 @@
 import "@std/dotenv/load"
-import { sleep } from "https://deno.land/x/sleep@v1.3.0/mod.ts"
+import { sleep } from "@michael-spengler/sleep"
 import { getLogger, Logger } from "@logtape/logtape"
-// import { AdminActions } from "./actions/admin.ts"
 import { ConfigurationManager } from "./managers/config.ts"
-// import { MAIN_COMMANDS_LIST, MainActions } from "./actions/main.ts"
 import { BotManager } from "./managers/bot.ts"
 import { AdminActions } from "./actions/admin.ts"
 import { MainActions, MainCommandsDetails } from "./actions/main.ts"
@@ -31,11 +29,9 @@ const LOGGER: Logger = getLogger(LogCategories.BOT)
 if (Deno.env.get(EnvironmentVariables.NODE_ENV) === "development")
 {
 	const waitTime: number = 3
-	// console.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
 	LOGGER.debug(`Waiting ${ waitTime } seconds before starting the bot to prevent sessions conflicts…`)
 	for (let seconds = waitTime; seconds > 0; seconds--)
 	{
-		// console.debug(`${ seconds }…`)
 		LOGGER.debug(`${ seconds }…`)
 		await sleep(1)
 	}
@@ -46,5 +42,4 @@ BOT.loadActionsComposer(new AdminActions())
 BOT.loadActionsComposer(new MainActions())
 BOT.Itself.api.setMyCommands(MainCommandsDetails)
 BOT.Itself.start()
-// console.info("Bot started! Have fun! 🚀")
 LOGGER.info("Bot started! Have fun! 🚀")

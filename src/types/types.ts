@@ -1,4 +1,4 @@
-import { Composer, Context } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
+import { Composer, Context } from "@grammy/grammy"
 import { SimpleLinkConverterSettings } from "../converters/simple.ts"
 
 export enum EnvironmentVariables
@@ -31,17 +31,20 @@ export type LinkConfiguration = {
 export type APIConfiguration = {
 	base_url?: string
 	// base_url: string
-	api_key?: string
 	// response_path: string
 	enabled?: boolean
 }
-export type APIsConfiguration = { [api: string]: APIConfiguration }
+export type OdesliConfiguration = APIConfiguration & {
+	country?: string
+}
+// export type APIsConfiguration = { [api: string]: APIConfiguration }
 export type FeaturesConfiguration = { link_recognition: boolean, inline_queries: boolean, stats: boolean }
-export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number } }
+export type AboutConfiguration = { code_repo: string; owner: number; status_updates?: { chat: number; topic?: number }; status_message?: string }
 
 export type Configuration = {
 	links: LinkConfiguration[]
-	apis: APIsConfiguration
+	odesli: OdesliConfiguration
+	// apis: APIsConfiguration
 	features: FeaturesConfiguration
 	about: AboutConfiguration
 }
@@ -56,6 +59,7 @@ export interface BotConfig
 	botDeveloper: number
 	isDeveloper: boolean
 	codeRepoURL: URL
+	statusMessage: string | null
 }
 
 export type CustomContext = Context & { config: BotConfig }

@@ -14,6 +14,14 @@ export const OdesliOrigins: string[] = [
 	"https://soundcloud.com",
 	"https://music.amazon.com",
 ]
+export const OdesliOriginsURLs: URL[] = OdesliOrigins.map(origin => new URL(origin))
+
+// Provides a list of expected output domains
+export const OdesliDestinations: string[] = [
+	"https://song.link",
+	"https://album.link"
+]
+export const OdesliDestinationsURLs: URL[] = OdesliDestinations.map(destination => new URL(destination))
 
 // Define the Platform type as a union of string literals
 export type OdesliPlatform =

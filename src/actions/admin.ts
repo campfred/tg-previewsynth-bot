@@ -1,4 +1,4 @@
-import { CommandContext, Composer } from "https://deno.land/x/grammy@v1.38.3/mod.ts"
+import { CommandContext, Composer } from "@grammy/grammy"
 import { CustomContext, BotActions, LogLevels } from "../types/types.ts"
 import { ConfigurationManager } from "../managers/config.ts"
 import { getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
@@ -20,6 +20,40 @@ export enum AdminCommands
 	CACHE_CLEAR = "clear",
 	CONFIG_SAVE = "save",
 	CONFIG_RELOAD = "reload",
+}
+
+/**
+ * Generates the message contents for the stats command.
+ * @returns Message string to insert into an outgoing response to a user.
+ */
+export function generateStatsMessageContents (): string
+{
+	let message: string = ""
+	message += "\n\n<blockquote><b>⌨️ Command usage</b>"
+	if (STATS.CommandsUsage.size === 0) message += "\nNo commands used yet."
+	else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
+	message += "</blockquote>"
+
+	message += "\n\n<blockquote><b>💬 Conversion methods</b>"
+	if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion methods used yet."
+	else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
+	message += "</blockquote>"
+
+	message += "\n\n<blockquote><b>🔗 Links</b>"
+	if (STATS.LinkConversionUsage.size === 0) message += "\nNo links converted yet."
+	else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
+	message += "</blockquote>"
+
+	message += "\n\n<blockquote><b>🗃️ Cache</b>"
+	message += `\n${ CACHE.size } links cached`
+	message += `\n${ STATS.CacheHits } hits`
+	message += `\n${ STATS.CacheMisses } misses`
+	if (STATS.CacheHits > 0 || STATS.CacheMisses > 0) message += `\n${ Math.round(STATS.CacheHitRatio * 100) }% hit ratio`
+	message += "</blockquote>"
+
+	message += `\n\nBtw, I've been up for ${ STATS.UpTime.round({ largestUnit: "days", smallestUnit: "seconds" }).toLocaleString("en") }! 🚀`
+
+	return message
 }
 
 export class AdminActions implements BotActions
@@ -45,7 +79,6 @@ export class AdminActions implements BotActions
 		{
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(AdminCommands.MAP_TOGGLE, ctx)
-			// console.debug(`Incoming /${ AdminCommands.MAP_TOGGLE } by ${ getExpeditorDebugString(ctx) } for "${ ctx.match }"`)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
 			try
@@ -53,8 +86,6 @@ export class AdminActions implements BotActions
 				await ctx.react("🤔")
 			} catch (error)
 			{
-				// console.error("An error occurred while trying to react to a message.")
-				// console.error(error)
 				logReactionError(error, ctx)
 				reactionsAllowed = false
 			}
@@ -74,22 +105,16 @@ export class AdminActions implements BotActions
 									await ctx.react("🫡")
 								} catch (error)
 								{
-									// console.error("An error occurred while trying to react to a message.")
-									// console.error(error)
 									logReactionError(error, ctx)
 									reactionsAllowed = false
 								}
 							}
 							map.enabled = state === undefined ? !map.enabled : state
-							// const inlineKeyboard: InlineKeyboard = new InlineKeyboard().text(map.enabled ? "Disable ❌" : "Enable ✅", `${map.enabled ? COMMANDS.MAP_DISABLE : COMMANDS.MAP_ENABLE} ${map.destination.hostname}`);
-							// ctx.reply(`${map.name} is now ${map.enabled ? "enabled! ✅" : "disabled! ❌"}`, { reply_parameters: { message_id: ctx.msgId }, reply_markup: inlineKeyboard });
 							try
 							{
 								await ctx.reply(`${ map.name } is now ${ map.enabled ? "enabled! ✅" : "disabled! ❌" }`, { reply_parameters: { message_id: ctx.msgId } })
 							} catch (error)
 							{
-								// console.error("An error occurred while trying to reply to a message.")
-								// console.error(error)
 								logReplyError(error, ctx)
 							}
 						}
@@ -116,9 +141,7 @@ export class AdminActions implements BotActions
 		{
 			if (ctx.config.isDeveloper)
 			{
-				// let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CACHE_CLEAR, ctx)
-				// console.debug(`Incoming /${ AdminCommands.CACHE_CLEAR } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
 
 				try
@@ -126,10 +149,7 @@ export class AdminActions implements BotActions
 					await ctx.react("🔥")
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to react to a message.")
-					// console.error(error)
 					logReactionError(error, ctx)
-					// reactionsAllowed = false
 				}
 				const cacheSize: number = CACHE.size
 				CACHE.clear()
@@ -138,8 +158,6 @@ export class AdminActions implements BotActions
 					await ctx.reply(`Cache cleared! 🧹\nIt's now all nice and tidy in here!~\n<blockquote>${ cacheSize } links were cleared from the cache. 💡</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to reply to a message.")
-					// console.error(error)
 					logReplyError(error, ctx)
 				}
 			}
@@ -149,9 +167,7 @@ export class AdminActions implements BotActions
 		{
 			if (ctx.config.isDeveloper)
 			{
-				// let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.STATS, ctx)
-				// console.debug(`Incoming /${ AdminCommands.STATS } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
 
 				try
@@ -159,50 +175,18 @@ export class AdminActions implements BotActions
 					await ctx.react("🤓")
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to react to a message.")
-					// console.error(error)
 					logReactionError(error, ctx)
-					// reactionsAllowed = false
 				}
 
 				let message: string = `Here's the current stats since my last boot up${ Math.random() < 0.25 ? ", nerd! 🤓" : "! 👀" }`
 
-				message += "\n\n<blockquote><b>⌨️ Command usage</b>"
-				if (STATS.CommandsUsage.size === 0) message += "\nNo commands used yet."
-				else for (const [command, count] of STATS.CommandsUsage) message += `\n/${ command } : ${ count }`
-				message += "</blockquote>"
-
-				message += "\n\n<blockquote><b>💬 Conversion methods</b>"
-				if (STATS.ConversionMethodsUsage.size === 0) message += "\nNo conversion methods used yet."
-				else for (const [method, count] of STATS.ConversionMethodsUsage) message += `\n${ method } : ${ count }`
-				message += "</blockquote>"
-
-				// message += "\n\n<blockquote><b>🛠️ Conversion types</b>"
-				// if (STATS.ConversionTypeUsage.size === 0) message += "\nNo conversion types used yet."
-				// else for (const [type, count] of STATS.ConversionTypeUsage) message += `\n${ type } : ${ count }`
-				// message += "</blockquote>"
-
-				message += "\n\n<blockquote><b>🔗 Links</b>"
-				if (STATS.LinkConversionUsage.size === 0) message += "\nNo links converted yet."
-				else for (const [link, count] of STATS.LinkConversionUsage) message += `\n${ link } : ${ count }`
-				message += "</blockquote>"
-
-				message += "\n\n<blockquote><b>🗃️ Cache</b>"
-				message += `\n${ CACHE.size } links cached`
-				message += `\n${ STATS.CacheHits } hits`
-				message += `\n${ STATS.CacheMisses } misses`
-				if (STATS.CacheHits > 0 || STATS.CacheMisses > 0) message += `\n${ Math.round(STATS.CacheHitRatio * 100) }% hit ratio`
-				message += "</blockquote>"
-
-				message += `\n\nBtw, I've been up for ${ STATS.UpTime.round({ largestUnit: "years", smallestUnit: "seconds" }).toLocaleString("en") }! 🚀`
+				message += generateStatsMessageContents()
 
 				try
 				{
 					await ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to reply to a message.")
-					// console.error(error)
 					logReplyError(error, ctx)
 				}
 			}
@@ -220,7 +204,6 @@ export class AdminActions implements BotActions
 			{
 				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_SAVE, ctx)
-				// console.debug(`Incoming /${ AdminCommands.CONFIG_SAVE } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
 
 				try
@@ -228,8 +211,6 @@ export class AdminActions implements BotActions
 					await ctx.react("⚡")
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to react to a message.")
-					// console.error(error)
 					logReactionError(error, ctx)
 					reactionsAllowed = false
 				}
@@ -243,8 +224,6 @@ export class AdminActions implements BotActions
 							await ctx.react("🎉")
 						} catch (error)
 						{
-							// console.error("An error occurred while trying to react to a message.")
-							// console.error(error)
 							logReactionError(error, ctx)
 							reactionsAllowed = false
 						}
@@ -254,14 +233,10 @@ export class AdminActions implements BotActions
 						await ctx.reply("Configuration is saved! 💛", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
-						// console.error("An error occurred while trying to reply to a message.")
-						// console.error(error)
 						logReplyError(error, ctx)
 					}
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to save the configuration.")
-					// console.error(error)
 					logAction(LogLevels.ERROR, "trying to save the configuration", String(error), ctx)
 					if (reactionsAllowed)
 					{
@@ -270,8 +245,6 @@ export class AdminActions implements BotActions
 							await ctx.react("💔")
 						} catch (error)
 						{
-							// console.error("An error occurred while trying to react to a message.")
-							// console.error(error)
 							logReactionError(error, ctx)
 							reactionsAllowed = false
 						}
@@ -281,8 +254,6 @@ export class AdminActions implements BotActions
 						await ctx.reply(`Failed to save configuration! 😱\n\n<blockquote>Check your configuration file's permissions or if it is mounted in read-only mode. 💡</blockquote>\n\nI will however continue running tho. No worries! 💛\n\nHere's the configuration's content as of now if you wanna copy it. ✨\n\n<blockquote>${ CONFIG.getConfigurationJson() }</blockquote>`, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
-						// console.error("An error occurred while trying to reply to a message.")
-						// console.error(error)
 						logReplyError(error, ctx)
 					}
 				}
@@ -295,7 +266,6 @@ export class AdminActions implements BotActions
 			{
 				let reactionsAllowed: boolean = true
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.CONFIG_RELOAD, ctx)
-				// console.debug(`Incoming /${ AdminCommands.CONFIG_RELOAD } by ${ getExpeditorDebugString(ctx) }`)
 				loggerCommand.debug(COMMAND_LOG_STRING)
 
 				try
@@ -303,8 +273,6 @@ export class AdminActions implements BotActions
 					await ctx.react("⚡")
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to react to a message.")
-					// console.error(error)
 					logReactionError(error, ctx)
 					reactionsAllowed = false
 				}
@@ -318,8 +286,6 @@ export class AdminActions implements BotActions
 							await ctx.react("🎉")
 						} catch (error)
 						{
-							// console.error("An error occurred while trying to react to a message.")
-							// console.error(error)
 							logReactionError(error, ctx)
 							reactionsAllowed = false
 						}
@@ -329,14 +295,10 @@ export class AdminActions implements BotActions
 						await ctx.reply("Configuration reloaded! 🚀", { reply_parameters: { message_id: ctx.msgId } })
 					} catch (error)
 					{
-						// console.error("An error occurred while trying to reply to a message.")
-						// console.error(error)
 						logReplyError(error, ctx)
 					}
 				} catch (error)
 				{
-					// console.error("An error occurred while trying to load the configuration.")
-					// console.error(error)
 					logAction(LogLevels.ERROR, "trying to load the configuration", String(error), ctx)
 					if (reactionsAllowed)
 					{
@@ -345,8 +307,6 @@ export class AdminActions implements BotActions
 							await ctx.react("💔")
 						} catch (error)
 						{
-							// console.error("An error occurred while trying to react to a message.")
-							// console.error(error)
 							logReactionError(error, ctx)
 							reactionsAllowed = false
 						}
@@ -356,8 +316,6 @@ export class AdminActions implements BotActions
 						await ctx.reply("Failed to load configuration! 😱\nMaybe the file is inaccessible?\n\n<blockquote>Check the configuration file's permissions or if it is not mounted. 💡</blockquote>\n\nI will continue running as is, but you may wanna fix this soon. 💛", { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
 					} catch (error)
 					{
-						// console.error("An error occurred while trying to reply to a message.")
-						// console.error(error)
 						logReplyError(error, ctx)
 					}
 				}
