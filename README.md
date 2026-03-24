@@ -168,6 +168,7 @@ features: # Disable behaviour features here
 | `PREVIEWSYNTH_TG_BOT_TOKEN`     | _(none)_        | Telegram bot token from [@BotFather](https://BotFather.t.me). |
 | `PREVIEWSYNTH_CONFIG_FILE_PATH` | `./config.yaml` | Path to the configuration file.                               |
 | `PREVIEWSYNTH_LOG_LEVEL`        | _(none)_        | Logging level to use for software logging.                    |
+| `ODESLI_API_KEY`                | _(none)_        | API key for Odesli API-based converter.          |
 
 ## Upcoming improvements
 
@@ -177,3 +178,8 @@ features: # Disable behaviour features here
       - To expand the message with basic infos
   - Allow adding unsupported APIs to config
     > Probably through _config.yaml_.(apis.base_url+response_path)
+
+## Contributing
+
+Contributions are very welcome!
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details on how to contribute.
