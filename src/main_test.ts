@@ -43,6 +43,14 @@ Deno.test("Full chain conversion", async (): Promise<void> =>
 	assertEquals(await FurAffinityConverter.parseLinkDefault(Link), Result)
 })
 
+Deno.test("Parsing logic with unsupported link", async (): Promise<void> =>
+{
+	const Link: URL = new URL("https://kktiktok.com/@/video/7427030188069883179")
+	const Converter: SimpleLinkConverter = new SimpleLinkConverter("TikTok", [new URL("https://tiktok.com/")], [], [new URL("https://vxtiktok.com/")])
+	// Should reject with "Unsupported link" instead of converting the unsupported link into a vxtiktok.com link.
+	assertRejects(async () => await Converter.parseLinkDefault(Link), Error, "Unsupported link")
+})
+
 Deno.test("TikTok-specific test case", async (): Promise<void> =>
 {
 	const Link: URL = new URL("https://vm.tiktok.com/ZMhtQT3Yf/")
