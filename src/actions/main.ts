@@ -35,6 +35,23 @@ async function sendStatusMessage (ctx: CommandContext<CustomContext> | HearsCont
 	if (ctx.config.statusMessage && ctx.chat.type == "private") await ctx.reply("<b>Oh, btw!</b>\n" + ctx.config.statusMessage, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
 }
 
+function isTargetedCommand (ctx: CommandContext<CustomContext>, command: string): boolean
+{
+	// private chat: always allow
+	if (ctx.chat.type === "private") return true
+
+	// group/supergroup: require /cmd@botname
+	const text = ctx.message?.text
+	if (!text) return false
+
+	const username = BOT.Itself.botInfo.username
+	if (!username) return false
+
+	const normalized = text.trim().toLowerCase()
+	const wanted = `/${ command.toLowerCase() }@${ username.toLowerCase() }`
+	return normalized === wanted || normalized.startsWith(`${ wanted } `)
+}
+
 /**
  * Process an incoming link conversion request.
  * @param ctx Command or Hears context.
@@ -192,8 +209,9 @@ export class MainActions implements BotActions
 		/**
 		 * Start command
 		 */
-		this.Composer.chatType("private").command(MainCommands.START, async function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.START, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.START)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -241,6 +259,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.PING)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -272,8 +291,9 @@ export class MainActions implements BotActions
 		/**
 		 * Get help instructions
 		 */
-		this.Composer.chatType("private").command(MainCommands.HELP, async function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.HELP, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.HELP)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.HELP, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -333,6 +353,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.command([MainCommands.LINK_CONVERT, MainCommands.LINK_EMBED], async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.LINK_CONVERT) && !isTargetedCommand(ctx, MainCommands.LINK_EMBED)) return
 			// deno-lint-ignore prefer-const
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.LINK_EMBED, ctx)
