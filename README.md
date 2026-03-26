@@ -31,6 +31,9 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 
 ## Supported commands
 
+> [!INFO]
+> Commands sent in a group must target directly the bot (like `/help@PreviewSynthBot`) to avoid conflicts with other bots in the same chat.
+
 ### Public commands
 
 - `/start`
@@ -88,10 +91,9 @@ links:
       preserveQueryParamKeys: # Optional, set query parameter keys to keep during link cleanup
         - id
         - flavour
-apis:
-  odesli:
-    enabled: true # Enable Odesli API-based converter
-    # country: CA # https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
+odesli:
+  enabled: true # Enable Odesli API-based converter
+  # country: CA # https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
 features: # Disable behaviour features here
   link_recognition: true # Optional, disabled by default
   inline_queries: true # Optional, disabled by default
