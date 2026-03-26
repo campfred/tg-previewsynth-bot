@@ -69,7 +69,14 @@ export class SimpleLinkConverter implements LinkConverter
 	 */
 	private findMatchingOrigin (link: URL): URL | undefined
 	{
-		for (const origin of this.origins) if (link.hostname.endsWith(origin.hostname) && link.pathname.startsWith(origin.pathname)) return origin
+		for (const origin of this.origins)
+		{
+			const sourceHost: string = origin.hostname.toLowerCase()
+			const linkHost: string = link.hostname.toLowerCase()
+
+			const isHostMatch: boolean = linkHost === sourceHost || linkHost.endsWith(`.${ sourceHost }`)
+			if (isHostMatch && link.pathname.startsWith(origin.pathname)) return origin
+		}
 		return undefined
 	}
 
