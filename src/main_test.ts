@@ -113,14 +113,20 @@ Deno.test("FurTrack user photography page translation", async function (): Promi
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
-Deno.test("Music-specific test case", async (): Promise<void> =>
+/**
+ * Basic test case to check that we're able to convert a music link with Odesli.
+ */
+Deno.test("Odesli-specific test case", async (): Promise<void> =>
 {
 	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
-	const SpotifyShareLink = new URL("https://open.spotify.com/intl-fr/track/4zbInBD4rY7tYPJ16LVxdh?si=3ca28df1bfa044db")
-	const OdesliConvertedLink = new URL("https://song.link/s/4zbInBD4rY7tYPJ16LVxdh")
-	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)
+	const MusicLink = new URL("https://tidal.com/track/311007944/u")
+	const OdesliConvertedLink = new URL("https://song.link/t/311007944")
+	assertEquals(await Converter.parseLinkDefault(MusicLink), OdesliConvertedLink)
 })
 
+/**
+ * There's a new share link format from Spotify, so this is testing that it is also supported by the bot.
+ */
 Deno.test("New Spotify share link test case", async (): Promise<void> =>
 {
 	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
