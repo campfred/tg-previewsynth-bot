@@ -3,7 +3,7 @@ import { BotCommand } from "@grammy/types/manage"
 import { InlineQueryResultArticle } from "@grammy/types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter, LogLevels } from "../types/types.ts"
-import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
+import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, isTargetedCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { AdminCommands } from "./admin.ts"
 import { BotManager } from "../managers/bot.ts"
@@ -192,8 +192,9 @@ export class MainActions implements BotActions
 		/**
 		 * Start command
 		 */
-		this.Composer.chatType("private").command(MainCommands.START, async function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.START, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.START)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.START, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -241,6 +242,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.PING, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.PING)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.PING, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -272,8 +274,9 @@ export class MainActions implements BotActions
 		/**
 		 * Get help instructions
 		 */
-		this.Composer.chatType("private").command(MainCommands.HELP, async function (ctx)
+		this.Composer.chatType(["private", "group", "supergroup"]).command(MainCommands.HELP, async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.HELP)) return
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.HELP, ctx)
 			loggerCommand.debug(COMMAND_LOG_STRING)
 
@@ -333,6 +336,7 @@ export class MainActions implements BotActions
 		 */
 		this.Composer.command([MainCommands.LINK_CONVERT, MainCommands.LINK_EMBED], async function (ctx)
 		{
+			if (!isTargetedCommand(ctx, MainCommands.LINK_CONVERT) && !isTargetedCommand(ctx, MainCommands.LINK_EMBED)) return
 			// deno-lint-ignore prefer-const
 			let reactionsAllowed: boolean = true
 			const loggerCommand: Logger = getLoggerForCommand(MainCommands.LINK_EMBED, ctx)

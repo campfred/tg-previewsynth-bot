@@ -1,5 +1,6 @@
 import { CallbackQueryContext, CommandContext, GrammyError, HearsContext, InlineQueryContext } from "@grammy/grammy"
 import { CustomContext, LinkConverter, LogLevels } from "./types/types.ts"
+import { BotManager } from "./managers/bot.ts"
 import { getLogger, Logger, LogLevel } from "@logtape/logtape"
 import { LogCategories } from "./managers/logging.ts"
 
@@ -113,4 +114,22 @@ export function logReplyError (error: unknown, ctx: CommandContext<CustomContext
 			ctx.leaveChat()
 			LOGGER.warn("'Left a chat because I couldn't respond to messages people were sending me.")
 		}
+}
+
+export function isTargetedCommand (ctx: CommandContext<CustomContext>, command: string): boolean
+{
+	// private chat: always allow
+	if (ctx.chat.type === "private") return true
+
+	// group/supergroup: require /cmd@botname
+	const text = ctx.message?.text
+	if (!text) return false
+
+	const bot: BotManager = BotManager.Instance
+	const username = bot.Itself.botInfo.username
+	if (!username) return false
+
+	const normalized = text.trim().toLowerCase()
+	const wanted = `/${ command.toLowerCase() }@${ username.toLowerCase() }`
+	return normalized === wanted || normalized.startsWith(`${ wanted } `)
 }

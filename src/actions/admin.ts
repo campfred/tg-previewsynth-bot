@@ -1,7 +1,7 @@
 import { CommandContext, Composer } from "@grammy/grammy"
 import { CustomContext, BotActions, LogLevels } from "../types/types.ts"
 import { ConfigurationManager } from "../managers/config.ts"
-import { getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
+import { getLoggerForCommand, isTargetedCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { CacheManager } from "../managers/cache.ts"
 import { Logger } from "@logtape/logtape"
@@ -165,6 +165,7 @@ export class AdminActions implements BotActions
 
 		this.Composer.command(AdminCommands.STATS, async function (ctx: CommandContext<CustomContext>)
 		{
+			if (!isTargetedCommand(ctx, AdminCommands.STATS)) return
 			if (ctx.config.isDeveloper)
 			{
 				const loggerCommand: Logger = getLoggerForCommand(AdminCommands.STATS, ctx)

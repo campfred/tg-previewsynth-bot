@@ -173,7 +173,8 @@ export class ConfigurationManager
 				{
 					const escapedHost: string = origin.hostname.replaceAll(".", "\\.")
 					const hostPattern: string = `(?:${ escapedHost }|(?:[a-z0-9-]+\\.)+${ escapedHost })`
-					return new RegExp(`^${ origin.protocol }\/\/${ hostPattern }${ origin.pathname.replaceAll("/", "\\/") }`, "i")
+					const escapedPath: string = origin.pathname.replaceAll("/", "\\/")
+					return new RegExp(`${ origin.protocol }\/\/${ hostPattern }${ escapedPath }(?:\\S*)`, "i")
 				}
 			)
 		)
