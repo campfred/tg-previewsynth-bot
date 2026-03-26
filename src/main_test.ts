@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertRejects } from "@std/assert"
 import { SimpleLinkConverter, SimpleLinkConverterSettings } from "./converters/simple.ts"
-import { OdesliMusicConverter } from "./converters/music.ts"
+import { OdesliMusicConverter } from "./converters/odesli.ts"
 
 type TestPlan = {
 	Link: URL,

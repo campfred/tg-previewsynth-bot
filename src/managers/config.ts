@@ -2,7 +2,7 @@ import { parse, stringify } from "@std/yaml"
 import { UserFromGetMe } from "@grammy/types/manage"
 import { AboutConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter, OdesliConfiguration } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
-import { OdesliMusicConverter } from "../converters/music.ts"
+import { OdesliMusicConverter } from "../converters/odesli.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 import { LogCategories } from "./logging.ts"
 
