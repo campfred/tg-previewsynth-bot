@@ -88,7 +88,7 @@ links:
       - https://ifunnyez.co.com
 odesli:
   enabled: true
-  country: CA # Optional, see https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
+  # country: CA # Optional, see https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
 features:
   link_recognition: true
   inline_queries: true

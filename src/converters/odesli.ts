@@ -24,7 +24,8 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 			: defaultCountry
 		LOGGER.debug(`Using country ${ this.country } for Odesli API requests.`)
 		this.odesli = new Odesli({
-			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }) // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
+			...(Deno.env.get("ODESLI_API_KEY") && { apiKey: Deno.env.get("ODESLI_API_KEY") }), // Set the apiKey property only when the environment variable is set to avoid issues with the constructor validation
+			metrics: false // Disable Odesli internal metrics interval to avoid Deno leak warnings in tests, it's not like I'm using the metrics feature anyway
 		})
 	}
 

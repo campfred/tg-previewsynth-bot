@@ -2,7 +2,7 @@ import { parse, stringify } from "@std/yaml"
 import { UserFromGetMe } from "@grammy/types/manage"
 import { AboutConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter, OdesliConfiguration } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
-import { OdesliMusicConverter } from "../converters/music.ts"
+import { OdesliMusicConverter } from "../converters/odesli.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 import { LogCategories } from "./logging.ts"
 
@@ -169,7 +169,12 @@ export class ConfigurationManager
 		LOGGER.debug("Generating regular expressions for supported origins…")
 		const originsAsRegExps: RegExp[] = this.AllConverters.flatMap(
 			(converter: LinkConverter): RegExp[] => converter.origins.map(
-				(origin): RegExp => new RegExp(`${ origin.protocol }\/\/.*${ origin.hostname.replaceAll(".", "\\.") }.*`, "i")
+				(origin): RegExp =>
+				{
+					const escapedHost: string = origin.hostname.replaceAll(".", "\\.")
+					const hostPattern: string = `(?:${ escapedHost }|(?:[a-z0-9-]+\\.)+${ escapedHost })`
+					return new RegExp(`^${ origin.protocol }\/\/${ hostPattern }${ origin.pathname.replaceAll("/", "\\/") }`, "i")
+				}
 			)
 		)
 		return originsAsRegExps
