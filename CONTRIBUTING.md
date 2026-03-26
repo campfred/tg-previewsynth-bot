@@ -29,3 +29,39 @@ Just, please, make sure you follow these guidelines while proposing your changes
 >
 > Also, since this project is primarly meant for usage by humans, there is an implicit expectation that the project's focus remains toward humans.
 > Therefore, no contribution solely meant to aid AI-assisted tools usage (so, without bringing any added value for direct usage or consumption by humans) will be accepted.
+
+## Development setup guide
+
+1.  Fork the repository
+2.  Clone the forked repository
+    ```shell
+    git clone https://github.com/campfred/tg-previewsynth-bot.git
+    cd tg-previewsynth-bot
+    ```
+3.  Install Deno
+    ```shell
+    brew install deno # or any other method you prefer, see https://docs.deno.com/runtime/getting_started/installation/
+    ```
+4.  Install dependencies
+    ```shell
+    deno task install
+    ```
+5.  Create a configuration file
+    ```shell
+    cp config.yaml.example config.yaml
+    ```
+6.  Set environment variables
+    ```shell
+    export PREVIEWSYNTH_TG_BOT_TOKEN={YOUR_BOT_TOKEN_FROM_@BOTFATHER}
+    ```
+7.  Run the application in development mode
+    ```shell
+    deno task dev
+    ```
+8.  Make your changes
+9.  Test your changes
+    ```shell
+    deno task test
+    ```
+10. Commit and push your changes to your forked repository
+11. Create a pull request to merge in the main repository's `main` branch
