@@ -121,9 +121,6 @@ Deno.test("FurTrack user photography page translation", async function (): Promi
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
-/**
- * Basic test case to check that we're able to convert a music link with Odesli.
- */
 Deno.test("Odesli-specific test case", async (): Promise<void> =>
 {
 	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
@@ -144,12 +141,12 @@ Deno.test("New Spotify share link test case", async (): Promise<void> =>
 })
 
 /**
- * This test case is for verifying that the bot won't be mistakenly supporting Dropbox links like if they were Twitter links.
+ * The bot was mistakenly supporting Dropbox links like if they were Twitter (X) links at some point.
  */
 Deno.test({
 	name: "Dropbox-specific test case",
 	sanitizeResources: false,
-	fn: async (): Promise<void> =>
+	fn: (): void =>
 	{
 		const Link: URL = new URL("https://www.dropbox.com/scl/fi/rnfvbft8pp9qp0amc3lv1/Chris-Lake-Abel-Balder-Ease-My-Mind-Chris-Lake-Live-Stream-Remix-1-2.wav?rlkey=8voa0tri6b895w2iv0d4fvif0&e=4&dl=0")
 		const Converter: SimpleLinkConverter = new SimpleLinkConverter("Twitter", [new URL("https://x.com/")], [], [new URL("https://fxtwitter.com/")])
