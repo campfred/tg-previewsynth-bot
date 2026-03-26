@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "@std/assert"
+import { assert, assertEquals, assertRejects } from "@std/assert"
 import { SimpleLinkConverter, SimpleLinkConverterSettings } from "./converters/simple.ts"
 import { OdesliMusicConverter } from "./converters/music.ts"
 
@@ -133,4 +133,19 @@ Deno.test("New Spotify share link test case", async (): Promise<void> =>
 	const SpotifyShareLink = new URL("https://spotify.link/tNTU1GlxwXb")
 	const OdesliConvertedLink = new URL("https://song.link/s/544TSCvEmOhC0favdRlHuQ")
 	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)
+})
+
+/**
+ * This test case is for verifying that the bot won't be mistakenly supporting Dropbox links like if they were Twitter links.
+ */
+Deno.test({
+	name: "Dropbox-specific test case",
+	sanitizeResources: false,
+	fn: async (): Promise<void> =>
+	{
+		const Link: URL = new URL("https://www.dropbox.com/scl/fi/rnfvbft8pp9qp0amc3lv1/Chris-Lake-Abel-Balder-Ease-My-Mind-Chris-Lake-Live-Stream-Remix-1-2.wav?rlkey=8voa0tri6b895w2iv0d4fvif0&e=4&dl=0")
+		const Converter: SimpleLinkConverter = new SimpleLinkConverter("Twitter", [new URL("https://x.com/")], [], [new URL("https://fxtwitter.com/")])
+		// Should reject with "Unsupported link" instead of converting the Dropbox link into an fxtwitter.com link.
+		assertRejects(async () => await Converter.parseLinkDefault(Link), Error, "Unsupported link")
+	}
 })
