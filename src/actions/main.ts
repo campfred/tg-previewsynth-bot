@@ -3,7 +3,7 @@ import { BotCommand } from "@grammy/types/manage"
 import { InlineQueryResultArticle } from "@grammy/types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter, LogLevels } from "../types/types.ts"
-import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
+import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, isTargetedCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
 import { StatsManager } from "../managers/stats.ts"
 import { AdminCommands } from "./admin.ts"
 import { BotManager } from "../managers/bot.ts"
@@ -33,23 +33,6 @@ export const MainCommandsDetails: BotCommand[] = [
 async function sendStatusMessage (ctx: CommandContext<CustomContext> | HearsContext<CustomContext>): Promise<void>
 {
 	if (ctx.config.statusMessage && ctx.chat.type == "private") await ctx.reply("<b>Oh, btw!</b>\n" + ctx.config.statusMessage, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-}
-
-function isTargetedCommand (ctx: CommandContext<CustomContext>, command: string): boolean
-{
-	// private chat: always allow
-	if (ctx.chat.type === "private") return true
-
-	// group/supergroup: require /cmd@botname
-	const text = ctx.message?.text
-	if (!text) return false
-
-	const username = BOT.Itself.botInfo.username
-	if (!username) return false
-
-	const normalized = text.trim().toLowerCase()
-	const wanted = `/${ command.toLowerCase() }@${ username.toLowerCase() }`
-	return normalized === wanted || normalized.startsWith(`${ wanted } `)
 }
 
 /**
