@@ -62,6 +62,7 @@ links:
     destinations:
       - https://eeinstagram.com
       - https://kkinstagram.com
+      - https://kkclip.com
     settings:
       expand: false
   - name: TikTok
