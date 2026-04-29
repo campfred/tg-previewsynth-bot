@@ -19,7 +19,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
 - Instagram
-  > instagram.com ➡️ eeinstagram.com, kkinstagram.com, ddinstagram.com
+  > instagram.com ➡️ eeinstagram.com, kkinstagram.com, ddinstagram.com, kkclip.com
 - Reddit
   > reddit.com ➡️ vxreddit.com, rxddit.com
 - Twitter
