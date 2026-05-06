@@ -4,16 +4,17 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+enable-beta-ecosystems: true # https://github.com/denoland/deno/issues/26788#issuecomment-4387927088
 updates:
+  - package-ecosystem: "deno"
+    directory: "/"
+    schedule:
+      interval: "weekly"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "monthly"
-  # - package-ecosystem: "deno"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "monthly"
+      interval: "weekly"
