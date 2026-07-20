@@ -193,6 +193,27 @@ export class ConfigurationManager
 	}
 
 	/**
+	 * Get all destination hostnames as regular expressions
+	 * @returns An array containing all the supported destination hostnames for detection through regular expressions
+	 */
+	getAllLinksDestinationsAsRegExps (): RegExp[]
+	{
+		LOGGER.debug("Generating regular expressions for supported destinations…")
+		const destinationsAsRegExps: RegExp[] = this.AllConverters.flatMap(
+			(converter: LinkConverter): RegExp[] => converter.destinations.map(
+				(destination): RegExp =>
+				{
+					const escapedHost: string = destination.hostname.replaceAll(".", "\\.")
+					const hostPattern: string = `(?:${ escapedHost }|(?:[a-z0-9-]+\\.)+${ escapedHost })`
+					const escapedPath: string = destination.pathname.replaceAll("/", "\\/")
+					return new RegExp(`${ destination.protocol }\/\/${ hostPattern }${ escapedPath }(?:\\S*)`, "i")
+				}
+			)
+		)
+		return destinationsAsRegExps
+	}
+
+	/**
 	 * Translates current link converters into link configurations.
 	 * @returns Link configurations
 	 */
