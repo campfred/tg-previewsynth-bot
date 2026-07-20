@@ -18,7 +18,7 @@ const FurAffinityConverter: SimpleLinkConverter = new SimpleLinkConverter("FurAf
 Deno.test("Link expanding", async (): Promise<void> =>
 {
 	const Link: URL = new URL("https://furaffinity.net/view/58904471/")
-	const Result: URL = new URL("https://www.furaffinity.net/view/58904471/")
+	const Result: URL = new URL("https://furaffinity.net/view/58904471/")
 	assertEquals(await FurAffinityConverter.expandLink(Link), Result)
 })
 
