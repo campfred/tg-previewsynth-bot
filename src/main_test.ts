@@ -91,33 +91,33 @@ Deno.test("YouTu.be-specific test case", async function ()
 	assertEquals(await Converter.parseLinkDefault(Link), Result)
 })
 
-const FurTrackConverter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], [/^https:\/\/(www\.)?furtrack\.com\/(\w+\/)?(\w+[:/])?\w+(\(\w+\))?\//i], [new URL("https://furtrack.owo.lgbt/p/")])
+const FurTrackConverter: SimpleLinkConverter = new SimpleLinkConverter("FurTrack", [new URL("https://furtrack.com/p/")], [/^https:\/\/www\.furtrack\.com\/\w+\/(?:\w+[:/])?\w+(?:\(\w+\))?\/[^/]+/i], [new URL("https://furtrack.owo.lgbt/p/")])
 
 Deno.test("FurTrack index translation", async function (): Promise<void>
 {
 	const NavLink = new URL("https://www.furtrack.com/index/character:yin_(wolf)/880404")
-	const ConvertedLink = new URL("https://furtrack.owo.lgbt/p/880404")
+	const ConvertedLink = new URL("https://furtrack.owo.lgbt/index/character:yin_(wolf)/880404")
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
 Deno.test("FurTrack user favs page translation", async function (): Promise<void>
 {
 	const NavLink = new URL("https://www.furtrack.com/user/bark/likes/691174")
-	const ConvertedLink = new URL("https://furtrack.owo.lgbt/p/691174")
+	const ConvertedLink = new URL("https://furtrack.owo.lgbt/user/bark/likes/691174")
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
 Deno.test("FurTrack user fursuiting page translation", async function (): Promise<void>
 {
 	const NavLink = new URL("https://www.furtrack.com/user/bark/fursuiting/888628")
-	const ConvertedLink = new URL("https://furtrack.owo.lgbt/p/888628")
+	const ConvertedLink = new URL("https://furtrack.owo.lgbt/user/bark/fursuiting/888628")
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
 Deno.test("FurTrack user photography page translation", async function (): Promise<void>
 {
 	const NavLink = new URL("https://www.furtrack.com/user/bark/photography/753398")
-	const ConvertedLink = new URL("https://furtrack.owo.lgbt/p/753398")
+	const ConvertedLink = new URL("https://furtrack.owo.lgbt/user/bark/photography/753398")
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
 })
 
