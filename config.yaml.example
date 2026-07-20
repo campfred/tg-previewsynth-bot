@@ -29,7 +29,7 @@ links:
     origins:
       - https://furtrack.com/p/
     origins_regex:
-      - ^https:\/\/www\.furtrack\.com\/\w+\/(\w+[:/])?\w+(\(\w+\))?\/
+      - ^https:\/\/www\.furtrack\.com\/\w+\/(?:\w+[:/])?\w+(?:\(\w+\))?\/[^/]+
     destinations:
       - https://furtrack.owo.lgbt/p/
   - name: Reddit
@@ -44,6 +44,7 @@ links:
       - https://bsky.app
     destinations:
       - https://fxbsky.app
+      - https://vxbsky.app
   - name: Twitter
     origins:
       - https://twitter.com
@@ -60,7 +61,7 @@ links:
     origins:
       - https://instagram.com
     destinations:
-      - https://eeinstagram.com
+      - https://instagramx.com
       - https://kkclip.com
     settings:
       expand: false
@@ -69,7 +70,6 @@ links:
       - https://tiktok.com
     destinations:
       - https://tfxktok.com
-      - https://vxtiktok.com
       - https://tiktokez.com
   - name: Snapchat
     origins:

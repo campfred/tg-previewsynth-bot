@@ -375,7 +375,7 @@ export class MainActions implements BotActions
 		/**
 		 * Detects and suggests link replacements
 		 */
-		this.Composer.inlineQuery([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps()], async function (ctx: InlineQueryContext<CustomContext>): Promise<void>
+		this.Composer.inlineQuery([...CONFIG.getAllLinksOriginsAsRegExps(), ...CONFIG.getAllLinksOriginRegExps(), ...CONFIG.getAllLinksDestinationsAsRegExps()], async function (ctx: InlineQueryContext<CustomContext>): Promise<void>
 		{
 			const logger: Logger = getLoggerForCommand("inline query", ctx)
 			logger.debug(COMMAND_LOG_STRING)
@@ -391,22 +391,62 @@ export class MainActions implements BotActions
 				logger.error(String(error))
 				logger.error(`Received link { arg } is invalid, silently aborting processing it.`)
 				ctx.answerInlineQuery([])
+				return
 			}
 
 			const url: URL = new URL(ctx.match.toString())
+			logger.debug(`Parsed URL: ${ url }`)
 			const Converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
+			logger.debug(`Converter found: ${ Converter ? Converter.name : "undefined" }`)
+			
 			if (Converter)
 			{
-				const queryResults: InlineQueryResultArticle[] = []
-				const convertedLinks: URL[] = await Converter.parseLink(new URL(link))
-				for (const convertedLink of convertedLinks)
+				try
 				{
-					queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
-				}
+					logger.debug(`Checking if link is a destination…`)
+					const isDestination: boolean = Converter.isDestinationSupported(url)
+					logger.debug(`Is destination: ${ isDestination }`)
+					
+					const queryResults: InlineQueryResultArticle[] = []
+					let convertedLinks: URL[]
+					
+					// Check if the provided link is a destination link
+					if (isDestination)
+					{
+						// If it's a destination, show all destination options with the same path
+						logger.debug(`Using destination options`)
+						convertedLinks = Converter.destinations.map((destination: URL): URL => {
+							const newLink = new URL(url)
+							newLink.protocol = destination.protocol
+							newLink.hostname = destination.hostname
+							newLink.port = destination.port
+							return newLink
+						})
+					} else
+					{
+						// If it's an origin, convert it normally
+						logger.debug(`Converting origin link`)
+						convertedLinks = await Converter.parseLink(new URL(link))
+					}
+					
+					logger.debug(`Got ${ convertedLinks.length } results`)
+					for (const convertedLink of convertedLinks)
+					{
+						queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
+					}
 
-				await ctx.answerInlineQuery(queryResults)
-				STATS.countConversion(Converter, ConversionMethods.INLINE)
-			} else ctx.answerInlineQuery([])
+					logger.debug(`Answering inline query with ${ queryResults.length } results`)
+					await ctx.answerInlineQuery(queryResults)
+					STATS.countConversion(Converter, ConversionMethods.INLINE)
+				} catch (error)
+				{
+					logger.debug(`Failed to parse link: ${ String(error) }`)
+					ctx.answerInlineQuery([])
+				}
+			} else {
+				logger.debug(`No converter found`)
+				ctx.answerInlineQuery([])
+			}
 		})
 
 		// Handle when no link is given
