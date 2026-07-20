@@ -223,7 +223,12 @@ export class SimpleLinkConverter implements LinkConverter
 		const matchesOriginRegExp: RegExp | undefined = this.findMatchingOriginRegExp(link)
 		if (matchesOriginRegExp)
 		{
-			const newLink = new URL(link.toString().replace(matchesOriginRegExp, destination.toString())) // This is not working at the moment.
+			// For regex-based origins, replace hostname/protocol/port while preserving the source path
+			const newLink = new URL(link)
+			newLink.protocol = destination.protocol
+			newLink.hostname = destination.hostname
+			newLink.port = destination.port
+			newLink.pathname = link.pathname
 			LOGGER.debug(`${ newLink }`)
 
 			return newLink
