@@ -9,6 +9,18 @@ import { OdesliDestinationsURLs, OdesliOriginsURLs } from "../types/odesli.ts"
 const CACHE: CacheManager = CacheManager.Instance
 const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.APIS]).with({ api: "Odesli" })
 
+/**
+ * Extracts an HTTP status code from an odesli.js error message, e.g.
+ * "HTTP 400: Bad Request" or "400: <code>, Codes in the 4xx range…".
+ * @param message Error message to parse.
+ * @returns The parsed status code, or `undefined` if none could be found.
+ */
+function extractHttpStatusCode (message: string): number | undefined
+{
+	const match: RegExpMatchArray | null = message.match(/\b([1-5]\d{2})\b/)
+	return match ? Number(match[1]) : undefined
+}
+
 export class OdesliMusicConverter extends SimpleLinkConverter implements LinkConverter
 {
 	override readonly type: ConversionTypes = ConversionTypes.API;
@@ -69,10 +81,54 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 				return newLink
 			} catch (error)
 			{
+				const statusCode: number | undefined = extractHttpStatusCode(String(error))
+
+				// Client errors (4xx) mean the link itself is invalid/unrecognized by Odesli,
+				// not that the service is having issues. Don't spam the status chat for those.
+				if (statusCode !== undefined && statusCode >= 400 && statusCode < 500)
+				{
+					LOGGER.debug(`Odesli rejected link as invalid/unrecognized (HTTP ${ statusCode }): ${ String(error) }`)
+					throw new Error("Invalid or unrecognized link")
+				}
+
 				LOGGER.error(String(error))
 				LOGGER.error(`Error with API ${ this.name }, maybe the service is having issues.`)
 				throw new Error("API error")
 			}
 		} else throw new Error("Unhandled link")
+	}
+
+	/**
+	 * Parse a given link via a specific destination.
+	 * @param link Link to convert.
+	 * @param destination Destination URL to convert the link to.
+	 * @returns Converted link.
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	 */
+	public override parseLinkDefault (link: URL): Promise<URL>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
+
+		LOGGER.debug(`Parsing link (default) ${ link }`)
+		return this.convertLink(link)
+	}
+
+	/**
+	 * Parse a given link and return only the default destination URL.
+	 * Odesli always returns a single song.link URL, not multiple alternatives.
+	 * @param link Link to convert.
+	 * @returns Array with a single converted link.
+	 * @throws Error if the link is unsupported or conversion fails.
+	 */
+	public override async parseLink (link: URL): Promise<URL[]>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
+
+		LOGGER.debug(`Parsing link ${ link }`)
+		if (this.isSourceSupported(link))
+		{
+			const convertedLink: URL = await this.convertLink(link)
+			return [convertedLink]
+		} else throw Error("Unsupported link")
 	}
 }
