@@ -185,10 +185,16 @@ export class AdminActions implements BotActions
 
 				try
 				{
-					await ctx.reply(message, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML" })
-				} catch (error)
+					await ctx.reply(message, { parse_mode: "HTML", reply_parameters: { message_id: ctx.msgId } })
+				} catch (_error)
 				{
-					logReplyError(error, ctx)
+					try
+					{
+						await ctx.reply(message, { parse_mode: "HTML" })
+					} catch (error)
+					{
+						logReplyError(error, ctx)
+					}
 				}
 			}
 		})
