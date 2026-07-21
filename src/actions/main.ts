@@ -1,6 +1,5 @@
 import { CommandContext, Composer, HearsContext, InlineQueryContext, InlineQueryResultBuilder } from "@grammy/grammy"
 import { BotCommand } from "@grammy/types/manage"
-import { InlineQueryResultArticle } from "@grammy/types/inline"
 import { ConfigurationManager } from "../managers/config.ts"
 import { BotActions, ConversionMethods, CustomContext, LinkConverter, LogLevels } from "../types/types.ts"
 import { findMatchingConverter, getChatDebugString, getExpeditorDebugString, getLoggerForCommand, isTargetedCommand, logAction, logReactionError, logReplyError } from "../utils.ts"
@@ -225,19 +224,18 @@ export class MainActions implements BotActions
 			response += `\nAnyway, I wish you a nice day! 🎶`
 			try
 			{
-				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-				await sendStatusMessage(ctx)
+				await ctx.reply(response, { parse_mode: "HTML", reply_parameters: { message_id: ctx.msgId }, link_preview_options: { is_disabled: true } })
 			} catch (_error)
 			{
 				try
 				{
 					await ctx.reply(response, { parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-				}
-				catch (error)
+				} catch (error)
 				{
 					logReplyError(error, ctx)
 				}
 			}
+			await sendStatusMessage(ctx)
 
 			STATS.countCommand(MainCommands.START)
 		})
@@ -321,8 +319,7 @@ export class MainActions implements BotActions
 			response += `\nFeel free to suggest it as an issue <a href = "${ ctx.config.codeRepoURL }/issues/new">on GitHub</a>!</blockquote>`
 			try
 			{
-				await ctx.reply(response, { reply_parameters: { message_id: ctx.msgId }, parse_mode: "HTML", link_preview_options: { is_disabled: true } })
-				await sendStatusMessage(ctx)
+				await ctx.reply(response, { parse_mode: "HTML", reply_parameters: { message_id: ctx.msgId }, link_preview_options: { is_disabled: true } })
 			} catch (_error)
 			{
 				try
@@ -333,6 +330,7 @@ export class MainActions implements BotActions
 					logReplyError(error, ctx)
 				}
 			}
+			await sendStatusMessage(ctx)
 			STATS.countCommand(MainCommands.HELP)
 		})
 
@@ -412,7 +410,7 @@ export class MainActions implements BotActions
 					const isDestination: boolean = Converter.isDestinationSupported(url)
 					logger.debug(`Is destination: ${ isDestination }`)
 
-					const queryResults: InlineQueryResultArticle[] = []
+					const queryResults: Array<Parameters<typeof ctx.answerInlineQuery>[0][number]> = []
 					let convertedLinks: URL[]
 
 					// Check if the provided link is a destination link
