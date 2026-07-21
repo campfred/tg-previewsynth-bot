@@ -398,7 +398,7 @@ export class MainActions implements BotActions
 			logger.debug(`Parsed URL: ${ url }`)
 			const Converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
 			logger.debug(`Converter found: ${ Converter ? Converter.name : "undefined" }`)
-			
+
 			if (Converter)
 			{
 				try
@@ -406,16 +406,17 @@ export class MainActions implements BotActions
 					logger.debug(`Checking if link is a destination…`)
 					const isDestination: boolean = Converter.isDestinationSupported(url)
 					logger.debug(`Is destination: ${ isDestination }`)
-					
+
 					const queryResults: InlineQueryResultArticle[] = []
 					let convertedLinks: URL[]
-					
+
 					// Check if the provided link is a destination link
 					if (isDestination)
 					{
 						// If it's a destination, show all destination options with the same path
 						logger.debug(`Using destination options`)
-						convertedLinks = Converter.destinations.map((destination: URL): URL => {
+						convertedLinks = Converter.destinations.map((destination: URL): URL =>
+						{
 							const newLink = new URL(url)
 							newLink.protocol = destination.protocol
 							newLink.hostname = destination.hostname
@@ -428,11 +429,13 @@ export class MainActions implements BotActions
 						logger.debug(`Converting origin link`)
 						convertedLinks = await Converter.parseLink(new URL(link))
 					}
-					
+
 					logger.debug(`Got ${ convertedLinks.length } results`)
-					for (const convertedLink of convertedLinks)
+					for (let i = 0; i < convertedLinks.length; i++)
 					{
-						queryResults.push(InlineQueryResultBuilder.article(convertedLink.hostname, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
+						const convertedLink = convertedLinks[i]
+						const resultId = `${ i }_${ convertedLink.toString() }`
+						queryResults.push(InlineQueryResultBuilder.article(resultId, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
 					}
 
 					logger.debug(`Answering inline query with ${ queryResults.length } results`)
@@ -443,13 +446,11 @@ export class MainActions implements BotActions
 					logger.debug(`Failed to parse link: ${ String(error) }`)
 					ctx.answerInlineQuery([])
 				}
-			} else {
+			} else
+			{
 				logger.debug(`No converter found`)
 				ctx.answerInlineQuery([])
 			}
 		})
-
-		// Handle when no link is given
-		this.Composer.on("inline_query", (ctx) => ctx.answerInlineQuery([]))
 	}
 }

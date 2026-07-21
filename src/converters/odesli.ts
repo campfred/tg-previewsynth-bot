@@ -75,4 +75,38 @@ export class OdesliMusicConverter extends SimpleLinkConverter implements LinkCon
 			}
 		} else throw new Error("Unhandled link")
 	}
+
+	/**
+	 * Parse a given link via a specific destination.
+	 * @param link Link to convert.
+	 * @param destination Destination URL to convert the link to.
+	 * @returns Converted link.
+	 * @throws Error if the link is unsupported or conversion is not needed.
+	 */
+	public override parseLinkDefault (link: URL): Promise<URL>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
+
+		LOGGER.debug(`Parsing link (default) ${ link }`)
+		return this.convertLink(link)
+	}
+
+	/**
+	 * Parse a given link and return only the default destination URL.
+	 * Odesli always returns a single song.link URL, not multiple alternatives.
+	 * @param link Link to convert.
+	 * @returns Array with a single converted link.
+	 * @throws Error if the link is unsupported or conversion fails.
+	 */
+	public override async parseLink (link: URL): Promise<URL[]>
+	{
+		if (!this.enabled) throw new Error("Converter is disabled.")
+
+		LOGGER.debug(`Parsing link ${ link }`)
+		if (this.isSourceSupported(link))
+		{
+			const convertedLink: URL = await this.convertLink(link)
+			return [convertedLink]
+		} else throw Error("Unsupported link")
+	}
 }
