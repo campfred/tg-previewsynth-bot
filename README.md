@@ -13,19 +13,19 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
 ## Supported links
 
 - Bluesky
-  > bsky.app ➡️ fxbsky.app
+  > bsky.app ➡️ fxbsky.app, vxbsky.app
 - FurAffinity
   > furaffinity.net ➡️ xfuraffinity.net
 - Furtrack
   > furtrack.com ➡️ furtrack.owo.lgbt
 - Instagram
-  > instagram.com ➡️ eeinstagram.com, kkclip.com
+  > instagram.com ➡️ https://instagramx.com, kkclip.com
 - Reddit
-  > reddit.com ➡️ vxreddit.com, rxddit.com
+  > reddit.com ➡️ vxreddit.com, rxddit.com, redditez.com
 - Twitter
-  > twitter.com, x.com ➡️ fxtwitter.com, vxtwitter.com, fixupx.com, girlcockx.com, xcancel.com
+  > twitter.com, x.com ➡️ fxtwitter.com, vxtwitter.com, fixupx.com, girlcockx.com, stupidpenisx.com, xeezz.com, xcancel.com
 - TikTok
-  > tiktok.com ➡️ tfxktok.com
+  > tiktok.com ➡️ tfxktok.com, tiktokez.com
 - Music (through [Odesli's API](https://odesli.co))
   > spotify.link, spotify.app.link, open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link / album.link
 
