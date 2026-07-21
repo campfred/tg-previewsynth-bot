@@ -80,97 +80,102 @@ async function processConversionRequest (ctx: CommandContext<CustomContext> | He
 	// Check if link matches in map
 	const url: URL = new URL(ctx.match.toString())
 	const converter: LinkConverter | undefined = findMatchingConverter(url, CONFIG.AllConverters)
-	if (converter)
+	try
 	{
-		if (reactionsAllowed)
+		if (converter)
 		{
-			try
+			if (reactionsAllowed)
 			{
-				await ctx.react("🤔")
-			} catch (error)
-			{
-				logReactionError(error, ctx)
-				reactionsAllowed = false
-			}
-		}
-		logger.debug(`${ converter?.name } will be used to convert requested link.`)
-		let linkConverted: URL = null as unknown as URL
-		try
-		{
-			linkConverted = await converter.parseLinkDefault(new URL(ctx.match.toString()))
-		} catch (error)
-		{
-			logAction(LogLevels.ERROR, "converting a link with a matching converter", String(error), ctx)
-			try
-			{
-				await ctx.reply(`Oof… Looks like I'm having difficulty converting that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`, {
-					parse_mode: "HTML",
-					reply_parameters: { message_id: ctx.msgId },
-					link_preview_options: { is_disabled: true },
-				})
-				await sendStatusMessage(ctx)
-			} catch (error)
-			{
-				logReplyError(error, ctx)
-			}
-			return
-		}
-		if (reactionsAllowed)
-		{
-			try
-			{
-				await ctx.react("👀")
-			} catch (error)
-			{
-				logReactionError(error, ctx)
-				reactionsAllowed = false
-			}
-		}
-		try
-		{
-			await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
-		} catch (_error)
-		{
-			try
-			{
-				await ctx.reply("Oof… Looks like I'm having difficulty converting that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>", {
-					parse_mode: "HTML",
-					reply_parameters: { message_id: ctx.msgId },
-					link_preview_options: { is_disabled: true },
-				})
-			} catch (error)
-			{
-				logReplyError(error, ctx)
-			}
-		}
-		STATS.countConversion(converter, method)
-	} else if (ctx.chat.type === "private")
-	{
-		// Handle when link isn't known in map
-		if (reactionsAllowed)
-		{
-			try
-			{
-				await ctx.react("🗿")
-			} catch (error)
-			{
-				logReactionError(error, ctx)
-				reactionsAllowed = false
-			}
-		}
-		try
-		{
-			await ctx.reply(
-				`Sorry, I don't have an equivalent for that website. 😥\n\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ ctx.config.codeRepoURL }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
+				try
 				{
-					parse_mode: "HTML",
-					reply_parameters: { message_id: ctx.msgId },
-					link_preview_options: { is_disabled: true },
-				},
-			)
-		} catch (error)
+					await ctx.react("🤔")
+				} catch (error)
+				{
+					logReactionError(error, ctx)
+					reactionsAllowed = false
+				}
+			}
+			logger.debug(`${ converter?.name } will be used to convert requested link.`)
+			let linkConverted: URL = null as unknown as URL
+			try
+			{
+				linkConverted = await converter.parseLinkDefault(new URL(ctx.match.toString()))
+			} catch (error)
+			{
+				logAction(LogLevels.ERROR, "converting a link with a matching converter", String(error), ctx)
+				try
+				{
+					await ctx.reply(`Oof… Looks like I'm having difficulty converting that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>`, {
+						parse_mode: "HTML",
+						reply_parameters: { message_id: ctx.msgId },
+						link_preview_options: { is_disabled: true },
+					})
+					await sendStatusMessage(ctx)
+				} catch (error)
+				{
+					logReplyError(error, ctx)
+				}
+				return
+			}
+			try
+			{
+				await ctx.reply(linkConverted.toString(), { reply_parameters: { message_id: ctx.msgId }, link_preview_options: { show_above_text: true } })
+			} catch (_error)
+			{
+				try
+				{
+					await ctx.reply("Oof… Looks like I'm having difficulty converting that link right now. I apologize for that. 😓\n<blockquote>Either try again or report that as <a href=\"${ ctx.config.codeRepoURL }/issues\">an isssue on GitHub</a> and my creator will take a look at it. 💡</blockquote>", {
+						parse_mode: "HTML",
+						reply_parameters: { message_id: ctx.msgId },
+						link_preview_options: { is_disabled: true },
+					})
+				} catch (error)
+				{
+					logReplyError(error, ctx)
+				}
+			}
+			STATS.countConversion(converter, method)
+		} else if (ctx.chat.type === "private")
 		{
-			logReplyError(error, ctx)
+			// Handle when link isn't known in map
+			if (reactionsAllowed)
+			{
+				try
+				{
+					await ctx.react("🗿")
+				} catch (error)
+				{
+					logReactionError(error, ctx)
+					reactionsAllowed = false
+				}
+			}
+			try
+			{
+				await ctx.reply(
+					`Sorry, I don't have an equivalent for that website. 😥\n\n<blockquote>If you happen to know one, feel free to submit a request through <a href="${ ctx.config.codeRepoURL }/issues">an Issue on my code's repository</a>. 💛</blockquote>`,
+					{
+						parse_mode: "HTML",
+						reply_parameters: { message_id: ctx.msgId },
+						link_preview_options: { is_disabled: true },
+					},
+				)
+			} catch (error)
+			{
+				logReplyError(error, ctx)
+			}
+		}
+	} finally
+	{
+		// Remove the bot's own reaction once processing is finished. This only clears reactions set by the bot itself and leaves other participants' reactions untouched.
+		if (reactionsAllowed)
+		{
+			try
+			{
+				await ctx.react([])
+			} catch (error)
+			{
+				logReactionError(error, ctx)
+			}
 		}
 	}
 }
