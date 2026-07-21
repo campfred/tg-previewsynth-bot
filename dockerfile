@@ -1,5 +1,6 @@
-FROM debian:13.5-slim # TODO Look into using distroless or scratch
+FROM debian:13.5-slim
 # Using Debian since the compiled binary uses the GNU dynamic linker
+# TODO Look into using distroless or scratch
 ARG TARGETOS
 ARG TARGETARCH
 
