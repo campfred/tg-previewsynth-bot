@@ -434,10 +434,10 @@ export class MainActions implements BotActions
 					}
 
 					logger.debug(`Got ${ convertedLinks.length } results`)
-					for (let i = 0; i < convertedLinks.length; i++)
+					for (let index = 0; index < convertedLinks.length; index++)
 					{
-						const convertedLink = convertedLinks[i]
-						const resultId = `${ i }_${ convertedLink.toString() }`
+						const convertedLink = convertedLinks[index]
+						const resultId = index.toString() // Using index as result ID as it's short (fitting in TG's 64-character limit) but still unique.
 						queryResults.push(InlineQueryResultBuilder.article(resultId, `Convert ${ Converter.name } link with ${ convertedLink.hostname } 🔀`).text(convertedLink.toString(), { link_preview_options: { show_above_text: true, prefer_large_media: true } }))
 					}
 
