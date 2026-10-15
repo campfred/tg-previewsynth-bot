@@ -5,8 +5,8 @@ about:
   #   chat: -12345678901234
   #   # topic: 1234 # Optional
   # status_message: | # Optional
-  #   Spotify and YouTube Music are not being nice to multiple aggregation services, including Odesli! 🫠 <i>(the one I'm using for converting music links!)</i>
-  #   I'll still try to convert those links and might fail. So, hang tight while they fix their oopsie! 🤞
+  #   Music link services are having trouble resolving some Spotify and YouTube Music links.
+  #   I'll still try to convert those links and might fail. So, hang tight while they fix it! 🤞
 links:
   # - name: Example
   #   origins:
@@ -86,9 +86,23 @@ links:
       - https://ifunny.com
     destinations:
       - https://ifunnyez.co.com
-odesli:
-  enabled: true
-  # country: CA # Optional, see https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
+  - name: Music
+    origins:
+      - https://spotify.link
+      - https://spotify.app.link
+      - https://open.spotify.com
+      - https://music.apple.com
+      - https://music.youtube.com
+      - https://tidal.com
+      - https://pandora.com
+      - https://deezer.com
+      - https://soundcloud.com
+      - https://music.amazon.com
+    destinations:
+      - https://song.link
+      - https://album.link
+    settings:
+      redirectUrlTemplate: https://song.link/{url}
 features:
   link_recognition: true
   inline_queries: true

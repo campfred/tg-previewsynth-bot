@@ -6,7 +6,7 @@ import { LogCategories } from "../managers/logging.ts"
 const CACHE: CacheManager = CacheManager.Instance
 const LOGGER: Logger = getLogger([LogCategories.BOT, LogCategories.LINKS])
 
-export type SimpleLinkConverterSettings = { expand?: boolean; preserveQueryParamKeys?: string[] }
+export type SimpleLinkConverterSettings = { expand?: boolean; preserveQueryParamKeys?: string[]; redirectUrlTemplate?: string }
 
 export class SimpleLinkConverter implements LinkConverter
 {
@@ -154,9 +154,9 @@ export class SimpleLinkConverter implements LinkConverter
 	 * @param link The link to expand.
 	 * @returns The expanded link.
 	 */
-	public async expandLink (link: URL): Promise<URL>
+	public async expandLink (link: URL, force: boolean = false): Promise<URL>
 	{
-		if (!this.expand) return link
+		if (!this.expand && !force) return link
 		LOGGER.debug(`Expanding link …\n\t${ link }`)
 		try
 		{
