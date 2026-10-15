@@ -26,7 +26,7 @@ Telegram bot to automatically convert links into embed-friendly ones for Telegra
   > twitter.com, x.com ➡️ fxtwitter.com, vxtwitter.com, fixupx.com, girlcockx.com, stupidpenisx.com, xeezz.com, xcancel.com
 - TikTok
   > tiktok.com ➡️ tfxktok.com, tiktokez.com
-- Music (through [Odesli's API](https://odesli.co))
+- Music (through Songlink's redirect-based share URL)
   > spotify.link, spotify.app.link, open.spotify.com, music.apple.com, music.youtube.com, tidal.com, pandora.com, deezer.com, soundcloud.com, music.amazon.com ➡️ song.link / album.link
 
 ## Supported commands
@@ -76,7 +76,7 @@ about:
   status_updates: # Optional
     chat: -12345678901234 # Chat ID where you'd like to send bot status updates.
     topic: 1234 # Optional, topic you'd like to use for those updates.
-  status_message: Spotify and YouTube Music are not being nice to multiple aggregation services including Odesli! 😤 (the one I'm using for converting music links!)\nI'll still try to convert those links and might fail. Hang tight while they fix their oopsie! 💛
+  status_message: Some music links may not resolve correctly right now.\nI'll still try to convert them and might fail. Hang tight while the services sort it out! 💛
 links:
   - name: Example # Display name of the website, ie.: FurAffinity
     origins: # Base URLs that must be converted, can be a single one as long as it stays an array
@@ -91,9 +91,23 @@ links:
       preserveQueryParamKeys: # Optional, set query parameter keys to keep during link cleanup
         - id
         - flavour
-odesli:
-  enabled: true # Enable Odesli API-based converter
-  # country: CA # https://linktree.notion.site/API-d0ebe08a5e304a55928405eb682f6741?pvs=97#0cb8da5b16994425a69a655072656370
+  - name: Music
+    origins:
+      - https://spotify.link
+      - https://spotify.app.link
+      - https://open.spotify.com
+      - https://music.apple.com
+      - https://music.youtube.com
+      - https://tidal.com
+      - https://pandora.com
+      - https://deezer.com
+      - https://soundcloud.com
+      - https://music.amazon.com
+    destinations:
+      - https://song.link
+      - https://album.link
+    settings:
+      redirectUrlTemplate: https://song.link/{url} # {url} is replaced with the encoded source URL
 features: # Disable behaviour features here
   link_recognition: true # Optional, disabled by default
   inline_queries: true # Optional, disabled by default
@@ -170,16 +184,11 @@ features: # Disable behaviour features here
 | `PREVIEWSYNTH_TG_BOT_TOKEN`     | _(none)_        | Telegram bot token from [@BotFather](https://BotFather.t.me). |
 | `PREVIEWSYNTH_CONFIG_FILE_PATH` | `./config.yaml` | Path to the configuration file.                               |
 | `PREVIEWSYNTH_LOG_LEVEL`        | _(none)_        | Logging level to use for software logging.                    |
-| `ODESLI_API_KEY`                | _(none)_        | API key for Odesli API-based converter.          |
 
 ## Upcoming improvements
 
 - API-based link converters
-  - Odesli / SongLinks
-    - Optional _Special function_ button
-      - To expand the message with basic infos
-  - Allow adding unsupported APIs to config
-    > Probably through _config.yaml_.(apis.base_url+response_path)
+  - Allow adding configurable API endpoints and response parsing to config
 
 ## Contributing
 

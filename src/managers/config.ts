@@ -1,13 +1,31 @@
 import { parse, stringify } from "@std/yaml"
 import { UserFromGetMe } from "@grammy/types/manage"
-import { AboutConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter, OdesliConfiguration } from "../types/types.ts"
+import { AboutConfiguration, Configuration, FeaturesConfiguration, LinkConfiguration, LinkConverter } from "../types/types.ts"
 import { SimpleLinkConverter } from "../converters/simple.ts"
-import { OdesliMusicConverter } from "../converters/odesli.ts"
+import { RedirectLinkConverter } from "../converters/redirect.ts"
 import { getLogger, Logger } from "@logtape/logtape"
 import { LogCategories } from "./logging.ts"
 
 const PATH_CONFIG_FILE: string = Deno.env.get("PREVIEWSYNTH_CONFIG_FILE_PATH") || Deno.env.get("previewsynth_config_file_path") || "config.yaml"
 const LOGGER: Logger = getLogger(LogCategories.BOT)
+const LEGACY_MUSIC_CONVERTER: LinkConfiguration = {
+	name: "Music",
+	origins: [
+		"https://spotify.link",
+		"https://spotify.app.link",
+		"https://open.spotify.com",
+		"https://music.apple.com",
+		"https://music.youtube.com",
+		"https://tidal.com",
+		"https://pandora.com",
+		"https://deezer.com",
+		"https://soundcloud.com",
+		"https://music.amazon.com",
+	],
+	origins_regex: [],
+	destinations: ["https://song.link", "https://album.link"],
+	settings: { redirectUrlTemplate: "https://song.link/{url}" },
+}
 
 /**
  * Manager that handles everything related to the configuration including loading and saving it.
@@ -17,7 +35,6 @@ export class ConfigurationManager
 	private static _Instance: ConfigurationManager
 	private _SimpleConverters: SimpleLinkConverter[] = [];
 	// private _APIConverters: APILinkConverter[] = [];
-	private _OdesliConverter!: OdesliMusicConverter
 	private _Features!: FeaturesConfiguration
 	private _About!: AboutConfiguration
 	private _BotInfo!: UserFromGetMe
@@ -63,14 +80,9 @@ export class ConfigurationManager
 	// get APIConverters (): APILinkConverter[] { return this._APIConverters }
 
 	/**
-	 * Returns the Odesli converter currently handled.
-	 */
-	get OdesliConverter (): OdesliMusicConverter { return this._OdesliConverter }
-
-	/**
 	 * Returns all of the converters currently handled.
 	 */
-	get AllConverters (): LinkConverter[] { return [...this._SimpleConverters, this._OdesliConverter] }
+	get AllConverters (): LinkConverter[] { return this._SimpleConverters }
 
 	/**
 	 * Returns the current configuration for features.
@@ -98,14 +110,14 @@ export class ConfigurationManager
 			// Handle missing links that has zero origins set
 			if (!("origins" in link) && !("origins_regex" in link)) throw new Error("No origin set in link config")
 
-			const converter = new SimpleLinkConverter(
-				link.name.trim(),
-				"origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : [],
-				"origins_regex" in link ? link.origins_regex.map((originRegExpString: string) => new RegExp(originRegExpString.trim(), "i")) : [],
-				"destinations" in link ? link.destinations.map((destination: string) => new URL(destination.trim())) : [],
-				link.settings,
-			)
-			converter.setEnabled(link.enabled || true)
+			const name = link.name.trim()
+			const origins = "origins" in link ? link.origins.map((origin: string) => new URL(origin.trim())) : []
+			const originRegExps = "origins_regex" in link ? link.origins_regex.map((originRegExpString: string) => new RegExp(originRegExpString.trim(), "i")) : []
+			const destinations = "destinations" in link ? link.destinations.map((destination: string) => new URL(destination.trim())) : []
+			const converter = link.settings?.redirectUrlTemplate
+				? new RedirectLinkConverter(name, origins, originRegExps, destinations, link.settings)
+				: new SimpleLinkConverter(name, origins, originRegExps, destinations, link.settings)
+			converter.setEnabled(link.enabled ?? true)
 
 			return converter
 		})
@@ -113,52 +125,6 @@ export class ConfigurationManager
 		logger.info(`${ converters.length } link converters`)
 		return converters
 	}
-
-	/**
-	 * 
-	 * @param odesliConfig 
-	 * @returns 
-	 */
-	private parseOdesliConverterInConfig (odesliConfig: OdesliConfiguration): OdesliMusicConverter
-	{
-		const converter = new OdesliMusicConverter(odesliConfig)
-		converter.setEnabled(odesliConfig.enabled || true)
-
-		return converter
-	}
-
-	// /**
-	//  * Processes api conversion configs into link converters.
-	//  * @param apiConfigs API link conversion configurations to process
-	//  * @returns API converters
-	//  */
-	// private parseAPIConvertersInConfig (apiConfigs: APIsConfiguration): APILinkConverter[]
-	// {
-	// 	const logger: Logger = LOGGER.with({ action: "loading apis configuration" })
-
-	// 	const converters: APILinkConverter[] = []
-	// 	logger.debug("Loading APIs configuration…")
-
-	// 	if ("odesli" in apiConfigs)
-	// 	{
-	// 		logger.debug("Odesli")
-	// 		const odesliConfig: APIConfiguration = apiConfigs["odesli"]
-
-	// 		const converter = new OdesliMusicConverter(
-	// 			"Music",
-	// 			OdesliOrigins.map((origin): URL => new URL(origin.trim())),
-	// 			[],
-	// 			[new URL("https://song.link")],
-	// 		)
-	// 		converter.setEnabled(odesliConfig.enabled || true)
-
-	// 		converters.push(converter)
-	// 	}
-
-
-	// 	logger.info(`${ converters.length } api converters`)
-	// 	return converters
-	// }
 
 	/**
 	 * Get all origin hostnames as regular expressions
@@ -229,44 +195,17 @@ export class ConfigurationManager
 				destinations: converter.destinations.map((destination: URL): string => destination.toString()),
 				enabled: converter.enabled,
 			}
+			const settings: NonNullable<LinkConfiguration["settings"]> = {}
+			if (!converter.expand) settings.expand = false
+			if (converter.preserveQueryParamKeys.length > 0) settings.preserveQueryParamKeys = converter.preserveQueryParamKeys
+			if (converter instanceof RedirectLinkConverter) settings.redirectUrlTemplate = converter.redirectUrlTemplate
+			if (Object.keys(settings).length > 0) config_link.settings = settings
 			linkConfigs.push(config_link)
 		}
 
 		// console.debug("Loaded links configuration!")
 		LOGGER.debug("Loaded links configuration!")
 		return linkConfigs
-	}
-
-	// /**
-	//  * Translates current API converters into API configurations.
-	//  * @returns API configurations
-	//  */
-	// private saveAPIConvertersInConfig (): APIsConfiguration
-	// {
-	// 	LOGGER.debug("Parsing api-based link converters into configuration…")
-	// 	const apiConfigs: APIsConfiguration = {}
-
-	// 	for (const api of this._APIConverters)
-	// 	{
-	// 		const config: APIConfiguration = {}
-	// 		if (!api.enabled) config.enabled = api.enabled
-
-	// 		apiConfigs[api.name.toLowerCase()] = config
-	// 	}
-
-	// 	LOGGER.debug("Loaded APIs configuration!")
-	// 	return apiConfigs
-	// }
-
-	private saveOdesliConverterInConfig (): OdesliConfiguration
-	{
-		const config: OdesliConfiguration = {
-			enabled: this._OdesliConverter.enabled,
-		}
-		if (this._OdesliConverter.country) config.country = this._OdesliConverter.country
-
-		LOGGER.debug("Loaded Odesli API configuration!")
-		return config
 	}
 
 	/**
@@ -277,8 +216,6 @@ export class ConfigurationManager
 	{
 		return stringify({
 			links: this.saveSimpleConvertersInConfig(),
-			// apis: this.saveAPIConvertersInConfig(),
-			odesli: this.saveOdesliConverterInConfig(),
 			features: this.Features,
 			about: this.About
 		})
@@ -339,11 +276,12 @@ export class ConfigurationManager
 		{
 			const config: Configuration = parse(await Deno.readTextFile(PATH_CONFIG_FILE)) as Configuration
 
-			this._SimpleConverters = this.parseSimpleConvertersInConfig(config.links)
-			logger.info("Loaded simple link convertions configuration!")
+			const links = config.links ?? []
+			if (config.odesli && !links.some(link => link.settings?.redirectUrlTemplate))
+				links.push({ ...LEGACY_MUSIC_CONVERTER, enabled: config.odesli.enabled ?? true })
 
-			this._OdesliConverter = this.parseOdesliConverterInConfig(config.odesli)
-			logger.info("Loaded Odesli API convertions configuration!")
+			this._SimpleConverters = this.parseSimpleConvertersInConfig(links)
+			logger.info("Loaded simple link convertions configuration!")
 
 			this._Features = config.features
 			logger.info("Loaded features configuration!")
@@ -370,8 +308,6 @@ export class ConfigurationManager
 
 		const config: Configuration = {
 			links: this.saveSimpleConvertersInConfig(),
-			// apis: this.saveAPIConvertersInConfig(),
-			odesli: this.saveOdesliConverterInConfig(),
 			features: this.Features,
 			about: this.About
 		}

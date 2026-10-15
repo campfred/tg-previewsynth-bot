@@ -1,6 +1,5 @@
 import { assert, assertEquals, assertRejects } from "@std/assert"
 import { SimpleLinkConverter, SimpleLinkConverterSettings } from "./converters/simple.ts"
-import { OdesliMusicConverter } from "./converters/odesli.ts"
 
 type TestPlan = {
 	Link: URL,
@@ -48,7 +47,7 @@ Deno.test("Parsing logic with unsupported link", async (): Promise<void> =>
 	const Link: URL = new URL("https://kktiktok.com/@/video/7427030188069883179")
 	const Converter: SimpleLinkConverter = new SimpleLinkConverter("TikTok", [new URL("https://tiktok.com/")], [], [new URL("https://vxtiktok.com/")])
 	// Should reject with "Unsupported link" instead of converting the unsupported link into a vxtiktok.com link.
-	assertRejects(async () => await Converter.parseLinkDefault(Link), Error, "Unsupported link")
+	await assertRejects(() => Converter.parseLinkDefault(Link), Error, "Unsupported link")
 })
 
 Deno.test("TikTok-specific test case", async (): Promise<void> =>
@@ -119,25 +118,6 @@ Deno.test("FurTrack user photography page translation", async function (): Promi
 	const NavLink = new URL("https://www.furtrack.com/user/bark/photography/753398")
 	const ConvertedLink = new URL("https://furtrack.owo.lgbt/user/bark/photography/753398")
 	assertEquals(await FurTrackConverter.parseLinkDefault(NavLink), ConvertedLink)
-})
-
-Deno.test("Odesli-specific test case", async (): Promise<void> =>
-{
-	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
-	const MusicLink = new URL("https://tidal.com/track/311007944/u")
-	const OdesliConvertedLink = new URL("https://song.link/t/311007944")
-	assertEquals(await Converter.parseLinkDefault(MusicLink), OdesliConvertedLink)
-})
-
-/**
- * There's a new share link format from Spotify, so this is testing that it is also supported by the bot.
- */
-Deno.test("New Spotify share link test case", async (): Promise<void> =>
-{
-	const Converter: OdesliMusicConverter = new OdesliMusicConverter()
-	const SpotifyShareLink = new URL("https://spotify.link/tNTU1GlxwXb")
-	const OdesliConvertedLink = new URL("https://song.link/s/544TSCvEmOhC0favdRlHuQ")
-	assertEquals(await Converter.parseLinkDefault(SpotifyShareLink), OdesliConvertedLink)
 })
 
 /**
